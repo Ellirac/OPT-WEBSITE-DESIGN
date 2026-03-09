@@ -1,0 +1,247 @@
+
+body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand img {
+    height: 70px;
+}
+
+.navbar-nav .nav-link {
+    color: #222;
+    margin-left: 1.2rem;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #d32f2f;
+    /* OPT red */
+}
+
+
+@media (max-width: 768px) {
+    .navbar-brand img {
+        height: 55px;
+    }
+
+    .navbar-nav .nav-link {
+        margin-left: 0;
+        padding: 0.75rem 0;
+    }
+}
+
+.hero-video-section {
+    position: relative;
+    height: 80vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    background: #000;
+}
+
+.hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.hero-video-section .container {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 768px) {
+    .hero-video {
+        object-fit: contain;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-video {
+        object-fit: contain;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-video {
+        object-fit: contain;
+    }
+}
+
+.hero-content h1 {
+    animation: fadeUp 1s ease-out;
+}
+
+.hero-content p {
+    animation: fadeUp 1.2s ease-out;
+}
+
+.hero-content a {
+    animation: fadeUp 1.4s ease-out;
+}
+
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+@media (max-width: 768px) {
+    .hero-video-section {
+        height: 65vh;
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+}
+
+section {
+    scroll-margin-top: 100px;
+ 
+}
+
+.bg-light {
+    background-color: #f6f6f6 !important;
+}
+
+
+.btn-danger {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+}
+
+.btn-danger:hover {
+    background-color: #b71c1c;
+    border-color: #b71c1c;
+}
+
+/* SECTION SEPARATOR - diagonal SVG */
+.section-separator {
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.section-separator svg {
+    display: block;
+    width: 100%;
+    height: 80px;
+}
+
+/* WHO WE ARE - FUTURISTIC DESIGN */
+.who-we-are-section {
+    position: relative;
+    background: linear-gradient(135deg, #f9f9f9, #ffffff);
+    overflow: hidden;
+    padding-top: 100px;
+    /* creates breathing space under separator */
+}
+
+.who-image-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.who-image {
+    transition: transform 0.8s ease, box-shadow 0.8s ease;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.who-image:hover {
+    transform: scale(1.05) rotate(-1deg);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* Floating shapes */
+.floating-shapes .shape {
+    position: absolute;
+    opacity: 0.15;
+    animation: float 6s ease-in-out infinite alternate;
+}
+
+.floating-shapes .circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #d32f2f;
+    top: 10%;
+    left: 80%;
+}
+
+.floating-shapes .triangle {
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 50px solid #d32f2f;
+    bottom: 10%;
+    left: 15%;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-15px) rotate(5deg);
+    }
+
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+}
+
+/* Typography & buttons tweaks */
+.who-we-are-section h2 {
+    font-family: 'Poppins', sans-serif;
+}
+
+.who-we-are-section p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+.who-we-are-section .btn-outline-dark {
+    border-color: #222;
+    color: #222;
+}
+
+.who-we-are-section .btn-outline-dark:hover {
+    background-color: #222;
+    color: #fff;
+}

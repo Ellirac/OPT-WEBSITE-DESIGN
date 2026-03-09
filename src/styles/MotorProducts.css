@@ -1,0 +1,586 @@
+/* ============================================================
+   MotorProducts.css
+   ============================================================ */
+
+:root {
+    --primary: #8b1c1c;
+    --primary-dark: #6a1515;
+    --primary-light: #a52a2a;
+    --accent: #ff4757;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+
+    /* Category Colors */
+    --color-sealing: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    --color-heat: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    --color-mounting: linear-gradient(135deg, #ad2f21 0%, #c0392b 100%);
+    --color-damping: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    --color-lighting: linear-gradient(135deg, #c75194 0%, #db4366 100%);
+    --color-fuel: linear-gradient(135deg, #16a085 0%, #1abc9c 100%);
+
+    /* Pin sizing */
+    --pin-size: 24px;
+    --pin-font-size: 11px;
+    --pin-border-width: 2px;
+}
+
+/* ── Page Wrapper ─────────────────────────────────────────── */
+.moto-page {
+    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+}
+
+/* ── Product Header ───────────────────────────────────────── */
+.moto-product-header {
+    position: relative;
+    background: linear-gradient(135deg,
+            var(--primary-dark) 0%,
+            var(--primary) 50%,
+            var(--primary-light) 100%);
+    padding: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 15px rgba(139, 28, 28, 0.2);
+}
+
+.moto-product-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.moto-header-decoration {
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.moto-header-content {
+    position: relative;
+    max-width: 750px;
+    color: white;
+    z-index: 2;
+}
+
+.moto-header-content h1 {
+    font-size: 2.2rem;
+    margin: 0 0 12px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.moto-header-content p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+    opacity: 0.95;
+    max-width: 650px;
+    color: white;
+    font-weight: 500;
+}
+
+/* ── Main Container ───────────────────────────────────────── */
+.moto-main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* ── Motorcycle Section ───────────────────────────────────── */
+.moto-car-container {
+    flex: 1;
+    max-width: 800px;
+}
+
+.moto-car-model {
+    position: relative;
+}
+
+.moto-car-wrapper {
+    position: relative;
+}
+
+.moto-car-img {
+    width: 100%;
+    height: 320px;
+    display: block;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.moto-car-glow {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 30%;
+    background: radial-gradient(ellipse, rgba(139, 28, 28, 0.12) 0%, transparent 70%);
+    filter: blur(15px);
+    z-index: -1;
+}
+
+/* ── Pins ─────────────────────────────────────────────────── */
+.moto-pin {
+    position: absolute;
+    width: var(--pin-size);
+    height: var(--pin-size);
+    color: white;
+    border-radius: 50%;
+    font-size: var(--pin-font-size);
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 var(--pin-border-width) white;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.moto-pin-number {
+    position: relative;
+    z-index: 2;
+    line-height: 1;
+}
+
+.moto-pin-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid white;
+    opacity: 0;
+    animation: moto-pulse 2s infinite;
+}
+
+@keyframes moto-pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.4);
+        opacity: 0.5;
+    }
+}
+
+.moto-pin:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 0 var(--pin-border-width) white;
+}
+
+.moto-pin:hover .moto-pin-pulse {
+    animation: moto-pulse 1s infinite;
+}
+
+.moto-pin.active {
+    transform: translate(-50%, -50%) scale(1.15);
+    box-shadow: 0 0 0 3px white, 0 0 0 5px currentColor, 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Part Details ─────────────────────────────────────────── */
+.moto-part-container {
+    flex: 1;
+    max-width: 700px;
+}
+
+.moto-part-card {
+    border-radius: 16px;
+    min-height: 450px;
+    transition: all 0.3s ease;
+}
+
+.moto-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 30px;
+    text-align: center;
+    color: #999;
+    min-height: 450px;
+}
+
+.moto-empty-state h3 {
+    margin: 12px 0 6px;
+    font-size: 1.1rem;
+    color: #aaa;
+}
+
+.moto-empty-state p {
+    font-size: 0.9rem;
+    color: #bbb;
+}
+
+.moto-part-content {
+    background: white;
+    border-radius: 16px;
+    animation: moto-fadeIn 0.4s ease;
+}
+
+@keyframes moto-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.moto-part-image-wrapper {
+    padding: 30px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 320px;
+    position: relative;
+    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px 16px 0 0;
+}
+
+.moto-part-image-wrapper img {
+    max-width: 90%;
+    max-height: 380px;
+    object-fit: contain;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.moto-part-image-wrapper img:hover {
+    transform: scale(1.06) translateY(-6px);
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
+}
+
+.moto-part-details {
+    padding: 20px 22px 25px;
+    background: white;
+    border-radius: 0 0 16px 16px;
+}
+
+.moto-part-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.moto-part-number-badge {
+    width: 38px;
+    height: 38px;
+    color: white;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
+}
+
+.moto-part-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.moto-part-category-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.moto-part-description {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ── Legend ───────────────────────────────────────────────── */
+.moto-legend-container {
+    max-width: 1100px;
+    margin: 40px auto 40px;
+    padding: 0 15px;
+}
+
+.moto-legend-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.moto-legend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+.moto-legend-item {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.moto-legend-item:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.moto-legend-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.moto-legend-color-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+}
+
+.moto-legend-header h4 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.moto-legend-products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.moto-legend-pin {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+}
+
+.moto-legend-pin:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .moto-main-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .moto-car-container,
+    .moto-part-container {
+        max-width: 550px;
+        width: 100%;
+    }
+
+    .moto-legend-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    :root {
+        --pin-size: 22px;
+        --pin-font-size: 10px;
+    }
+
+    .moto-product-header {
+        padding: 25px 20px;
+    }
+
+    .moto-header-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .moto-header-content p {
+        font-size: 0.88rem;
+    }
+
+    .moto-part-title {
+        font-size: 1.35rem;
+    }
+
+    .moto-part-card {
+        min-height: 520px;
+    }
+
+    .moto-part-image-wrapper {
+        padding: 40px 30px;
+        min-height: 300px;
+    }
+
+    .moto-part-image-wrapper img {
+        max-height: 320px;
+        max-width: 95%;
+    }
+
+    .moto-part-details {
+        padding: 24px 26px 30px;
+    }
+
+    .moto-car-container {
+        max-width: 620px;
+    }
+
+    .moto-legend-title {
+        font-size: 1.5rem;
+    }
+
+    .moto-legend-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    :root {
+        --pin-size: 20px;
+        --pin-font-size: 9px;
+        --pin-border-width: 2px;
+    }
+
+    .moto-product-header {
+        padding: 22px 20px;
+    }
+
+    .moto-header-content h1 {
+        font-size: 1.65rem;
+    }
+
+    .moto-header-content p {
+        font-size: 0.87rem;
+    }
+
+    .moto-main-container {
+        padding: 15px;
+        gap: 22px;
+    }
+
+    .moto-car-container {
+        max-width: 100%;
+    }
+
+    .moto-part-card {
+        min-height: 520px;
+    }
+
+    .moto-empty-state {
+        padding: 70px 35px;
+    }
+
+    .moto-empty-state h3 {
+        font-size: 1.3rem;
+    }
+
+    .moto-empty-state p {
+        font-size: 0.88rem;
+    }
+
+    .moto-part-image-wrapper {
+        min-height: 280px;
+        padding: 30px;
+    }
+
+    .moto-part-image-wrapper img {
+        max-height: 300px;
+        max-width: 95%;
+    }
+
+    .moto-part-details {
+        padding: 20px 20px 24px;
+    }
+
+    .moto-part-number-badge {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+
+    .moto-part-title {
+        font-size: 1.35rem;
+    }
+
+    .moto-part-description {
+        font-size: 0.95rem;
+        line-height: 1.7;
+    }
+
+    .moto-legend-container {
+        margin: 30px auto 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --pin-size: 18px;
+        --pin-font-size: 8px;
+        --pin-border-width: 1.5px;
+    }
+
+    .moto-legend-pin {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 400px) {
+    :root {
+        --pin-size: 16px;
+        --pin-font-size: 7px;
+        --pin-border-width: 1.5px;
+    }
+
+    .moto-header-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .moto-part-card {
+        min-height: 500px;
+    }
+}

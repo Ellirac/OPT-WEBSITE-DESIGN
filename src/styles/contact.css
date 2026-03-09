@@ -1,0 +1,145 @@
+.contact-header {
+  text-align: center;
+  margin-top: 70px;
+  margin-bottom: 40px;
+  color:#000
+}
+
+.contact-header h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.contact-header p {
+  font-size: 1.1rem;
+  font-weight: 100;
+  color: #353232;
+}
+
+.contact-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #ffffff, #ffffff);
+  padding-bottom: 60px;
+  color: #ffffff;
+}
+
+.row h4 {
+  margin-bottom: 20px;
+  color: #ffffff;
+  font-weight: 600;
+  display: block;
+  text-align: center;
+}
+
+.row p strong{
+  color: rgb(29, 29, 29);
+  text-align: center;
+}
+
+.info-block h5 {
+  margin-bottom: 10px;
+  color: #000;
+  font-weight: 600;
+}
+
+/* GLASS EFFECT */
+.glass {
+  background: #961c1ce0;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 20px;
+  border: 1px solid rgba(2, 0, 0, 0.686);
+}
+
+/* FORM INPUT */
+.form-control {
+  margin-bottom: 14px;
+  border-radius: 14px;
+  padding: 12px;
+}
+
+/* BUTTON */
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  border-radius: 30px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-submit:hover {
+  background: #bb2d3b;
+}
+
+/* SPINNER */
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #fff;
+  border-top: 3px solid transparent;
+  border-radius: 50%;
+  margin: auto;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* MODAL */
+.success-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.success-box {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 22px;
+  text-align: center;
+  animation: pop 0.4s ease;
+  color: #000;
+  width: 90%;
+  max-width: 400px;
+}
+
+.success-box h3 {
+  font-weight: 700;
+}
+
+.success-box button {
+  margin-top: 15px;
+  padding: 10px 26px;
+  border-radius: 30px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* MAP */
+.map-section iframe {
+  width: 100%;
+  border-radius: 20px;
+}

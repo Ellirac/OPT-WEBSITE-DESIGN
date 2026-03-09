@@ -1,0 +1,375 @@
+/* =========================
+   COMPANY PAGE LAYOUT
+========================= */
+
+.company-page {
+    background-color: #ffffff;
+    padding-top: 102px;
+    /* space for fixed header */
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.company-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: sticky;
+    top: 140px;
+    /* aligns below header */
+}
+
+.company-sidebar button {
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #222;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.company-sidebar button:hover {
+    background-color: #f6f6f6;
+}
+
+.company-sidebar button.active {
+    border-left: 4px solid #d32f2f;
+    color: #d32f2f;
+    background-color: #fdf2f2;
+}
+
+/* =========================
+   CONTENT AREA
+========================= */
+
+.company-content {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.company-section {
+    scroll-margin-top: 160px;
+    margin-top: 20px;
+}
+
+.company-content h2 {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+.company-content p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #444;
+}
+
+/* =========================
+   FACTORY CARDS
+========================= */
+
+.factory-cards .factory-card {
+    border: 1px solid #eee;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.factory-cards .factory-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.15);
+}
+
+.factory-cards .card-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.factory-cards .card-text .badge {
+    font-size: 0.85rem;
+}
+
+/* =========================
+   COMPANY INFO CARDS
+========================= */
+
+.company-details .info-card {
+    border: 1px solid #eee;
+    background-color: #fff;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.company-details .info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+}
+
+.company-details .info-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #d32f2f;
+    display: inline-block;
+    padding-bottom: 4px;
+    color: #d32f2f;
+}
+
+.company-details p {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.company-details p span.badge {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* =========================
+   HISTORY LIST
+========================= */
+
+.history-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.history-list li {
+    padding-left: 20px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.history-list li::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background-color: #d32f2f;
+    border-radius: 50%;
+    position: absolute;
+    left: 0;
+    top: 8px;
+}
+
+/* Clickable card image cursor */
+.clickable-img {
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.clickable-img:hover {
+    transform: scale(1.03);
+}
+
+/* Lightbox overlay */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+/* Lightbox content */
+.lightbox-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    text-align: center;
+    position: relative;
+}
+
+.lightbox-content img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+/* Lightbox caption */
+.lightbox-caption h5 {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.lightbox-caption p {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Close button */
+.lightbox-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 28px;
+    background: none;
+    border: none;
+    color: #222;
+    cursor: pointer;
+}
+
+/* =========================
+   ANIMATION
+========================= */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================
+   MOBILE VIEW
+========================= */
+
+@media (max-width: 768px) {
+    .company-sidebar {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .company-sidebar button {
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        flex: 1 1 50%;
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    .company-sidebar button.active {
+        border-bottom: 3px solid #d32f2f;
+    }
+
+    .factory-cards .card {
+        margin-bottom: 20px;
+    }
+
+    .company-details .row.g-4 {
+        row-gap: 20px;
+    }
+}
+
+
+/* Owners Message */
+/* Owner Cards */
+.owner-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: default;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.owner-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.owner-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #d32f2f;
+    transition: transform 0.3s;
+}
+
+.owner-img:hover {
+    transform: scale(1.05);
+}
+
+/* Owner Message Box */
+.owner-message {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #444;
+    border: 2px solid #d32f2f;
+    background: linear-gradient(135deg, #fff5f5, #fff);
+    padding: 30px;
+    border-radius: 16px;
+}
+
+/* Japanese & English titles */
+.owner-message h6 {
+    font-family: "Poppins", sans-serif;
+}
+
+/* LIGHTBOX */
+.lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 700px;
+    width: 90%;
+    text-align: center;
+}
+
+.lightbox-content img {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 2rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: white;
+    background: rgba(0, 0, 0, 0.4);
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.lightbox-nav.left {
+    left: 10px;
+}
+
+.lightbox-nav.right {
+    right: 10px;
+}
+
+.lightbox-caption {
+    color: #fff;
+}
+

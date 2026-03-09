@@ -1,0 +1,64 @@
+/* Company History Timeline */
+/* CALENDAR GRID TIMELINE */
+.company-history-section {
+    margin-top: 20px;
+    padding: 60px 20px;
+    background-color: #ffffff;
+}
+
+.company-history-section h2 {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    margin-bottom: 50px;
+    margin-top: -60px;
+    color: #000000;
+}
+
+/* Grid container */
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Each year card */
+.history-card {
+    background-color: #fff;
+    border: 2px solid #d32f2f;
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.history-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Year styling */
+.history-year {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
+    background-color: #d32f2f;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+/* Event styling */
+.history-event {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #444;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .history-grid {
+        grid-template-columns: 1fr;
+    }
+}
