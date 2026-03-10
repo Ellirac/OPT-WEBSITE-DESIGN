@@ -1,7 +1,7 @@
 /* OUR TEAM SECTION */
 .our-team-section {
-    padding-top: 5px;
-    margin-top: -110px;
+    padding-top: 50px;
+    margin-top: -40px;
     padding-bottom: 40px;
     background-color: #ffffff;
 }
@@ -10,7 +10,7 @@
 .our-team-section h2 {
     font-family: "Poppins", sans-serif;
     font-weight: 700;
-    margin-top: 0;
+    margin-top: -75px;
     margin-bottom: 50px;
     text-align: center;
     color: #222;
@@ -34,7 +34,7 @@
     font-weight: 600;
     font-size: 1.3rem;
     color: #d32f2f;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     margin-left: 5px;
     border-left: 4px solid #d32f2f;
     padding-left: 10px;
