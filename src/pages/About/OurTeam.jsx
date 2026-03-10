@@ -1,9 +1,9 @@
 import React from "react";
 import "../../styles/OurTeam.css";
-import ownerImg from "../../assets/images/Owner.jpg";
-import keImage from "../../assets/images/Chairman.jpg";
-import mariettaImg from "../../assets/images/Opt-P Director.jpg"; 
-import kikuoImg from "../../assets/images/Vice President.jpg";
+import ownerImg from "../../assets/images/Owner.png";
+import keImage from "../../assets/images/Chairman.png";
+import mariettaImg from "../../assets/images/President.png";
+import kikuoImg from "../../assets/images/Vice President.png";
 
 const OurTeam = () => {
   const organization = [
@@ -21,7 +21,6 @@ const OurTeam = () => {
     { department: "TECHNICAL", teams: ["Technical", "Maintenance"] },
   ];
 
-
   return (
     <div className="our-team-section company-section">
       <h2>Our Team</h2>
@@ -29,11 +28,12 @@ const OurTeam = () => {
       {/* ORGANIZATION */}
       <div className="organization-section mb-5">
         <h3 className="section-title">Organization</h3>
-        <div className="row">
-          {organization.map((person, index) => (
-            <div key={index} className="col-md-3 col-sm-6 mb-4">
+        <div className="row justify-content-center">          {organization.map((person, index) => (
+            <div key={index} className="col-6 col-sm-6 col-md-3 mb-4">
               <div className="team-card shadow-lg h-100">
-                <img src={person.img} alt={person.name} className="team-img" />
+                <div className="team-img-wrapper">
+                  <img src={person.img} alt={person.name} className="team-img" />
+                </div>
                 <div className="team-info">
                   <h5 className="team-name">{person.name}</h5>
                   <p className="team-role">{person.role}</p>
@@ -49,7 +49,7 @@ const OurTeam = () => {
         <h3 className="section-title">Management Team</h3>
         <div className="row">
           {management.map((dept, index) => (
-            <div key={index} className="col-md-4 col-sm-6 mb-4">
+            <div key={index} className="col-12 col-sm-6 col-md-4 mb-4">
               <div className="management-card shadow-sm h-100 p-3">
                 <h5 className="management-dept">{dept.department}</h5>
                 <ul className="management-teams">

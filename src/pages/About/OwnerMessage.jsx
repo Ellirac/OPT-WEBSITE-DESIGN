@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import owner1 from "../../assets/images/Owner.jpg"; // MR. KO OTSUKA
-import owner2 from "../../assets/images/Chairman.jpg"; // MR. KEI OTSUKA
+import owner1 from "../../assets/images/Owner.png"; // MR. KO OTSUKA
+import owner2 from "../../assets/images/Chairman.png"; // MR. KEI OTSUKA
 import "../../styles/company.css";
 
 const OwnerMessage = () => {

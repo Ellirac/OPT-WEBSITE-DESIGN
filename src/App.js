@@ -10,20 +10,24 @@ import Products from "./pages/Products";
 import Careers from "./pages/Careers";
 import Contact from "./pages/Contact";
 import Activities from "./pages/Activities";
-
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
+
       <Header />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<Company />} />
         <Route path="/activities" element={<Activities />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/products/" element={<Products />} />
+        <Route path="/products" element={<Products />} />
       </Routes>
+
       <Footer />
     </BrowserRouter>
   );

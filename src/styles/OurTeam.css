@@ -1,8 +1,11 @@
-/* OUR TEAM SECTION */
+/* =========================
+   OUR TEAM SECTION
+========================= */
+
 .our-team-section {
-    padding-top: 50px;
-    margin-top: -40px;
-    padding-bottom: 40px;
+    padding-top: 5px;
+    margin-top: 1px;
+    padding-bottom: 60px;
     background-color: #ffffff;
 }
 
@@ -10,14 +13,12 @@
 .our-team-section h2 {
     font-family: "Poppins", sans-serif;
     font-weight: 700;
-    margin-top: -75px;
-    margin-bottom: 50px;
+    margin-bottom: 40px;
     text-align: center;
     color: #222;
     position: relative;
 }
 
-/* Decorative underline */
 .our-team-section h2::after {
     content: "";
     display: block;
@@ -31,19 +32,23 @@
 /* SECTION TITLES */
 .section-title {
     font-family: "Poppins", sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1.3rem;
     color: #d32f2f;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
     margin-left: 5px;
     border-left: 4px solid #d32f2f;
     padding-left: 10px;
+    display: inline-block;
 }
 
-/* ORGANIZATION CARDS */
+/* =========================
+   ORGANIZATION CARDS
+========================= */
+
 .team-card {
     background-color: #fff;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
     text-align: center;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -54,106 +59,34 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
+/* Wrapper controls the aspect ratio — image fills it fully */
+/* Wrapper controls the fixed height — same for all cards */
+.team-img-wrapper {
+    width: 100%;
+    height: 260px;
+    overflow:visible;
+}
+
 .team-img {
     width: 100%;
-    height: 220px;
+    height: 100%;
     object-fit: cover;
+    object-position: center 15%;
+    /* slightly above center to keep faces in frame */
+    display: block;
+    transition: transform 0.3s ease;
 }
 
-.team-info {
-    padding: 12px 10px;
+.team-card:hover .team-img {
+    transform: scale(1.04);
 }
 
-.team-name {
-    font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 5px;
-}
-
-.team-role {
-    font-size: 0.9rem;
-    color: #555;
-}
-
-/* MANAGEMENT CARDS */
-.management-card {
-    background-color: #fff;
-    border-radius: 12px;
-    padding: 15px;
-    text-align: left;
-}
-
-.management-dept {
-    font-weight: 700;
-    color: #d32f2f;
-    margin-bottom: 12px;
-}
-
-.management-teams {
-    list-style: disc inside;
-    padding-left: 0;
-}
-
-.management-teams li {
-    font-size: 0.95rem;
-    color: #444;
-    padding: 3px 0;
-}
-
-/* RESPONSIVE */
+/* MOBILE VIEW */
 @media (max-width: 768px) {
-
-    .team-card,
-    .management-card {
-        text-align: center;
+    .team-img-wrapper {
+        height: 200px;
+        /* consistent fixed height on mobile too */
     }
-
-    .management-dept {
-        text-align: center;
-    }
-
-    .section-title {
-        text-align: center;
-        margin-left: 0;
-        border-left: none;
-        padding-left: 0;
-    }
-}
-
-/* Our Team */
-.our-team-section {
-    padding-top: 130px;
-    /* space for fixed header */
-    padding-bottom: 60px;
-}
-
-.section-title {
-    font-family: 'Poppins', sans-serif;
-    font-weight: 700;
-    margin-bottom: 25px;
-    color: #d32f2f;
-    border-bottom: 2px solid #d32f2f;
-    display: inline-block;
-    padding-bottom: 5px;
-}
-
-/* ORGANIZATION CARDS */
-.team-card {
-    background-color: #fff;
-    border-radius: 16px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.team-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-}
-
-.team-img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
 }
 
 .team-info {
@@ -162,16 +95,21 @@
 }
 
 .team-name {
-    font-weight: 600;
-    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 4px;
 }
 
 .team-role {
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     color: #555;
+    margin-bottom: 0;
 }
 
-/* MANAGEMENT TEAM CARDS */
+/* =========================
+   MANAGEMENT CARDS
+========================= */
+
 .management-card {
     background-color: #f9f9f9;
     border-radius: 12px;
@@ -194,15 +132,56 @@
     list-style: disc;
     padding-left: 20px;
     color: #444;
+    margin-bottom: 0;
 }
 
 .management-teams li {
+    font-size: 0.95rem;
     margin-bottom: 6px;
 }
 
-/* MOBILE ADJUSTMENTS */
+/* =========================
+   MOBILE VIEW
+========================= */
+
 @media (max-width: 768px) {
-    .team-img {
-        height: 150px;
+    .our-team-section {
+        padding-top: 20px;
+    }
+
+    .section-title {
+        text-align: center;
+        margin-left: 0;
+        border-left: none;
+        padding-left: 0;
+        border-bottom: 3px solid #d32f2f;
+        display: block;
+        padding-bottom: 6px;
+    }
+
+    /* Wider aspect ratio on mobile so cards aren't too tall in 2-col grid */
+    .team-img-wrapper {
+        aspect-ratio: 4 / 4;
+    }
+
+    .team-name {
+        font-size: 0.85rem;
+    }
+
+    .team-role {
+        font-size: 0.78rem;
+    }
+
+    .management-card {
+        text-align: center;
+    }
+
+    .management-dept {
+        text-align: center;
+    }
+
+    .management-teams {
+        text-align: left;
+        display: inline-block;
     }
 }
