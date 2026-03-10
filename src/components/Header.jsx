@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, } from "react-router-dom";
 import { useRef } from "react";
 import logo from "../assets/images/opt_logo2.png";
 
