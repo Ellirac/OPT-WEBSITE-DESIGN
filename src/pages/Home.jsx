@@ -409,7 +409,7 @@ export default function Home() {
       <section className="partners-section">
         <div className="container">
           <Reveal direction="up">
-            <div className="section-label">Global Network</div>
+            <div className="section-label">Our Customers</div>
             <h2 className="section-title">Trusted By Industry Leaders</h2>
           </Reveal>
         </div>
