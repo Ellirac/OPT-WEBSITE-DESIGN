@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles/Career.css"
 
 const jobList = [
   { title: "Company Driver", date: "01/06/2025" },
