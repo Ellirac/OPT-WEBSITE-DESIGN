@@ -6,14 +6,12 @@ const Header = () => {
   const navRef = useRef(null);
   const location = useLocation();
 
-  // Scroll to top on every route change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
   const handleNavClick = (path) => {
     handleNavClose();
-    // If already on the same page, force scroll to top
     if (location.pathname === path) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }

@@ -102,7 +102,6 @@ const rowTwo   = allPartners.slice(8, 16);
 const rowThree = allPartners.slice(16, 24);
 const rowFour  = allPartners.slice(24, 32);
 
-/* ── Reveal wrapper ── */
 function Reveal({ children, direction = "up", delay = 0, className = "" }) {
   const [ref, inView] = useInView(0.12);
   const dirClass = { up: "reveal-up", left: "reveal-left", right: "reveal-right", pop: "reveal-pop" }[direction] || "reveal-up";
@@ -128,7 +127,6 @@ export default function Home() {
     document.body.style.overflow = "auto";
   };
 
-  /* ── Generic reveal observer ── */
   useEffect(() => {
     const els = document.querySelectorAll(".reveal-up, .reveal-left, .reveal-right, .reveal-pop");
     const obs = new IntersectionObserver(
@@ -139,7 +137,7 @@ export default function Home() {
     return () => obs.disconnect();
   }, []);
 
-  /* ── WHO WE ARE — text stagger on section enter only ── */
+  /* ── WHO WE ARE ── */
   const wwaRef = useRef(null);
   useEffect(() => {
     const section = wwaRef.current;
@@ -220,10 +218,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── WHO WE ARE — split-screen, image always fully visible ── */}
+      {/* ── WHO WE ARE ── */}
       <section className="wwa-section" ref={wwaRef}>
 
-        {/* LEFT — sticky text panel */}
         <div className="wwa-left-panel">
           <div className="wwa-left-inner">
 
@@ -278,20 +275,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* RIGHT — image always fully visible, no curtain */}
         <div className="wwa-right-panel">
           <div className="wwa-image" style={{ backgroundImage: `url(${whoImage})` }} />
-          {/* Left-edge gradient so image blends into text panel */}
           <div className="wwa-image-scrim" />
-          {/* Decorative corner frame */}
           <div className="wwa-corner-frame" />
-          {/* Year badge */}
           <div className="wwa-badge">
             <span className="wwa-badge-year">1948</span>
             <span className="wwa-badge-line" />
             <span className="wwa-badge-text">Founded<br/>in Japan</span>
           </div>
-          {/* Floating accent pill top-right */}
           <div className="wwa-float-pill">
             <span className="wwa-float-num">75<sup>+</sup></span>
             <span className="wwa-float-label">Years of Excellence</span>
@@ -300,7 +292,6 @@ export default function Home() {
 
       </section>
 
-      {/* ── SEPARATOR: Who We Are → Products ── */}
       <div className="sep sep--wwa-to-products" />
 
       {/* ── PRODUCTS ── */}
@@ -325,7 +316,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SEPARATOR: Products → Why Choose Us ── */}
       <div className="sep sep--products-to-why" />
 
       {/* ── WHY CHOOSE US ── */}
@@ -352,7 +342,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SEPARATOR: Why → Industries ── */}
       <div className="sep sep--why-to-industries" />
 
       {/* ── INDUSTRIES ── */}
@@ -375,7 +364,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SEPARATOR: Industries → Certifications ── */}
       <div className="sep sep--industries-to-certs" />
 
       {/* ── CERTIFICATIONS ── */}
@@ -402,7 +390,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SEPARATOR: Certifications → Partners ── */}
       <div className="sep sep--certs-to-partners" />
 
       {/* ── PARTNERS ── */}
@@ -429,7 +416,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── SEPARATOR: Partners → CTA ── */}
       <div className="sep sep--partners-to-cta" />
 
       {/* ── CTA BANNER ── */}
