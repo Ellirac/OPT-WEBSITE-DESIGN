@@ -140,7 +140,7 @@
 .hero-video-section {
     position: relative;
     height: 100vh;
-    min-height: 580px;
+    min-height: 610px;
     overflow: hidden;
     display: flex;
     align-items: flex-end;
