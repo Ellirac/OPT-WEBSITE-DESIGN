@@ -1,253 +1,268 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import "../../styles/AutomobileProducts.css";
-import BOOTCLUTCH from "../../assets/images/automobile/New Update/PACKING and SEAL.png";
-import IMG2 from "../../assets/images/automobile/New Update/DAMPER and MOUNT 1.png";
-import IMG3 from "../../assets/images/automobile/New Update/DAMPER and MOUNT 2.png";
-import ORING from "../../assets/images/automobile/New Update/BOOT and COVER.png";
-import IMG5 from "../../assets/images/automobile/New Update/BOOT and COVER (1).png";
-import IMG6 from "../../assets/images/automobile/New Update/BOOT and COVER (2).png";
-import IMG7 from "../../assets/images/automobile/New Update/OTHERS.png";
-import IMG8 from "../../assets/images/automobile/New Update/EXTERIOR PRODUCTS.png";
-import CAR_IMAGE from "../../assets/images/automobile/Car Image.png";
 
+// ─── DATA ────────────────────────────────────────────────────────────────────
 
-const PARTS = {
-  1:  { name: "Packing and Seal",   img: BOOTCLUTCH,    desc: "Products for sealing applications to prevent or seal passage of oil, fuel oil, water, air, dust, and other contaminants across mating surfaces and joints.",             category: "sealing",      categoryName: "Sealing Components"   },
-  2:  { name: "Damper and Mount",   img: IMG2,          desc: "Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.",                                                                 category: "sealing",      categoryName: "Sealing Components"   },
-  3:  { name: "Damper and Mount",   img: IMG3,          desc: "Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.",                                                                 category: "protective",   categoryName: "Protective Covers"     },
-  4:  { name: "Boot and Cover",     img: ORING,         desc: "Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.",                                                                 category: "sealing",      categoryName: "Sealing Components"   },
-  5:  { name: "Boot and Cover",     img: IMG5,          desc: "Flexible rubber boots designed to protect steering and suspension joints from dust, moisture, and road debris, ensuring reliable long-term joint performance.",          category: "sealing",      categoryName: "Sealing Components"   },
-  6:  { name: "Boot and Cover",     img: IMG6,          desc: "Flexible rubber boots designed to protect steering and suspension joints from dust, moisture, and road debris, ensuring reliable long-term joint performance.",          category: "vibration",    categoryName: "Anti-Vibration"        },
-  7:  { name: "Others",             img: IMG8,          desc: "Accordion-style rubber covers engineered to shield driveshaft CV joints and rack-and-pinion assemblies from contamination while retaining lubricating grease.",          category: "protective",   categoryName: "Protective Covers"     },
-  8:  { name: "Exterior Products",  img: IMG7,          desc: "High-grade exterior rubber parts such as weather strips, door seals, and body moldings that provide weather resistance, acoustic insulation, and a refined finish.",     category: "fluid",        categoryName: "Fluid Transfer"        },
+const parts = {
+  1: { name: "Packing and Seal",  displayNum: 1, img: "automobile/New Update/PACKING and SEAL.png",
+       desc: "Products for sealing applications to prevent or seal passage of oil, fuel oil, water, air, dust, and other contaminants across mating surfaces and joints.",
+       category: "seal",     categoryName: "Packing and Seal" },
+  2: { name: "Damper and Mount",  displayNum: 2, img: "automobile/New Update/DAMPER and MOUNT 1.png",
+       desc: "Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.",
+       category: "mount",    categoryName: "Damper and Mount" },
+  3: { name: "Damper and Mount",  displayNum: 3, img: "automobile/New Update/DAMPER and MOUNT 2.png",
+       desc: "Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.",
+       category: "mount",    categoryName: "Damper and Mount" },
+  4: { name: "Damper and Mount",  displayNum: 3, img: "automobile/New Update/DAMPER and MOUNT 2.png",
+       desc: "Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.",
+       category: "mount",    categoryName: "Damper and Mount" },
+  5: { name: "Boot and Cover",    displayNum: 4, img: "automobile/New Update/BOOT and COVER.png",
+       desc: "Flexible rubber boots designed to protect steering and suspension joints from dust, moisture, and road debris, ensuring reliable long-term joint performance.",
+       category: "cover",    categoryName: "Boot and Cover" },
+  6: { name: "Boot and Cover",    displayNum: 5, img: "automobile/New Update/BOOT and COVER (1).png",
+       desc: "Accordion-style rubber covers engineered to shield driveshaft CV joints and rack-and-pinion assemblies from contamination while retaining lubricating grease.",
+       category: "cover",    categoryName: "Boot and Cover" },
+  7: { name: "Boot and Cover",    displayNum: 6, img: "automobile/New Update/BOOT and COVER (2).png",
+       desc: "Protective rubber covers for brake and clutch components, preventing fluid contamination and extending service life under repeated thermal cycling.",
+       category: "cover",    categoryName: "Boot and Cover" },
+  8: { name: "Others",            displayNum: 6, img: "automobile/New Update/OTHERS.png",
+       desc: "Specialized components including grommets, bushings, bump stops, and custom-molded rubber-to-metal parts suited for diverse automotive and industrial applications.",
+       category: "others",   categoryName: "Others" },
+  9: { name: "Exterior Products", displayNum: 7, img: "automobile/New Update/EXTERIOR PRODUCTS.png",
+       desc: "High-grade exterior rubber parts such as weather strips, door seals, and body moldings that provide weather resistance, acoustic insulation, and a refined finish.",
+       category: "products", categoryName: "Exterior Products" },
 };
 
-/** Pin positions as percentages of the image dimensions */
-const PIN_POSITIONS = {
-  1:  { top: 41, left: 35},
-  2:  { top: 35, left: 58 },
-  3:  { top: 49, left: 40},
-  4:  { top: 53, left: 16 },
-  5:  { top: 51, left: 23 },
-  6:  { top: 60, left: 27},
-  7:  { top: 44, left: 30 },
-  8:  { top: 55, left: 20 },
+const pinPositions = {
+  1: { top: 57, left: 30 },
+  2: { top: 63, left: 59 },
+  3: { top: 54, left: 42 },
+  4: { top: 33, left: 77 },
+  5: { top: 77, left: 39 },
+  6: { top: 59, left: 65 },
+  7: { top: 51, left: 48 },
+  8: { top: 30, left: 81 },
+  9: { top: 22, left: 55 },
 };
 
-const CATEGORY_COLORS = {
-  vibration:  "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
-  sealing:    "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
-  protective: "linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)",
-  fluid:      "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
-  structural: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)",
-  filtration: "linear-gradient(135deg, #34495e 0%, #2c3e50 100%)",
-  general:    "linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%)",
-
+const categoryColors = {
+  seal:     "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
+  mount:    "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
+  cover:    "linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)",
+  others:   "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
+  products: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)",
 };
 
-/** Legend data – keeps JSX clean */
-const LEGEND_CATEGORIES = [
-  { category: "seal",  label: "Packing and Seal",       pins: [1]        },
-  { category: "mount",    label: "Damper and Mount",   pins: [2, 3]  },
-  { category: "cover", label: "Boot and Cover",    pins: [4, 5, 6]  },
-  { category: "others",      label: "Others",       pins: [6]  },
-  { category: "products", label: "Exterior Products",   pins: [7]     },
+const legendItems = [
+  {
+    gradient: "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
+    title: "Packing and Seal",
+    pins: [{ partId: 1, label: 1 }],
+    subdesc: "has packing and sealing materials that are resistant to oils, fuel oil, water, and handles not only O-rings, but can also provide optimized design and material selection for irregular-shaped seal shapes.",
+  },
+  {
+    gradient: "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
+    title: "Damper and Mount",
+    pins: [{ partId: 2, label: 2 }, { partId: 3, label: 3 }],
+    subdesc: "can suppress vibration transmission and reduce noise by optimizing the shape and material properties for applications that supports various functional units such as passenger cars and trucks",
+  },
+  {
+    gradient: "linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)",
+    title: "Boot and Cover",
+    pins: [{ partId: 5, label: 4 }, { partId: 6, label: 5 }, { partId: 7, label: 6 }],
+    subdesc: "rubber products understand the functions and characteristics that customers demand and are constantly researching and developing to realize the optimum specifications by the most economical method, making rapid progress in the world.",
+  },
+  {
+    gradient: "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
+    title: "Others",
+    pins: [{ partId: 8, label: 6 }],
+    subdesc: "Responds quickly to customer requests by making full use of our track record of mass production of materials with special functions, optimal shape design, and technology for vulcanizing and bonding rubber to metal fittings and resin. In addition, regarding the materials handled, we have a track record of mass production for various rubber materials.",
+  },
+  {
+    gradient: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)",
+    title: "Exterior Products",
+    pins: [{ partId: 9, label: 7 }],
+    subdesc: "understand the quality of exterior products that customers require, and is constantly conducting research and development to realize the optimal specifications in the most economical way, resulting in the development of rubber products that are the forefront of the world.",
+  },
 ];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-/** Animated pin overlaid on the car image */
-function Pin({ id, style, isActive, onClick }) {
-  const part = PARTS[id];
-  return (
-    <div
-      className={`auto-pin${isActive ? " active" : ""}`}
-      style={{ ...style, background: CATEGORY_COLORS[part.category] }}
-      onClick={() => onClick(id)}
-      title={part.name}
-    >
-      <span className="auto-pin-number">{id}</span>
-      <span className="auto-pin-pulse" />
-    </div>
-  );
-}
-
-/** Part detail card shown on the right */
-function PartCard({ selectedId }) {
-  if (!selectedId) {
-    return (
-      <div className="auto-part-card">
-        <div className="auto-empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M9 11l3 3L22 4" />
-            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-          </svg>
-          <h3>Select a Component</h3>
-          <p>Click on any numbered pin to view product details</p>
-        </div>
-      </div>
-    );
-  }
-
-  const part = PARTS[selectedId];
-  const color = CATEGORY_COLORS[part.category];
-
-  return (
-    <div className="auto-part-card">
-      <div className="auto-part-content">
-        <div className="auto-part-image-wrapper">
-          <img src={part.img} alt={part.name} />
-        </div>
-        <div className="auto-part-details">
-          <div className="auto-part-header">
-            <div className="auto-part-number-badge" style={{ background: color }}>
-              {selectedId}
-            </div>
-            <h2 className="auto-part-title">{part.name}</h2>
-          </div>
-          <div className="auto-part-category-badge" style={{ background: color }}>
-            {part.categoryName}
-          </div>
-          <p className="auto-part-description">{part.desc}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/** Legend section at the bottom */
-function Legend({ onPinClick }) {
-  return (
-    <div className="auto-legend-container">
-      <h3 className="auto-legend-title">Product Classification</h3>
-      <div className="auto-legend-grid">
-        {LEGEND_CATEGORIES.map(({ category, label, pins }) => {
-          const color = CATEGORY_COLORS[category];
-          return (
-            <div key={category} className="auto-legend-item">
-              <div className="auto-legend-header">
-                <div className="auto-legend-color-box" style={{ background: color }} />
-                <h4>{label}</h4>
-              </div>
-              <div className="auto-legend-products">
-                {pins.map((pinId) => (
-                  <button
-                    key={pinId}
-                    className="auto-legend-pin"
-                    style={{ background: color }}
-                    onClick={() => onPinClick(pinId)}
-                  >
-                    {pinId}
-                  </button>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── COMPONENT ───────────────────────────────────────────────────────────────
 
 export default function AutomobileProducts() {
-  const [selectedId, setSelectedId] = useState(null);
-  const [pinStyles, setPinStyles]   = useState({});
+  const [selectedPartId, setSelectedPartId] = useState(null);
+  const [pinStyles, setPinStyles]           = useState({});
+  const [contentKey, setContentKey]         = useState(0); // force re-animation
 
-  const imgRef     = useRef(null);
   const wrapperRef = useRef(null);
+  const imgRef     = useRef(null);
 
-  /** Recalculate absolute pin positions whenever the image resizes */
   const positionPins = useCallback(() => {
-    const img     = imgRef.current;
-    const wrapper = wrapperRef.current;
-    if (!img || !wrapper) return;
+    if (!wrapperRef.current || !imgRef.current) return;
+    const wrapperRect = wrapperRef.current.getBoundingClientRect();
+    const imgRect     = imgRef.current.getBoundingClientRect();
+    const offsetTop   = imgRect.top  - wrapperRect.top;
+    const offsetLeft  = imgRect.left - wrapperRect.left;
 
-    const wRect = wrapper.getBoundingClientRect();
-    const iRect = img.getBoundingClientRect();
-    const offsetTop  = iRect.top  - wRect.top;
-    const offsetLeft = iRect.left - wRect.left;
-
-    const next = {};
-    Object.entries(PIN_POSITIONS).forEach(([id, pos]) => {
-      next[id] = {
-        position: "absolute",
-        top:  `${offsetTop  + (pos.top  / 100) * iRect.height}px`,
-        left: `${offsetLeft + (pos.left / 100) * iRect.width}px`,
-      };
+    const styles = {};
+    Object.keys(pinPositions).forEach((id) => {
+      const pos = pinPositions[id];
+      const top  = offsetTop  + (pos.top  / 100) * imgRef.current.height;
+      const left = offsetLeft + (pos.left / 100) * imgRef.current.width;
+      styles[id] = { top: `${top}px`, left: `${left}px` };
     });
-    setPinStyles(next);
+    setPinStyles(styles);
   }, []);
 
   useEffect(() => {
-  const observer = new ResizeObserver(() => positionPins());
-  if (wrapperRef.current) observer.observe(wrapperRef.current);
-  return () => observer.disconnect();
-}, [positionPins]);
+    window.addEventListener("resize", positionPins);
+    return () => window.removeEventListener("resize", positionPins);
+  }, [positionPins]);
 
-  const handleSelectPart = (id) => setSelectedId(id);
-
-  const handleLegendPin = (id) => {
-    setSelectedId(id);
-    document
-      .querySelector(".auto-part-card")
-      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const handleSelectPart = (id) => {
+    setSelectedPartId(id);
+    setContentKey((k) => k + 1);
   };
 
+  const handleLegendPinClick = (partId) => {
+    handleSelectPart(partId);
+    document.getElementById("partCard")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const selectedPart = selectedPartId ? parts[selectedPartId] : null;
+
   return (
-    <div className="auto-page">
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <div className="auto-product-header">
-        <div className="auto-header-content">
+    <>
+      {/* HEADER */}
+      <div className="product-header">
+        <div className="header-content">
           <h1>Automobile Products</h1>
           <p>
-            Ohtsuka Poly-Tech (Philippines) Inc. handles parts for motorcycles as well as
-            four-wheeled vehicles. We use the most suitable materials for the purpose, such
-            as vibration isolation and sealing, to supply high-quality products.
+            Ohtsuka Poly-Tech (Philippines) Inc. handles parts for motorcycles as well as four-wheeled vehicles.
+            We use the most suitable materials for the purpose, such as vibration isolation
+            and sealing, to supply high-quality products.
           </p>
         </div>
-        <div className="auto-header-decoration" />
+        <div className="header-decoration" />
       </div>
 
-      {/* ── Car + Part Details ──────────────────────────────────────── */}
-      <div className="auto-main-container">
-        {/* Car */}
-        <div className="auto-car-container">
-          <div className="auto-car-model">
-            <div className="auto-car-wrapper" ref={wrapperRef}>
+      {/* MAIN CONTENT */}
+      <div className="main-container">
+
+        {/* LEFT: CAR IMAGE */}
+        <div className="car-container">
+          <div className="car-model">
+            <div className="car-wrapper" ref={wrapperRef}>
               <img
                 ref={imgRef}
-                src={CAR_IMAGE}
+                src="Car Image.png"
+                className="car-img"
                 alt="Car"
-                className="auto-car-img"
                 onLoad={positionPins}
               />
-              <div className="auto-car-glow" />
-
-              {/* Pins */}
-              {Object.keys(PARTS).map((id) => (
-                <Pin
-                  key={id}
-                  id={Number(id)}
-                  style={pinStyles[id] || { display: "none" }}
-                  isActive={selectedId === Number(id)}
-                  onClick={handleSelectPart}
-                
-                />
-              ))}
+              <div className="car-glow" />
             </div>
+
+            {/* PINS */}
+            {Object.keys(parts).map((id) => {
+              const numId = parseInt(id);
+              const part  = parts[numId];
+              const style = pinStyles[numId] || {};
+              return (
+                <div
+                  key={numId}
+                  className={`pin${selectedPartId === numId ? " active" : ""}`}
+                  data-id={numId}
+                  data-category={part.category}
+                  style={{
+                    ...style,
+                    background: categoryColors[part.category],
+                    display: pinStyles[numId] ? "flex" : "none",
+                  }}
+                  onClick={() => handleSelectPart(numId)}
+                >
+                  <span className="pin-number">{part.displayNum}</span>
+                  <span className="pin-pulse" />
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Details */}
-        <div className="auto-part-container">
-          <PartCard selectedId={selectedId} />
+        {/* RIGHT: PART DETAILS */}
+        <div className="part-container">
+          <div className="part-card" id="partCard">
+            {!selectedPart && (
+              <div className="empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                </svg>
+                <h3>Select a Component</h3>
+                <p>Click on any numbered pin to view product details</p>
+              </div>
+            )}
+
+            {selectedPart && (
+              <div key={contentKey} className="part-content active">
+                <div className="part-image-wrapper">
+                  <img id="partImg" src={selectedPart.img} alt="Product" />
+                </div>
+                <div className="part-details">
+                  <div className="part-header">
+                    <div
+                      className="part-number-badge"
+                      style={{ background: categoryColors[selectedPart.category] }}
+                    >
+                      {selectedPart.displayNum}
+                    </div>
+                    <h2 className="part-title">{selectedPart.name}</h2>
+                  </div>
+                  <div
+                    className="part-category-badge"
+                    style={{ background: categoryColors[selectedPart.category] }}
+                  >
+                    {selectedPart.categoryName}
+                  </div>
+                  <p className="part-description">{selectedPart.desc}</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ── Legend ─────────────────────────────────────────────────── */}
-      <Legend onPinClick={handleLegendPin} />
-    </div>
+      {/* CLASSIFICATION LEGEND */}
+      <div className="legend-container">
+        <h3 className="legend-title">Product Classification</h3>
+        <div className="legend-grid">
+          {legendItems.map((item, idx) => (
+            <div className="legend-item" key={idx}>
+              <div className="legend-header">
+                <div className="legend-color-box" style={{ background: item.gradient }} />
+                <h4>{item.title}</h4>
+              </div>
+              <div className="legend-products">
+                {item.pins.map((pin) => (
+                  <span
+                    key={pin.partId}
+                    className="legend-pin"
+                    data-part-id={pin.partId}
+                    style={{ background: item.gradient }}
+                    onClick={() => handleLegendPinClick(pin.partId)}
+                  >
+                    {pin.label}
+                  </span>
+                ))}
+              </div>
+              <p className="legend-main-desc" />
+              <div className="legend-subdesc">
+                <span className="legend-opt-label">Ohtsuka Polytech (OPT)</span>
+                <p className="legend-subdesc-text">{item.subdesc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 }
