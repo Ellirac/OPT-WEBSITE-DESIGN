@@ -159,7 +159,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="home-page mt-5 pt-5">
+    <div className="home-page">
 
       {/* ── Legal Entry Notice ── */}
       {showNotice && (

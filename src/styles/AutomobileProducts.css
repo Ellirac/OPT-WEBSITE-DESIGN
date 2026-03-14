@@ -267,7 +267,7 @@ body {
 }
 
 .legend-item {
-  background: white;
+  background: rgba(149, 141, 141, 0.689);
   border-radius: 12px;
   padding: 18px;
   box-shadow: var(--card-shadow);
@@ -310,7 +310,7 @@ body {
 
 .legend-main-desc { font-size: 0.88rem; color: #555; line-height: 1.6; margin: 10px 0 0; min-height: 1.2em; }
 
-.legend-subdesc { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+.legend-subdesc {padding-top: 10px; border-top: 1px solid #f0f0f0; }
 
 .legend-opt-label {
   display: inline-block;
