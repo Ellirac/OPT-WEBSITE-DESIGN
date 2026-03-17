@@ -1,0 +1,119 @@
+.navbar-main {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    transition: padding 0.4s ease;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.nav-pill {
+    transition: background 0.4s ease,
+        box-shadow 0.4s ease,
+        border-radius 0.4s ease,
+        padding 0.4s ease;
+    padding: 6px 12px;
+    border-radius: 0px;
+}
+
+.nav-pill.pill-active {
+    background: rgb(255, 255, 255);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    border-radius: 50px;
+    padding: 8px 28px;
+}
+
+/* ── Link styles ── */
+.nav-link-animated {
+    position: relative;
+    padding: 6px 4px !important;
+    padding-bottom: 6px !important;
+    color: #4b87ae !important;
+    font-size: 1rem !important;
+    letter-spacing: 0.04em;
+    transition: color 0.3s ease;
+    white-space: nowrap;
+}
+
+.pill-active .nav-link-animated {
+    color: #1a1a1a !important;
+}
+
+.nav-link-animated::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 2px;
+    background-color: #d32f2f;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.nav-link-animated:hover::after,
+.nav-link-animated.active-link::after {
+    width: 100%;
+}
+
+.nav-link-animated.active-link {
+    color: #d32f2f !important;
+}
+
+.nav-link-animated:hover {
+    color: #d32f2f !important;
+}
+
+.navbar-nav .nav-item {
+    margin: 0 6px;
+}
+
+.navbar-logo {
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.35));
+    transition: filter 0.3s ease;
+}
+
+/* ── Mobile fallback ── */
+@media (max-width: 991px) {
+
+    .navbar-main {
+        background-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    #mainNav {
+        background-color: rgba(0, 0, 0, 0.55) !important;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 12px;
+        margin-top: 8px;
+        padding: 12px 16px;
+    }
+
+    .nav-pill,
+    .nav-pill.pill-active {
+        background: transparent !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        backdrop-filter: none !important;
+    }
+
+    .nav-link-animated {
+        color: #ffffff !important;
+        font-size: 1.05rem !important;
+    }
+
+    .pill-active .nav-link-animated {
+        color: #ffffff !important;
+    }
+
+    .navbar-nav .nav-item {
+        margin: 4px 0;
+        width: 100%;
+    }
+}

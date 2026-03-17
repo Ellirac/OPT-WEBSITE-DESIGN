@@ -178,7 +178,6 @@
 .career-jobs {
     background: #fff;
     border-radius: 16px;
-
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
 }
@@ -466,6 +465,7 @@
     overflow-y: auto;
     box-shadow: 0 32px 80px rgba(0, 0, 0, 0.42);
     animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
 }
 
 .modal-card::-webkit-scrollbar {
@@ -481,52 +481,64 @@
     border-radius: 4px;
 }
 
-.modal-header {
-    background: linear-gradient(135deg, #c0392b 0%, #7a0000 100%);
-    padding: 32px 34px 26px;
-    border-radius: 20px 20px 0 0;
-    position: relative;
-    overflow: hidden;
-}
-
-.modal-header-pattern {
+/* ── MODAL CLOSE BUTTON ── */
+.modal-close-btn {
     position: absolute;
-    inset: 0;
-    background-image:
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.09) 0%, transparent 50%),
-        radial-gradient(circle at 10% 85%, rgba(0, 0, 0, 0.12) 0%, transparent 40%);
-    pointer-events: none;
+    top: 14px;
+    right: 16px;
+    background: #f2f2f2;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    line-height: 1;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    z-index: 10;
 }
 
-.modal-badge {
+.modal-close-btn:hover {
+    background: #ffe0e0;
+    color: #b30000;
+}
+
+/* ── MODAL TITLE BAR ── */
+.modal-card-title-bar {
+    padding: 28px 34px 18px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-badge-inline {
     display: inline-block;
-    background: rgba(255, 255, 255, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    color: #fff;
+    background: rgba(179, 0, 0, 0.08);
+    border: 1px solid rgba(179, 0, 0, 0.2);
+    color: #b30000;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
     padding: 4px 12px;
     border-radius: 20px;
-    margin-bottom: 12px;
-    position: relative;
+    margin-bottom: 10px;
 }
 
-.modal-title {
+.modal-card-heading {
     font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    color: #fff;
-    margin: 0 0 8px;
+    font-size: 22px;
+    color: #1a1a2e;
+    margin: 0 0 6px;
     line-height: 1.3;
-    position: relative;
 }
 
-.modal-date {
+.modal-card-date {
     font-size: 12.5px;
-    color: rgba(255, 255, 255, 0.62);
+    color: #aaa;
     margin: 0;
-    position: relative;
 }
 
 .modal-body {
@@ -608,6 +620,50 @@
     color: #b30000;
 }
 
+.opt-footer {
+    background: #111;
+    color: #bbb;
+    font-size: 14px;
+}
+
+.footer-brand {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.brand-highlight {
+    color: #dc3545;
+}
+
+.footer-copy {
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #888;
+}
+
+.footer-links span {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.footer-links span:hover {
+    color: #ffffff;
+}
+
+.modal-body p {
+    line-height: 1.7;
+    color: #444;
+    font-size: 14px;
+}
+
+.modal-dialog {
+    margin-top: 190px;
+}
+
+.modal-title {
+    font-weight: 600;
+}
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
     .career-hero {
@@ -647,8 +703,8 @@
         gap: 22px;
     }
 
-    .modal-header {
-        padding: 24px 22px 20px;
+    .modal-card-title-bar {
+        padding: 24px 22px 16px;
     }
 
     .modal-body {
@@ -659,7 +715,7 @@
         padding: 16px 22px;
     }
 
-    .modal-title {
-        font-size: 20px;
+    .modal-card-heading {
+        font-size: 18px;
     }
 }
