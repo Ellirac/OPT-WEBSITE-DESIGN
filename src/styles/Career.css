@@ -450,9 +450,13 @@
     -webkit-backdrop-filter: blur(8px);
     z-index: 1000;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* ← changed: was center */
     justify-content: center;
-    padding: 20px;
+    padding: 110px 20px 20px;
+    /* ← changed: top pad clears the fixed header */
+    overflow-y: auto;
+    /* ← allows modal itself to scroll if viewport is short */
     animation: fadeIn 0.2s ease;
 }
 
@@ -461,7 +465,8 @@
     border-radius: 20px;
     max-width: 640px;
     width: 100%;
-    max-height: 88vh;
+    max-height: calc(100vh - 130px);
+    /* ← keeps card from going taller than visible area */
     overflow-y: auto;
     box-shadow: 0 32px 80px rgba(0, 0, 0, 0.42);
     animation: slideUp 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -664,6 +669,7 @@
 .modal-title {
     font-weight: 600;
 }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
     .career-hero {
@@ -701,6 +707,15 @@
         grid-template-columns: 1fr;
         padding: 28px 26px;
         gap: 22px;
+    }
+
+    .modal-backdrop {
+        padding: 100px 12px 16px;
+        /* ← slightly tighter on mobile */
+    }
+
+    .modal-card {
+        max-height: calc(100vh - 120px);
     }
 
     .modal-card-title-bar {

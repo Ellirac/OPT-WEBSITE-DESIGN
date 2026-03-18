@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/activities.css";
 
 const activities = [
@@ -28,7 +28,7 @@ const activities = [
   },
   {
     id: 5,
-    title: "Community Donation Drive 2023e",
+    title: "Community Donation Drive 2023",
     category: "CSR",
     youtubeId: "XgbeoEwirXM",
   },
@@ -43,36 +43,55 @@ const activities = [
 const Activities = () => {
   const [activeVideo, setActiveVideo] = useState(null);
 
+  // Close on ESC key
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "Escape") setActiveVideo(null);
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, []);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = activeVideo ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [activeVideo]);
+
   return (
-    <div className="activities-neo container">
-      <div className="activities-header">
-        <h2>Company Activities</h2>
-        <p>Watch highlights of our corporate events and initiatives</p>
-      </div>
+    <div className="activities-neo">
+      <div className="container">
+        <div className="activities-header">
+          <h2>Company Activities</h2>
+          <p>Watch highlights of our corporate events and initiatives</p>
+        </div>
 
-      <div className="row">
-        {activities.map((item) => (
-          <div key={item.id} className="col-md-4 col-sm-6 mb-4">
-            <div
-              className="video-card"
-              onClick={() => setActiveVideo(item)}
-            >
-              <img
-                src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
-                alt={item.title}
-              />
-
-              <div className="video-overlay">
-                <span className="video-tag">{item.category}</span>
-                <h5>{item.title}</h5>
-
-                <div className="play-btn">
-                  ▶
+        <div className="row">
+          {activities.map((item) => (
+            <div key={item.id} className="col-md-4 col-sm-6 mb-4">
+              <div
+                className="video-card"
+                onClick={() => setActiveVideo(item)}
+              >
+                <div className="video-card-inner">
+                  <img
+                    src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`}
+                    alt={item.title}
+                  />
                 </div>
+
+                <div className="video-overlay">
+                  <span className="video-tag">{item.category}</span>
+                  <h5>{item.title}</h5>
+                </div>
+
+                <div className="play-btn">▶</div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* VIDEO MODAL */}
@@ -82,11 +101,17 @@ const Activities = () => {
             className="video-modal-box"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* EXIT BUTTON */}
             <button
               className="video-close"
               onClick={() => setActiveVideo(null)}
+              aria-label="Close video"
             >
-              &times;
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+              <span className="video-close-text">EXIT</span>
             </button>
 
             <iframe

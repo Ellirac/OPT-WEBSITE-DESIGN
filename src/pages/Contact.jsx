@@ -250,7 +250,7 @@ const Contact = () => {
         </div>
       )}
 
-    </div>
+   </div>
   );
 };
 

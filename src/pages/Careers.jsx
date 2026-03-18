@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/Career.css";
 
 const jobList = [
@@ -173,6 +173,18 @@ function JobModal({ job, onClose }) {
 export default function Career() {
   const [selectedJob, setSelectedJob] = useState(null);
 
+  // Lock background scroll when modal is open
+  useEffect(() => {
+    if (selectedJob) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedJob]);
+
   return (
     <>
       {/* HERO */}
@@ -262,11 +274,11 @@ export default function Career() {
               <input type="text" placeholder="Contact Number" required />
             </div>
             <select required>
-              <option value="">— Select Position Applying For —</option>
-              <option>Company Driver</option>
-              <option>Mechanical Engineer</option>
-              <option>Molding Operator / Production Operator</option>
-              <option>Electrical Engineer</option>
+            <option value="" disabled selected>— Select Position Applying For —</option>
+            <option>Company Driver</option>
+            <option>Mechanical Engineer</option>
+            <option>Molding Operator / Production Operator</option>
+            <option>Electrical Engineer</option>
             </select>
             <input type="file" />
             <textarea placeholder="Message (optional)" rows="4" />
