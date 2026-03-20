@@ -1,4 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
+import { db } from '../firebase';
+import {
+  doc, setDoc, onSnapshot
+} from 'firebase/firestore';
 
 /**
  * CMS State shape — mirrors the actual hardcoded data in each site component.
@@ -430,10 +434,6 @@ function cmsReducer(state, { type, payload }) {
 }
 
 // ─── Firebase-powered Context & Provider ─────────────────────────────────────
-import { db } from '../firebase';
-import {
-  doc, setDoc, onSnapshot
-} from 'firebase/firestore';
 
 const CMSContext = createContext(null);
 
