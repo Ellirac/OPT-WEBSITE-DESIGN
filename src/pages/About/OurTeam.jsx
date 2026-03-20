@@ -1,59 +1,62 @@
 import React from "react";
 import "../../styles/OurTeam.css";
-import ownerImg from "../../assets/images/Owner.png";
-import keImage from "../../assets/images/Chairman.png";
+import { useCMS } from "../../admin/context/CMSContext";
+
+import ownerImg    from "../../assets/images/Owner.png";
+import keImage     from "../../assets/images/Chairman.png";
 import mariettaImg from "../../assets/images/President.png";
-import kikuoImg from "../../assets/images/Vice President.png";
+import kikuoImg    from "../../assets/images/Vice President.png";
+
+const FALLBACK_IMGS = {
+  "MR. KO OTSUKA":        ownerImg,
+  "MR. KEI OTSUKA":       keImage,
+  "MS. MARIETTA CANAYON": mariettaImg,
+  "MR. KIKUO NAKAYAMA":   kikuoImg,
+};
 
 const OurTeam = () => {
-  const organization = [
-    { name: "MR. KO OTSUKA", role: "OWNER", img: ownerImg },
-    { name: "MR. KEI OTSUKA", role: "CHAIRMAN & PRESIDENT", img: keImage },
-    { name: "MS. MARIETTA CANAYON", role: "OPT-P DIRECTOR", img: mariettaImg },
-    { name: "MR. KIKUO NAKAYAMA", role: "VICE-PRESIDENT", img: kikuoImg },
-  ];
-
-  const management = [
-    { department: "ADMINISTRATION", teams: ["Human Resources", "Accounting", "IT"] },
-    { department: "PLANNING", teams: ["Planning", "Purchasing"] },
-    { department: "SALES", teams: ["Sales", "DCC"] },
-    { department: "PRODUCTION", teams: ["Production 1", "Production 2", "Finishing, Inspection & Packing"] },
-    { department: "TECHNICAL", teams: ["Technical", "Maintenance"] },
-  ];
+  const { state } = useCMS();
+  const organization = state.about.organization;
+  const management   = state.about.management;
 
   return (
     <div className="our-team-section company-section">
       <h2>Our Team</h2>
 
-      {/* ORGANIZATION */}
       <div className="organization-section mb-5">
         <h3 className="section-title">Organization</h3>
-        <div className="row justify-content-center">          {organization.map((person, index) => (
-            <div key={index} className="col-6 col-sm-6 col-md-3 mb-4">
-              <div className="team-card shadow-lg h-100">
-                <div className="team-img-wrapper">
-                  <img src={person.img} alt={person.name} className="team-img" />
-                </div>
-                <div className="team-info">
-                  <h5 className="team-name">{person.name}</h5>
-                  <p className="team-role">{person.role}</p>
+        <div className="row justify-content-center">
+          {organization.map((person) => {
+            const imgSrc = person.img || FALLBACK_IMGS[person.name] || null;
+            return (
+              <div key={person.id} className="col-6 col-sm-6 col-md-3 mb-4">
+                <div className="team-card shadow-lg h-100">
+                  <div className="team-img-wrapper">
+                    {imgSrc
+                      ? <img src={imgSrc} alt={person.name} className="team-img" />
+                      : <div style={{ height:200, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:50, color:'#d1d5db' }}>👤</div>
+                    }
+                  </div>
+                  <div className="team-info">
+                    <h5 className="team-name">{person.name}</h5>
+                    <p className="team-role">{person.role}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* MANAGEMENT TEAM */}
       <div className="management-section">
         <h3 className="section-title">Management Team</h3>
         <div className="row">
-          {management.map((dept, index) => (
-            <div key={index} className="col-12 col-sm-6 col-md-4 mb-4">
+          {management.map((dept) => (
+            <div key={dept.id} className="col-12 col-sm-6 col-md-4 mb-4">
               <div className="management-card shadow-sm h-100 p-3">
                 <h5 className="management-dept">{dept.department}</h5>
                 <ul className="management-teams">
-                  {dept.teams.map((team, idx) => (
+                  {(dept.teams || []).map((team, idx) => (
                     <li key={idx}>{team}</li>
                   ))}
                 </ul>

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useCMS } from "../admin/context/CMSContext";
 
 import "../styles/Home.css";
 import heroVideo from "../assets/videos/OPT COVER.mp4";
@@ -54,53 +55,7 @@ const industries = [
   { num: "05", label: "Industrial" },
 ];
 
-/* ── Certifications ── */
-const certs = [
-  { code: "ISO 9001",   label: "Quality Management" },
-  { code: "ISO 14001",  label: "Environmental Management" },
-  { code: "IATF 16949", label: "Automotive Quality" },
-  { code: "5S",         label: "Workplace Excellence" },
-];
-
-/* ── Partners ── */
-const allPartners = [
-  { name: "BIGMATE PHILIPPINES INC." },
-  { name: "F.TECH PHILIPPINES MFG., INC." },
-  { name: "FCC (PHILIPPINES) CORP." },
-  { name: "FURUKAWA ELECTRIC AUTOPARTS PHILS." },
-  { name: "HARADA AUTOMOTIVE ANTENNA PHILS." },
-  { name: "HIBLOW PHILIPPINES INC." },
-  { name: "HKT PHILIPPINES INC." },
-  { name: "HONDA CARS PHILIPPINES INC." },
-  { name: "HONDA PARTS MFG. CORP." },
-  { name: "HONDA PHILIPPINES INC." },
-  { name: "HONDA TRADING PHILIPPINES ECOZONE" },
-  { name: "KYUSHU F.TECH INC." },
-  { name: "LAGUNA AUTO-PARTS MFG. CORP." },
-  { name: "MEC ELECTRONICS PHILS. CORP." },
-  { name: "MITSUBA PHILIPPINES CORPORATION" },
-  { name: "MUBEA DO BRASIL" },
-  { name: "MUBEA INC." },
-  { name: "OHTSUKA POLY-TECH CO., LTD." },
-  { name: "PT MINEBEA ACCESSSOLUTIONS INDONESIA" },
-  { name: "PT. MAHLE INDONESIA" },
-  { name: "RYONAN ELECTRIC PHILIPPINES CORP." },
-  { name: "SANDEN INTERNATIONAL PHILIPPINES" },
-  { name: "SHANGHAI O.P.T RUBBER & PLASTIC" },
-  { name: "SHANGHAI RI SHANG AUTO RUBBER CO." },
-  { name: "SIIX EMS PHILIPPINES, INC." },
-  { name: "SUNCHIRIN INDUSTRIES (MALAYSIA)" },
-  { name: "TAIYO CORPORATION" },
-  { name: "TOYOTA AISIN PHILIPPINES, INC." },
-  { name: "TOYOTA MOTORS PHILIPPINES CORP." },
-  { name: "TOYU INDUSTRIES (THAILAND) CO., LTD." },
-  { name: "TRITON INDUSTRIAL PLASTIC MFG. CORP." },
-  { name: "WISTAR CORPORATION" },
-];
-const rowOne   = allPartners.slice(0, 8);
-const rowTwo   = allPartners.slice(8, 16);
-const rowThree = allPartners.slice(16, 24);
-const rowFour  = allPartners.slice(24, 32);
+/* ── CMS data replaces hardcoded certs and partners (see useCMS below) ── */
 
 function Reveal({ children, direction = "up", delay = 0, className = "" }) {
   const [ref, inView] = useInView(0.12);
@@ -114,12 +69,34 @@ function Reveal({ children, direction = "up", delay = 0, className = "" }) {
 }
 
 export default function Home() {
+  /* ── CMS data ── */
+  const { state } = useCMS();
+  const certs       = state.home.certifications;
+  const allPartners = state.home.partners;
+
+  /* ── Certificate lightbox ── */
+  const [selectedCert, setSelectedCert] = useState(null);
+  // Dynamic rows — works for any partner count
+  const chunkSize = 8;
+  const partnerRows = [];
+  for (let i = 0; i < allPartners.length; i += chunkSize) {
+    partnerRows.push(allPartners.slice(i, i + chunkSize));
+  }
+  while (partnerRows.length < 4) partnerRows.push([]);
+  const [rowOne, rowTwo, rowThree, rowFour] = partnerRows;
 
   /* ── Legal notice ── */
   const [showNotice, setShowNotice] = useState(false);
   useEffect(() => {
     const accepted = localStorage.getItem("opt_notice_accepted");
     if (!accepted) { setShowNotice(true); document.body.style.overflow = "hidden"; }
+  }, []);
+
+  // ESC closes cert lightbox
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') setSelectedCert(null); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
   const handleAcceptNotice = () => {
     localStorage.setItem("opt_notice_accepted", "true");
@@ -379,14 +356,104 @@ export default function Home() {
           <div className="certs-grid">
             {certs.map((c, i) => (
               <Reveal key={i} direction="pop" delay={i + 1}>
-                <div className="cert-card">
+                <div
+                  className={`cert-card${c.img ? ' cert-card--clickable' : ''}`}
+                  onClick={() => c.img && setSelectedCert(c)}
+                  style={{ cursor: c.img ? 'pointer' : 'default' }}
+                >
+                  {c.img && (
+                    <div className="cert-img-thumb">
+                      <img src={c.img} alt={c.code} />
+                    </div>
+                  )}
                   <div className="cert-code">{c.code}</div>
                   <div className="cert-divider" />
                   <div className="cert-label">{c.label}</div>
+                  {c.img && <div className="cert-view-hint">View Certificate →</div>}
                 </div>
               </Reveal>
             ))}
           </div>
+
+          {/* Certificate Lightbox */}
+          {selectedCert && (
+            <div
+              onClick={() => setSelectedCert(null)}
+              style={{
+                position:'fixed', inset:0, zIndex:9998,
+                background:'rgba(0,0,0,0.92)', backdropFilter:'blur(6px)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                padding:24, animation:'certFadeIn 0.2s ease',
+              }}
+            >
+              <div onClick={e => e.stopPropagation()} style={{ maxWidth:780, width:'100%', position:'relative' }}>
+                {/* Header */}
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:16 }}>
+                  <div>
+                    <div style={{ color:'#fff', fontSize:22, fontWeight:800, letterSpacing:'-0.3px' }}>
+                      {selectedCert.code}
+                    </div>
+                    <div style={{ color:'rgba(255,255,255,0.55)', fontSize:13.5, marginTop:3 }}>
+                      {selectedCert.label}
+                      {selectedCert.issuedBy && <span style={{ color:'rgba(255,255,255,0.35)' }}> · {selectedCert.issuedBy}</span>}
+                      {selectedCert.validUntil && <span style={{ color:'rgba(255,255,255,0.35)' }}> · Valid until {selectedCert.validUntil}</span>}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedCert(null)}
+                    style={{
+                      background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.15)',
+                      color:'#fff', borderRadius:8, padding:'7px 16px', cursor:'pointer',
+                      fontSize:13.5, fontWeight:500, flexShrink:0, marginLeft:16,
+                    }}
+                  >
+                    ✕ Close
+                  </button>
+                </div>
+
+                {/* Certificate image */}
+                <div style={{
+                  background:'#fff', borderRadius:12, overflow:'hidden',
+                  boxShadow:'0 32px 80px rgba(0,0,0,0.5)',
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  minHeight:200,
+                }}>
+                  <img
+                    src={selectedCert.img}
+                    alt={selectedCert.code}
+                    style={{ width:'100%', maxHeight:'75vh', objectFit:'contain', display:'block' }}
+                  />
+                </div>
+
+                {/* Navigation if multiple certs have images */}
+                {certs.filter(c => c.img).length > 1 && (
+                  <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:14 }}>
+                    {certs.filter(c => c.img).map(c => (
+                      <button
+                        key={c.id}
+                        onClick={(e) => { e.stopPropagation(); setSelectedCert(c); }}
+                        style={{
+                          padding:'5px 14px', border:'1px solid',
+                          borderColor: selectedCert.id === c.id ? '#c0392b' : 'rgba(255,255,255,0.2)',
+                          background:  selectedCert.id === c.id ? '#c0392b'  : 'rgba(255,255,255,0.07)',
+                          color:'#fff', borderRadius:20, fontSize:12.5, cursor:'pointer',
+                          fontWeight: selectedCert.id === c.id ? 700 : 400,
+                          transition:'all 0.15s',
+                        }}
+                      >
+                        {c.code}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <p style={{ textAlign:'center', fontSize:12, color:'rgba(255,255,255,0.25)', marginTop:14 }}>
+                  Click outside or press ESC to close
+                </p>
+              </div>
+              <style>{`@keyframes certFadeIn{from{opacity:0}to{opacity:1}}`}</style>
+            </div>
+          )}
         </div>
       </section>
 
