@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import "../../styles/MotorProducts.css";
 import { useCMS } from "../../admin/context/CMSContext";
 
@@ -141,7 +141,10 @@ function Legend({ motorParts, onPinClick }) {
 
 export default function MotorcycleProducts() {
   const { state }  = useCMS();
-  const motorParts = state.products.motorParts || [];
+  const motorParts = useMemo(
+    () => state.products.motorParts || [],
+    [state.products.motorParts]
+  );
 
   const [selectedId, setSelectedId] = useState(null);
   const [pinStyles,  setPinStyles]  = useState({});

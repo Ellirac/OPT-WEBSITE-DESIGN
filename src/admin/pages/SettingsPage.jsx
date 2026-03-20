@@ -98,7 +98,6 @@ function EmailJsConfig() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function SettingsPage({ onLogout }) {
   const toast = useToast();
-  const creds    = loadCreds();
   const recovery = loadRecovery();
 
   // ── Username ──

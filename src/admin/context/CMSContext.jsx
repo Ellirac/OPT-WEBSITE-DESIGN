@@ -1,8 +1,4 @@
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
-import { db } from '../firebase';
-import {
-  doc, getDoc, setDoc, onSnapshot
-} from 'firebase/firestore';
 
 /**
  * CMS State shape — mirrors the actual hardcoded data in each site component.
@@ -434,6 +430,10 @@ function cmsReducer(state, { type, payload }) {
 }
 
 // ─── Firebase-powered Context & Provider ─────────────────────────────────────
+import { db } from '../firebase';
+import {
+  doc, setDoc, onSnapshot
+} from 'firebase/firestore';
 
 const CMSContext = createContext(null);
 
@@ -468,7 +468,6 @@ export function CMSProvider({ children }) {
   const [state,      dispatch]      = useReducer(cmsReducer, initialState);
   const [loading,    setLoading]    = useState(true);   // waiting for first Firestore load
   const [saveStatus, setSaveStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
-  const [fbState,    setFbState]    = useState(null);   // latest state synced FROM Firestore
 
   // ── Load from Firestore on mount, then listen for real-time changes ──────────
   useEffect(() => {
@@ -479,8 +478,6 @@ export function CMSProvider({ children }) {
     const unsubscribe = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
         const data = snap.data();
-        setFbState(data);
-        // Hydrate reducer with Firestore data
         dispatch({ type: '__HYDRATE__', payload: data });
       }
       setLoading(false);

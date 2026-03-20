@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import optLogo from '../../assets/images/opt_logo.png';
+import optLogo from '../../assets/images/opt_logo2.png';
 
 // ─── Password rules — exported so SettingsPage reuses them ────────────────────
 export const PASSWORD_RULES = [
@@ -19,7 +19,6 @@ export function PasswordChecklist({ password }) {
       {PASSWORD_RULES.map(r => {
         const empty = password.length === 0;
         const ok    = !empty && r.test(password);
-        const fail  = !empty && !ok;
         return (
           <li key={r.id} style={{ display:'flex', alignItems:'center', gap:8, fontSize:12.5,
             color: empty ? '#9ca3af' : ok ? '#16a34a' : '#dc2626', transition:'color 0.18s' }}>
