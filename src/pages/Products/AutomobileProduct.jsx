@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import "../../styles/AutomobileProducts.css";
 import { useCMS } from "../../admin/context/CMSContext";
 
-// Static fallback images — used when no CMS image is uploaded for a part
+// Static fallback images — used when no CMS image uploaded for a part
 const STATIC_IMGS = {
   "seal":     "automobile/New Update/PACKING and SEAL.png",
   "mount":    "automobile/New Update/DAMPER and MOUNT 1.png",
@@ -11,21 +11,33 @@ const STATIC_IMGS = {
   "products": "automobile/New Update/EXTERIOR PRODUCTS.png",
 };
 
-const categoryColors = {
-  seal:     "linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)",
-  mount:    "linear-gradient(135deg, #3498db 0%, #2980b9 100%)",
-  cover:    "linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%)",
-  others:   "linear-gradient(135deg, #f39c12 0%, #e67e22 100%)",
-  products: "linear-gradient(135deg, #1abc9c 0%, #16a085 100%)",
+// Hardcoded fallback colors for original default parts (old category string field)
+const FALLBACK_COLORS = {
+  seal:     "#e74c3c",
+  mount:    "#3498db",
+  cover:    "#9b59b6",
+  others:   "#f39c12",
+  products: "#1abc9c",
 };
+
+// Resolve the correct color for any part (new CMS parts have pt.color, old ones use fallback)
+function partColor(pt) {
+  return pt.color || FALLBACK_COLORS[pt.category] || "#c0392b";
+}
+
+// Group key — new parts use categoryId, old ones use category string
+function groupKey(pt) {
+  return pt.categoryId || pt.category || "other";
+}
 
 export default function AutomobileProducts() {
   const { state } = useCMS();
-  const cmsParts = state.products.parts; // [{ id, name, category, categoryName, desc, img, pinTop, pinLeft }]
+  const cmsParts       = state.products.parts;
+  const autoCategories = state.products.autoCategories || [];
 
   const [selectedPartId, setSelectedPartId] = useState(null);
-  const [pinStyles, setPinStyles]           = useState({});
-  const [contentKey, setContentKey]         = useState(0);
+  const [pinStyles,      setPinStyles]      = useState({});
+  const [contentKey,     setContentKey]     = useState(0);
 
   const wrapperRef = useRef(null);
   const imgRef     = useRef(null);
@@ -36,12 +48,12 @@ export default function AutomobileProducts() {
     const imgRect     = imgRef.current.getBoundingClientRect();
     const offsetTop   = imgRect.top  - wrapperRect.top;
     const offsetLeft  = imgRect.left - wrapperRect.left;
-
     const styles = {};
-    cmsParts.forEach((pt) => {
-      const top  = offsetTop  + (pt.pinTop  / 100) * imgRef.current.height;
-      const left = offsetLeft + (pt.pinLeft / 100) * imgRef.current.width;
-      styles[pt.id] = { top: `${top}px`, left: `${left}px` };
+    cmsParts.forEach(pt => {
+      styles[pt.id] = {
+        top:  `${offsetTop  + (pt.pinTop  / 100) * imgRect.height}px`,
+        left: `${offsetLeft + (pt.pinLeft / 100) * imgRect.width}px`,
+      };
     });
     setPinStyles(styles);
   }, [cmsParts]);
@@ -53,18 +65,31 @@ export default function AutomobileProducts() {
 
   const handleSelectPart = (id) => {
     setSelectedPartId(id);
-    setContentKey((k) => k + 1);
+    setContentKey(k => k + 1);
   };
 
   const selectedPart = cmsParts.find(p => p.id === selectedPartId) || null;
 
-  // Build legend from unique categories preserving order
-  const legendMap = {};
-  cmsParts.forEach((pt, i) => {
-    if (!legendMap[pt.category]) legendMap[pt.category] = { category: pt.category, categoryName: pt.categoryName, parts: [] };
-    legendMap[pt.category].parts.push({ ...pt, displayNum: i + 1 });
-  });
-  const legendItems = Object.values(legendMap);
+  // Build legend — group by categoryId (new) or category string (old)
+  const legendItems = useMemo(() => {
+    const map = {};
+    cmsParts.forEach((pt, i) => {
+      const key = groupKey(pt);
+      if (!map[key]) {
+        // Try to get category desc from CMS categories list
+        const cmsCat = autoCategories.find(c => c.id === key);
+        map[key] = {
+          key,
+          categoryName: pt.categoryName || cmsCat?.label || key,
+          color:        partColor(pt),
+          desc:         cmsCat?.desc || "",
+          parts:        [],
+        };
+      }
+      map[key].parts.push({ ...pt, displayNum: i + 1 });
+    });
+    return Object.values(map);
+  }, [cmsParts, autoCategories]);
 
   return (
     <>
@@ -81,51 +106,38 @@ export default function AutomobileProducts() {
       </div>
 
       <div className="main-container">
-        {/* LEFT: CAR IMAGE + PINS */}
+        {/* Car image + pins */}
         <div className="car-container">
           <div className="car-model">
             <div className="car-wrapper" ref={wrapperRef}>
-              <img
-                ref={imgRef}
-                src="Car Image.png"
-                className="car-img"
-                alt="Car"
-                onLoad={positionPins}
-              />
+              <img ref={imgRef} src="Car Image.png" className="car-img" alt="Car" onLoad={positionPins} />
               <div className="car-glow" />
             </div>
-
-            {cmsParts.map((pt, i) => {
-              const style = pinStyles[pt.id] || {};
-              return (
-                <div
-                  key={pt.id}
-                  className={`pin${selectedPartId === pt.id ? " active" : ""}`}
-                  data-id={pt.id}
-                  data-category={pt.category}
-                  style={{
-                    ...style,
-                    background: categoryColors[pt.category],
-                    display: pinStyles[pt.id] ? "flex" : "none",
-                  }}
-                  onClick={() => handleSelectPart(pt.id)}
-                >
-                  <span className="pin-number">{i + 1}</span>
-                  <span className="pin-pulse" />
-                </div>
-              );
-            })}
+            {cmsParts.map((pt, i) => (
+              <div
+                key={pt.id}
+                className={`pin${selectedPartId === pt.id ? " active" : ""}`}
+                style={{
+                  ...pinStyles[pt.id],
+                  background: partColor(pt),
+                  display: pinStyles[pt.id] ? "flex" : "none",
+                }}
+                onClick={() => handleSelectPart(pt.id)}
+              >
+                <span className="pin-number">{i + 1}</span>
+                <span className="pin-pulse" />
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* RIGHT: PART DETAILS */}
+        {/* Part detail panel */}
         <div className="part-container">
           <div className="part-card" id="partCard">
             {!selectedPart && (
               <div className="empty-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M9 11l3 3L22 4" />
-                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                  <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
                 </svg>
                 <h3>Select a Component</h3>
                 <p>Click on any numbered pin to view product details</p>
@@ -135,19 +147,18 @@ export default function AutomobileProducts() {
               <div key={contentKey} className="part-content active">
                 <div className="part-image-wrapper">
                   <img
-                    id="partImg"
                     src={selectedPart.img || STATIC_IMGS[selectedPart.category] || ""}
                     alt={selectedPart.name}
                   />
                 </div>
                 <div className="part-details">
                   <div className="part-header">
-                    <div className="part-number-badge" style={{ background: categoryColors[selectedPart.category] }}>
+                    <div className="part-number-badge" style={{ background: partColor(selectedPart) }}>
                       {cmsParts.findIndex(p => p.id === selectedPart.id) + 1}
                     </div>
                     <h2 className="part-title">{selectedPart.name}</h2>
                   </div>
-                  <div className="part-category-badge" style={{ background: categoryColors[selectedPart.category] }}>
+                  <div className="part-category-badge" style={{ background: partColor(selectedPart) }}>
                     {selectedPart.categoryName}
                   </div>
                   <p className="part-description">{selectedPart.desc}</p>
@@ -158,22 +169,21 @@ export default function AutomobileProducts() {
         </div>
       </div>
 
-      {/* CLASSIFICATION LEGEND */}
+      {/* Legend */}
       <div className="legend-container">
         <h3 className="legend-title">Product Classification</h3>
         <div className="legend-grid">
-          {legendItems.map((item) => (
-            <div className="legend-item" key={item.category}>
+          {legendItems.map(item => (
+            <div className="legend-item" key={item.key}>
               <div className="legend-header">
-                <div className="legend-color-box" style={{ background: categoryColors[item.category] }} />
                 <h4>{item.categoryName}</h4>
               </div>
               <div className="legend-products">
-                {item.parts.map((pt) => (
+                {item.parts.map(pt => (
                   <span
                     key={pt.id}
                     className="legend-pin"
-                    style={{ background: categoryColors[pt.category], cursor: "pointer" }}
+                    style={{ background: partColor(pt), cursor: "pointer" }}
                     onClick={() => {
                       handleSelectPart(pt.id);
                       document.getElementById("partCard")?.scrollIntoView({ behavior:"smooth", block:"center" });
@@ -186,7 +196,9 @@ export default function AutomobileProducts() {
               <p className="legend-main-desc" />
               <div className="legend-subdesc">
                 <span className="legend-opt-label">Ohtsuka Polytech (OPT)</span>
-                <p className="legend-subdesc-text">{item.parts[0]?.desc || ""}</p>
+                <p className="legend-subdesc-text">
+                  {item.desc || item.parts[0]?.desc || ""}
+                </p>
               </div>
             </div>
           ))}

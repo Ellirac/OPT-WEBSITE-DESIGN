@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
+
 import { db } from '../firebase';
 import {
   doc, setDoc, onSnapshot
 } from 'firebase/firestore';
-
 /**
  * CMS State shape — mirrors the actual hardcoded data in each site component.
  *
@@ -321,6 +321,22 @@ const initialState = {
 
   // Products — automobile parts with hotspot pin positions (% based on image)
   products: {
+    // Custom categories — shared by both automobile and motorcycle editors
+    autoCategories: [
+      { id:'ac1', label:'Packing and Seal',  color:'#e74c3c', desc:'Sealing products resistant to oils, fuel, water, air, and dust.' },
+      { id:'ac2', label:'Damper and Mount',  color:'#3498db', desc:'Vibration transmission prevention and interference reduction.' },
+      { id:'ac3', label:'Boot and Cover',    color:'#9b59b6', desc:'Flexible protective covers for joints and assemblies.' },
+      { id:'ac4', label:'Others',            color:'#f39c12', desc:'Grommets, bushings, bump stops, and custom rubber-to-metal parts.' },
+      { id:'ac5', label:'Exterior Products', color:'#1abc9c', desc:'Weather strips, door seals, and body moldings.' },
+    ],
+    motorCategories: [
+      { id:'mc1', label:'Sealing & Gaskets',   color:'#3498db', desc:'Seals head cover and joints to prevent oil leaks.' },
+      { id:'mc2', label:'Heat Management',     color:'#e67e22', desc:'Reduces heat transfer to maintain component performance.' },
+      { id:'mc3', label:'Mounting & Support',  color:'#c0392b', desc:'Secure mounting and vibration reduction for motorcycle parts.' },
+      { id:'mc4', label:'Vibration Damping',   color:'#9b59b6', desc:'Reduces vibration and improves durability.' },
+      { id:'mc5', label:'Lighting Protection', color:'#c75194', desc:'Absorbs vibration and protects lighting assemblies.' },
+      { id:'mc6', label:'Fuel System',         color:'#16a085', desc:'Secure mounting for fuel system components.' },
+    ],
     motorParts: [
       // pinTop / pinLeft are % positions on the Motor Image.png
       { id:'mp1', name:'HEAD COVER GASKET',                               category:'sealing',  categoryName:'Sealing & Gaskets',   pinTop:45, pinLeft:43, desc:'Seals the head cover to prevent oil leaks.',                             img:null },
@@ -402,6 +418,16 @@ function cmsReducer(state, { type, payload }) {
     case 'CAREER_UPDATE': return up('careers', 'jobs', list => list.map(x => x.id === payload.id ? payload : x));
     case 'CAREER_DEL':    return up('careers', 'jobs', list => list.filter(x => x.id !== payload));
 
+    // PRODUCTS — AUTO CATEGORIES
+    case 'AUTO_CAT_ADD':    return up('products','autoCategories', list=>[...list,payload]);
+    case 'AUTO_CAT_UPDATE': return up('products','autoCategories', list=>list.map(x=>x.id===payload.id?payload:x));
+    case 'AUTO_CAT_DEL':    return up('products','autoCategories', list=>list.filter(x=>x.id!==payload));
+
+    // PRODUCTS — MOTOR CATEGORIES
+    case 'MOTOR_CAT_ADD':    return up('products','motorCategories', list=>[...list,payload]);
+    case 'MOTOR_CAT_UPDATE': return up('products','motorCategories', list=>list.map(x=>x.id===payload.id?payload:x));
+    case 'MOTOR_CAT_DEL':    return up('products','motorCategories', list=>list.filter(x=>x.id!==payload));
+
     // PRODUCTS — MOTOR PARTS
     case 'MOTOR_PART_ADD':    return up('products', 'motorParts', list => [...list, payload]);
     case 'MOTOR_PART_UPDATE': return up('products', 'motorParts', list => list.map(x => x.id === payload.id ? payload : x));
@@ -423,8 +449,10 @@ function cmsReducer(state, { type, payload }) {
         products:   {
           ...initialState.products,
           ...p.products,
-          parts:      p.products?.parts      ?? initialState.products.parts,
-          motorParts: p.products?.motorParts ?? initialState.products.motorParts,
+          parts:           p.products?.parts           ?? initialState.products.parts,
+          motorParts:      p.products?.motorParts      ?? initialState.products.motorParts,
+          autoCategories:  p.products?.autoCategories  ?? initialState.products.autoCategories,
+          motorCategories: p.products?.motorCategories ?? initialState.products.motorCategories,
         },
       };
     }
@@ -444,7 +472,7 @@ export function uid() {
 }
 
 // Image compression — max 900px wide, JPEG 75%
-function compressImage(dataUrl, maxW = 900, quality = 0.75) {
+function compressImage(dataUrl, maxW = 900, quality = 0.82) {
   return new Promise(resolve => {
     const img = new Image();
     img.onload = () => {
@@ -453,8 +481,19 @@ function compressImage(dataUrl, maxW = 900, quality = 0.75) {
       const h      = Math.round(img.height * scale);
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', quality));
+      const ctx = canvas.getContext('2d');
+      // Preserve transparency: only use JPEG for non-transparent images
+      const isPng = dataUrl.startsWith('data:image/png');
+      if (!isPng) {
+        // Fill white background for JPEG (avoids black transparency)
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+      }
+      ctx.drawImage(img, 0, 0, w, h);
+      // Use PNG for transparent images, JPEG for everything else
+      const format = isPng ? 'image/png' : 'image/jpeg';
+      const q      = isPng ? 1 : quality;
+      resolve(canvas.toDataURL(format, q));
     };
     img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
@@ -500,6 +539,14 @@ export function CMSProvider({ children }) {
     saveTimer.current = setTimeout(async () => {
       try {
         const [col, docId] = FIRESTORE_DOC.split('/');
+        // Firestore has a 1MB document limit — check size before saving
+        const jsonStr = JSON.stringify(state);
+        const sizeKB  = Math.round((new Blob([jsonStr]).size) / 1024);
+        if (sizeKB > 950) {
+          console.warn(`[OPT CMS] Data size is ${sizeKB}KB — approaching Firestore 1MB limit. Remove large images.`);
+          setSaveStatus('error');
+          return;
+        }
         await setDoc(doc(db, col, docId), state, { merge: true });
         setSaveStatus('saved');
       } catch (err) {
