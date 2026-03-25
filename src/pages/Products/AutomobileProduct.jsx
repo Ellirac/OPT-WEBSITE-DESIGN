@@ -33,8 +33,10 @@ function groupKey(pt) {
 export default function AutomobileProducts() {
   const { state } = useCMS();
   const cmsParts       = state.products.parts;
-  const autoCategories = state.products.autoCategories || [];
-
+  const autoCategories = useMemo(() => {
+    return state.products.autoCategories || [];
+  }, [state.products.autoCategories]);
+  
   const [selectedPartId, setSelectedPartId] = useState(null);
   const [pinStyles,      setPinStyles]      = useState({});
   const [contentKey,     setContentKey]     = useState(0);
