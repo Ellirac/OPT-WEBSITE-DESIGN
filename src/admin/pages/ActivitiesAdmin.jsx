@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useCMS, uid, compressImage } from '../context/CMSContext';
 import { useToast } from '../components/Toast';
 import Modal, { ModalActions } from '../components/Modal';
