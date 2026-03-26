@@ -1,97 +1,87 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "../../styles/AutomobileProducts.css";
-import { useCMS } from "../../admin/context/CMSContext";
 
-// Static fallback images — used when no CMS image uploaded for a part
-const STATIC_IMGS = {
-  "seal":     "automobile/New Update/PACKING and SEAL.png",
-  "mount":    "automobile/New Update/DAMPER and MOUNT 1.png",
-  "cover":    "automobile/New Update/BOOT and COVER.png",
-  "others":   "automobile/New Update/OTHERS.png",
-  "products": "automobile/New Update/EXTERIOR PRODUCTS.png",
-};
+// ─── Hardcoded data — no Firebase needed ─────────────────────────────────────
+const CATEGORIES = [
+  { id:'anti',  label:'Anti-Vibration Rubber', color:'#e74c3c', desc:'Vulcanized rubber products used for the purpose of vibration transmission prevention and interference reduction in automobile components.' },
+  { id:'grommet',  label:'Grommets',              color:'#3498db', desc:'Rubber grommets and insulating parts that protect wiring harnesses, cables, and hoses from abrasion through metal panels and brackets.' },
+  { id:'seal',  label:'Packing Seals',         color:'#9b59b6', desc:'Sealing products resistant to oils, fuel, water, air, and dust — preventing leakage across mating surfaces and joints.' },
+  { id:'stop',  label:'Stopper',               color:'#f39c12', desc:'Rubber stoppers and bump stops that absorb impact and limit range of motion in suspension and body components.' },
+  { id:'resin', label:'Resin',                 color:'#1abc9c', desc:'High-precision resin and plastic parts used in automobile assemblies requiring dimensional stability and chemical resistance.' },
+];
 
-// Hardcoded fallback colors for original default parts (old category string field)
-const FALLBACK_COLORS = {
-  seal:     "#e74c3c",
-  mount:    "#3498db",
-  cover:    "#9b59b6",
-  others:   "#f39c12",
-  products: "#1abc9c",
-};
+const PARTS = [
+  // Anti-Vibration Rubber
+  { id:'p1',  name:'Exhaust Mount',                 cat:'anti',  pinTop:54, pinLeft:44, img:'automobile/10.png' },
+  { id:'p2',  name:'Spring Lower Mount',            cat:'anti',  pinTop:62, pinLeft:50, img:'automobile/11.png' },
+  { id:'p3',  name:'Radiator Mount',                cat:'anti',  pinTop:35, pinLeft:32, img:'automobile/12.png' },
+  { id:'p4',  name:'Electric servo mount',          cat:'anti',  pinTop:58, pinLeft:62, img:'automobile/13.png' },
+  { id:'p5',  name:'Fuel Tank Cushion',             cat:'anti',  pinTop:70, pinLeft:35, img:'automobile/New Update/DAMPER and MOUNT 1.png' },
+  { id:'p6',  name:'Stabilize bush',                cat:'anti',  pinTop:40, pinLeft:55, img:'automobile/New Update/OTHERS.png' },
+  { id:'p7',  name:'Metal Bonding',                 cat:'anti',  pinTop:28, pinLeft:60, img:'automobile/New Update/OTHERS.png' },
+  // Grommets
+  { id:'p8',  name:'Whole Grommet',                 cat:'grommet',  pinTop:65, pinLeft:44, img:'automobile/New Update/OTHERS.png' },
+  { id:'p9',  name:'Steering Grommets',             cat:'grommet',  pinTop:46, pinLeft:36, img:'automobile/New Update/OTHERS.png' },
+  // Packing Seals
+  { id:'p10', name:'Head cover packing',            cat:'seal',  pinTop:50, pinLeft:30, img:'automobile/New Update/PACKING and SEAL.png' },
+  { id:'p11', name:'Fuel Packing',                  cat:'seal',  pinTop:60, pinLeft:66, img:'automobile/New Update/PACKING and SEAL.png' },
+  { id:'p12', name:'Water Pump Packing',            cat:'seal',  pinTop:44, pinLeft:44, img:'automobile/New Update/PACKING and SEAL.png' },
+  { id:'p13', name:'Thermomount',                   cat:'seal',  pinTop:40, pinLeft:28, img:'automobile/O-RING.png' },
+  { id:'p14', name:'Oil filter packing',            cat:'seal',  pinTop:46, pinLeft:40, img:'automobile/New Update/PACKING and SEAL.png' },
+  { id:'p15', name:'Filler Cap',                    cat:'seal',  pinTop:30, pinLeft:24, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+  { id:'p16', name:'In-mani Packing',               cat:'seal',  pinTop:30, pinLeft:74, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+  // Stopper
+  { id:'p17', name:'Tailgate Stopper',              cat:'stop',  pinTop:36, pinLeft:70, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+  { id:'p18', name:'Door Stopper',                  cat:'stop',  pinTop:40, pinLeft:16, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+  { id:'p19', name:'Trunk Stopper',                 cat:'stop',  pinTop:25, pinLeft:44, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+  // Resin
+  { id:'p20', name:'Oil Level Gauge',               cat:'resin', pinTop:22, pinLeft:36, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
+  { id:'p21', name:'Ashtray',                       cat:'resin', pinTop:22, pinLeft:55, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
+  { id:'p22', name:'Boots',                         cat:'resin', pinTop:75, pinLeft:44, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
+];
 
-// Resolve the correct color for any part (new CMS parts have pt.color, old ones use fallback)
-function partColor(pt) {
-  return pt.color || FALLBACK_COLORS[pt.category] || "#c0392b";
-}
 
-// Group key — new parts use categoryId, old ones use category string
-function groupKey(pt) {
-  return pt.categoryId || pt.category || "other";
-}
+const catColor = (id) => CATEGORIES.find(c=>c.id===id)?.color || '#c0392b';
+const catLabel = (id) => CATEGORIES.find(c=>c.id===id)?.label || '';
 
+// Legend grouped by category
+const LEGEND = CATEGORIES.map(cat => ({
+  ...cat,
+  parts: PARTS.filter(p=>p.cat===cat.id).map((p,i)=>({
+    ...p, num: PARTS.findIndex(x=>x.id===p.id)+1
+  }))
+})).filter(g=>g.parts.length>0);
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function AutomobileProducts() {
-  const { state } = useCMS();
-  const cmsParts       = state.products.parts;
-  const autoCategories = useMemo(() => {
-    return state.products.autoCategories || [];
-  }, [state.products.autoCategories]);
-  
-  const [selectedPartId, setSelectedPartId] = useState(null);
-  const [pinStyles,      setPinStyles]      = useState({});
-  const [contentKey,     setContentKey]     = useState(0);
+  const [selectedId,  setSelectedId]  = useState(null);
+  const [pinStyles,   setPinStyles]   = useState({});
+  const [contentKey,  setContentKey]  = useState(0);
 
   const wrapperRef = useRef(null);
   const imgRef     = useRef(null);
 
   const positionPins = useCallback(() => {
     if (!wrapperRef.current || !imgRef.current) return;
-    const wrapperRect = wrapperRef.current.getBoundingClientRect();
-    const imgRect     = imgRef.current.getBoundingClientRect();
-    const offsetTop   = imgRect.top  - wrapperRect.top;
-    const offsetLeft  = imgRect.left - wrapperRect.left;
+    const wRect = wrapperRef.current.getBoundingClientRect();
+    const iRect = imgRef.current.getBoundingClientRect();
     const styles = {};
-    cmsParts.forEach(pt => {
+    PARTS.forEach(pt => {
       styles[pt.id] = {
-        top:  `${offsetTop  + (pt.pinTop  / 100) * imgRect.height}px`,
-        left: `${offsetLeft + (pt.pinLeft / 100) * imgRect.width}px`,
+        top:  `${iRect.top  - wRect.top  + (pt.pinTop  / 100) * iRect.height}px`,
+        left: `${iRect.left - wRect.left + (pt.pinLeft / 100) * iRect.width}px`,
       };
     });
     setPinStyles(styles);
-  }, [cmsParts]);
+  }, []);
 
   useEffect(() => {
-    window.addEventListener("resize", positionPins);
-    return () => window.removeEventListener("resize", positionPins);
+    window.addEventListener('resize', positionPins);
+    return () => window.removeEventListener('resize', positionPins);
   }, [positionPins]);
 
-  const handleSelectPart = (id) => {
-    setSelectedPartId(id);
-    setContentKey(k => k + 1);
-  };
-
-  const selectedPart = cmsParts.find(p => p.id === selectedPartId) || null;
-
-  // Build legend — group by categoryId (new) or category string (old)
-  const legendItems = useMemo(() => {
-    const map = {};
-    cmsParts.forEach((pt, i) => {
-      const key = groupKey(pt);
-      if (!map[key]) {
-        // Try to get category desc from CMS categories list
-        const cmsCat = autoCategories.find(c => c.id === key);
-        map[key] = {
-          key,
-          categoryName: pt.categoryName || cmsCat?.label || key,
-          color:        partColor(pt),
-          desc:         cmsCat?.desc || "",
-          parts:        [],
-        };
-      }
-      map[key].parts.push({ ...pt, displayNum: i + 1 });
-    });
-    return Object.values(map);
-  }, [cmsParts, autoCategories]);
+  const select = (id) => { setSelectedId(id); setContentKey(k=>k+1); };
+  const selected = PARTS.find(p=>p.id===selectedId) || null;
 
   return (
     <>
@@ -99,71 +89,63 @@ export default function AutomobileProducts() {
         <div className="header-content">
           <h1>Automobile Products</h1>
           <p>
-            Ohtsuka Poly-Tech (Philippines) Inc. handles parts for motorcycles as well as four-wheeled vehicles.
-            We use the most suitable materials for the purpose, such as vibration isolation
-            and sealing, to supply high-quality products.
+            Ohtsuka Poly-Tech (Philippines) Inc. manufactures a wide range of rubber and resin
+            components for automobiles — from vibration isolation mounts to precision seals.
+            Click any pin to view product details.
           </p>
         </div>
         <div className="header-decoration" />
       </div>
 
       <div className="main-container">
-        {/* Car image + pins */}
+        {/* Car + pins */}
         <div className="car-container">
           <div className="car-model">
             <div className="car-wrapper" ref={wrapperRef}>
               <img ref={imgRef} src="Car Image.png" className="car-img" alt="Car" onLoad={positionPins} />
               <div className="car-glow" />
             </div>
-            {cmsParts.map((pt, i) => (
-              <div
-                key={pt.id}
-                className={`pin${selectedPartId === pt.id ? " active" : ""}`}
-                style={{
-                  ...pinStyles[pt.id],
-                  background: partColor(pt),
-                  display: pinStyles[pt.id] ? "flex" : "none",
-                }}
-                onClick={() => handleSelectPart(pt.id)}
+            {PARTS.map((pt, i) => (
+              <div key={pt.id}
+                className={`pin${selectedId===pt.id?' active':''}`}
+                style={{ ...pinStyles[pt.id], background:catColor(pt.cat), display:pinStyles[pt.id]?'flex':'none' }}
+                onClick={() => select(pt.id)}
               >
-                <span className="pin-number">{i + 1}</span>
+                <span className="pin-number">{i+1}</span>
                 <span className="pin-pulse" />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Part detail panel */}
+        {/* Part detail */}
         <div className="part-container">
           <div className="part-card" id="partCard">
-            {!selectedPart && (
+            {!selected ? (
               <div className="empty-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                  <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
                 </svg>
                 <h3>Select a Component</h3>
                 <p>Click on any numbered pin to view product details</p>
               </div>
-            )}
-            {selectedPart && (
+            ) : (
               <div key={contentKey} className="part-content active">
                 <div className="part-image-wrapper">
-                  <img
-                    src={selectedPart.img || STATIC_IMGS[selectedPart.category] || ""}
-                    alt={selectedPart.name}
-                  />
+                  <img src={selected.img} alt={selected.name}
+                    onError={e=>{ e.target.src='automobile/New Update/OTHERS.png'; }} />
                 </div>
                 <div className="part-details">
                   <div className="part-header">
-                    <div className="part-number-badge" style={{ background: partColor(selectedPart) }}>
-                      {cmsParts.findIndex(p => p.id === selectedPart.id) + 1}
+                    <div className="part-number-badge" style={{ background:catColor(selected.cat) }}>
+                      {PARTS.findIndex(p=>p.id===selected.id)+1}
                     </div>
-                    <h2 className="part-title">{selectedPart.name}</h2>
+                    <h2 className="part-title">{selected.name}</h2>
                   </div>
-                  <div className="part-category-badge" style={{ background: partColor(selectedPart) }}>
-                    {selectedPart.categoryName}
+                  <div className="part-category-badge" style={{ background:catColor(selected.cat) }}>
+                    {catLabel(selected.cat)}
                   </div>
-                  <p className="part-description">{selectedPart.desc}</p>
+                  <p className="part-description">{CATEGORIES.find(c=>c.id===selected.cat)?.desc||''}</p>
                 </div>
               </div>
             )}
@@ -175,32 +157,22 @@ export default function AutomobileProducts() {
       <div className="legend-container">
         <h3 className="legend-title">Product Classification</h3>
         <div className="legend-grid">
-          {legendItems.map(item => (
-            <div className="legend-item" key={item.key}>
-              <div className="legend-header">
-                <h4>{item.categoryName}</h4>
-              </div>
+          {LEGEND.map(g => (
+            <div className="legend-item" key={g.id}>
+              <div className="legend-header"><h4>{g.label}</h4></div>
               <div className="legend-products">
-                {item.parts.map(pt => (
-                  <span
-                    key={pt.id}
-                    className="legend-pin"
-                    style={{ background: partColor(pt), cursor: "pointer" }}
-                    onClick={() => {
-                      handleSelectPart(pt.id);
-                      document.getElementById("partCard")?.scrollIntoView({ behavior:"smooth", block:"center" });
-                    }}
-                  >
-                    {pt.displayNum}
+                {g.parts.map(pt => (
+                  <span key={pt.id} className="legend-pin"
+                    style={{ background:catColor(pt.cat), cursor:'pointer' }}
+                    onClick={() => { select(pt.id); document.getElementById('partCard')?.scrollIntoView({ behavior:'smooth', block:'center' }); }}>
+                    {pt.num}
                   </span>
                 ))}
               </div>
               <p className="legend-main-desc" />
               <div className="legend-subdesc">
                 <span className="legend-opt-label">Ohtsuka Polytech (OPT)</span>
-                <p className="legend-subdesc-text">
-                  {item.desc || item.parts[0]?.desc || ""}
-                </p>
+                <p className="legend-subdesc-text">{g.desc}</p>
               </div>
             </div>
           ))}

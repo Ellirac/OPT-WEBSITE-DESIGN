@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import {
   doc, setDoc, onSnapshot
 } from 'firebase/firestore';
+
 /**
  * CMS State shape — mirrors the actual hardcoded data in each site component.
  *
@@ -206,6 +207,12 @@ const initialState = {
 
   // Activities — YouTube-based (youtubeId + title + category)
   activities: {
+    folders: [
+      { id:'af1', name:'Corporate Events',   date:'2024-01-01' },
+      { id:'af2', name:'CSR Activities',     date:'2024-01-01' },
+      { id:'af3', name:'Company Milestones', date:'2024-01-01' },
+    ],
+    images: [],
     posts: [
       { id: 'a1', title: 'APV Expo Philippines 2025',                    category: 'Event',               youtubeId: 'QNpJaWDy-0Y' },
       { id: 'a2', title: 'Christmas Spirit Program 2024',                category: 'CSR',                 youtubeId: '5GC7A5Wedm8' },
@@ -408,7 +415,17 @@ function cmsReducer(state, { type, payload }) {
     case 'ABOUT_UPDATE_BASE': return up('about', 'bases', list => list.map(x => x.id === payload.id ? payload : x));
     case 'ABOUT_DEL_BASE':    return up('about', 'bases', list => list.filter(x => x.id !== payload));
 
-    // ACTIVITIES
+    // ACTIVITIES — FOLDERS
+    case 'ACT_FOLDER_ADD':    return up('activities','folders', list=>[...list,payload]);
+    case 'ACT_FOLDER_UPDATE': return up('activities','folders', list=>list.map(x=>x.id===payload.id?payload:x));
+    case 'ACT_FOLDER_DEL':    return up('activities','folders', list=>list.filter(x=>x.id!==payload));
+
+    // ACTIVITIES — IMAGES
+    case 'ACT_IMG_ADD':    return up('activities','images', list=>[...list,payload]);
+    case 'ACT_IMG_UPDATE': return up('activities','images', list=>list.map(x=>x.id===payload.id?payload:x));
+    case 'ACT_IMG_DEL':    return up('activities','images', list=>list.filter(x=>x.id!==payload));
+
+    // ACTIVITIES — POSTS
     case 'ACT_ADD':    return up('activities', 'posts', list => [...list, payload]);
     case 'ACT_UPDATE': return up('activities', 'posts', list => list.map(x => x.id === payload.id ? payload : x));
     case 'ACT_DEL':    return up('activities', 'posts', list => list.filter(x => x.id !== payload));
@@ -444,7 +461,12 @@ function cmsReducer(state, { type, payload }) {
       return {
         home:       { ...initialState.home,       ...p.home },
         about:      { ...initialState.about,       ...p.about },
-        activities: { ...initialState.activities,  ...p.activities },
+        activities: {
+          ...initialState.activities, ...p.activities,
+          folders: p.activities?.folders ?? initialState.activities.folders,
+          images:  p.activities?.images  ?? initialState.activities.images,
+          posts:   p.activities?.posts   ?? initialState.activities.posts,
+        },
         careers:    { ...initialState.careers,     ...p.careers },
         products:   {
           ...initialState.products,

@@ -6,6 +6,41 @@ import ConfirmDelete from '../components/ConfirmDelete';
 import UploadArea from '../components/UploadArea';
 import CategoryManager from '../components/CategoryManager';
 import MOTOR_IMAGE from '../../assets/images/motor/Motor Image.png';
+import M1 from '../../assets/images/Vehicle Products/1. Exhaust Mount.png';
+import M2 from '../../assets/images/Vehicle Products/2. Spring Lower Mount.png';
+import M3 from '../../assets/images/Vehicle Products/3. Radiator Mount.png';
+import M4 from '../../assets/images/Vehicle Products/4. Electric Serrvo Mount.png';
+import M5 from '../../assets/images/Vehicle Products/5. Fuel Tank Cushion.png';
+import M6 from '../../assets/images/Vehicle Products/6. Stabilizer Bushings.png';
+import M7 from '../../assets/images/Vehicle Products/7. Metal Adhesion.png';
+import M8 from '../../assets/images/Vehicle Products/8. Hole Grommets.png';
+import M9 from '../../assets/images/Vehicle Products/9. Steering Grommet.png';
+import M10 from '../../assets/images/Vehicle Products/10. Head Cover Gasket.png';
+import M11 from '../../assets/images/Vehicle Products/11. Fuel Packing.png';
+import M12 from '../../assets/images/Vehicle Products/12. Water Pump Gasket.png';
+import M13 from '../../assets/images/Vehicle Products/13. Thermo Mount.png';
+import M14 from '../../assets/images/Vehicle Products/14. Oil Filter Gasket.png';
+import M15 from '../../assets/images/Vehicle Products/15. Filter Cap.png';
+
+// Static fallback by part name — never goes to Firebase
+const MOTOR_STATIC = {
+  'HEAD COVER GASKET':                                M1,
+  'INSULATOR CARB':                                   M2,
+  'PLUG, RUBBER STAND & BAND TOOL':                   M3,
+  'RUBBER RADIATOR MT, DAMPER CONNECTOR & GROMMET':   M4,
+  'DAMPER, RUBBER SIDE COVER & DAMPER CONNECTOR':     M5,
+  'RUBBER RADIATOR MOUNT & BAND TOOL, DAMPER & DUST': M6,
+  'RUBBER TAIL LIGHT':                                M7,
+  'TRAY FUEL':                                        M8,
+  'TRAY FUEL2':                                       M9,
+  'TRAY FUEL3':                                       M10,
+  'TRAY FUEL4':                                       M11,
+  'TRAY FUEL5':                                       M12,
+  'TRAY FUEL6':                                       M13,
+  'TRAY FUEL7':                                       M14,
+  'TRAY FUEL8':                                       M15,
+                
+};
 
 export default function MotorProductsAdmin() {
   const { state, dispatch } = useCMS();
@@ -210,8 +245,14 @@ export default function MotorProductsAdmin() {
           )}
 
           <div className="cms-form-group">
-            <label>Part Image (optional)</label>
-            <UploadArea onUpload={setPartImg} preview={partImg} />
+            <label>Part Image <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional — defaults to static part image)</span></label>
+            <UploadArea onUpload={setPartImg} preview={partImg || MOTOR_STATIC[form.name] || null} />
+            {partImg && (
+              <button type="button" onClick={() => setPartImg(null)}
+                style={{ marginTop:6, fontSize:11.5, color:'#dc2626', background:'none', border:'none', cursor:'pointer', padding:0 }}>
+                ✕ Remove custom image (revert to default)
+              </button>
+            )}
           </div>
 
           <ModalActions>
