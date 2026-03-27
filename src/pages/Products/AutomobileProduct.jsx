@@ -12,32 +12,32 @@ const CATEGORIES = [
 
 const PARTS = [
   // Anti-Vibration Rubber
-  { id:'p1',  name:'Exhaust Mount',                 cat:'anti',  pinTop:54, pinLeft:44, img:'automobile/10.png' },
-  { id:'p2',  name:'Spring Lower Mount',            cat:'anti',  pinTop:62, pinLeft:50, img:'automobile/11.png' },
-  { id:'p3',  name:'Radiator Mount',                cat:'anti',  pinTop:35, pinLeft:32, img:'automobile/12.png' },
-  { id:'p4',  name:'Electric servo mount',          cat:'anti',  pinTop:58, pinLeft:62, img:'automobile/13.png' },
-  { id:'p5',  name:'Fuel Tank Cushion',             cat:'anti',  pinTop:70, pinLeft:35, img:'automobile/New Update/DAMPER and MOUNT 1.png' },
-  { id:'p6',  name:'Stabilize bush',                cat:'anti',  pinTop:40, pinLeft:55, img:'automobile/New Update/OTHERS.png' },
-  { id:'p7',  name:'Metal Bonding',                 cat:'anti',  pinTop:28, pinLeft:60, img:'automobile/New Update/OTHERS.png' },
+  { id:'p1',  name:'Exhaust Mount',                 cat:'anti',  pinTop:39, pinLeft:80, img:'automobile/Vehicle Products/1. Exhaust Mount.png' },
+  { id:'p2',  name:'Spring Lower Mount',            cat:'anti',  pinTop:35, pinLeft:77, img:'automobile/Vehicle Products/2. Spring Lower Mount.png' },
+  { id:'p3',  name:'Radiator Mount',                cat:'anti',  pinTop:78, pinLeft:22, img:'automobile/Vehicle Products/3. Radiator Mount.png' },
+  { id:'p4',  name:'Electric servo mount',          cat:'anti',  pinTop:48, pinLeft:25, img:'automobile/Vehicle Products/4. Electric Serrvo Mount.png' },
+  { id:'p5',  name:'Fuel Tank Cushion',             cat:'anti',  pinTop:60, pinLeft:63, img:'automobile/Vehicle Products/5. Fuel Tank Cushion.png' },
+  { id:'p6',  name:'Stabilize bush',                cat:'anti',  pinTop:71, pinLeft:42, img:'automobile/Vehicle Products/6. Stabilizer Bushings.png' },
+  { id:'p7',  name:'Metal Bonding',                 cat:'anti',  pinTop:57, pinLeft:41, img:'automobile/Vehicle Products//7. Metal Adhesion.png' },
   // Grommets
-  { id:'p8',  name:'Whole Grommet',                 cat:'grommet',  pinTop:65, pinLeft:44, img:'automobile/New Update/OTHERS.png' },
-  { id:'p9',  name:'Steering Grommets',             cat:'grommet',  pinTop:46, pinLeft:36, img:'automobile/New Update/OTHERS.png' },
+  { id:'p8',  name:'Hole Grommet',                  cat:'grommet',  pinTop:13, pinLeft:58, img:'automobile/Vehicle Products/8. Hole Grommets.png' },
+  { id:'p9',  name:'Steering Grommets',             cat:'grommet',  pinTop:52, pinLeft:47, img:'automobile/Vehicle Products/9. Steering Grommet.png' },
   // Packing Seals
-  { id:'p10', name:'Head cover packing',            cat:'seal',  pinTop:50, pinLeft:30, img:'automobile/New Update/PACKING and SEAL.png' },
-  { id:'p11', name:'Fuel Packing',                  cat:'seal',  pinTop:60, pinLeft:66, img:'automobile/New Update/PACKING and SEAL.png' },
-  { id:'p12', name:'Water Pump Packing',            cat:'seal',  pinTop:44, pinLeft:44, img:'automobile/New Update/PACKING and SEAL.png' },
-  { id:'p13', name:'Thermomount',                   cat:'seal',  pinTop:40, pinLeft:28, img:'automobile/O-RING.png' },
-  { id:'p14', name:'Oil filter packing',            cat:'seal',  pinTop:46, pinLeft:40, img:'automobile/New Update/PACKING and SEAL.png' },
-  { id:'p15', name:'Filler Cap',                    cat:'seal',  pinTop:30, pinLeft:24, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
-  { id:'p16', name:'In-mani Packing',               cat:'seal',  pinTop:30, pinLeft:74, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+  { id:'p10', name:'Head cover packing',            cat:'seal',  pinTop:49, pinLeft:33, img:'automobile/Vehicle Products/10. Head Cover Gasket.png' },
+  { id:'p11', name:'Fuel Packing',                  cat:'seal',  pinTop:64, pinLeft:60, img:'automobile/Vehicle Products/11. Fuel Packing.png' },
+  { id:'p12', name:'Water Pump Packing',            cat:'seal',  pinTop:44, pinLeft:30, img:'automobile/Vehicle Products/12. Water Pump Gasket.png' },
+  { id:'p13', name:'Thermomount',                   cat:'seal',  pinTop:57, pinLeft:34, img:'automobile/Vehicle Products/13. Thermo Mount.png' },
+  { id:'p14', name:'Oil filter packing',            cat:'seal',  pinTop:59, pinLeft:27, img:'automobile/Vehicle Products/14. Oil Filter Gasket.png' },
+  { id:'p15', name:'Filler Cap',                    cat:'seal',  pinTop:51, pinLeft:39, img:'automobile/Vehicle Products/15. Filter Cap.png' },
+  { id:'p16', name:'In-mani Packing',               cat:'seal',  pinTop:53, pinLeft:30, img:'automobile/Vehicle Products/16. Intake Manifold Gasket.png' },
   // Stopper
-  { id:'p17', name:'Tailgate Stopper',              cat:'stop',  pinTop:36, pinLeft:70, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
-  { id:'p18', name:'Door Stopper',                  cat:'stop',  pinTop:40, pinLeft:16, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
-  { id:'p19', name:'Trunk Stopper',                 cat:'stop',  pinTop:25, pinLeft:44, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+  { id:'p17', name:'Tailgate Stopper',              cat:'stop',  pinTop:24, pinLeft:79, img:'automobile/Vehicle Products/17. Tailgate Stopper.png' },
+  { id:'p18', name:'Door Stopper',                  cat:'stop',  pinTop:50, pinLeft:63, img:'automobile/Vehicle Products/18. Door Stopper.png' },
+  { id:'p19', name:'Trunk Stopper',                 cat:'stop',  pinTop:32, pinLeft:82, img:'automobile/Vehicle Products/19. Trunk Stopper.png' },
   // Resin
-  { id:'p20', name:'Oil Level Gauge',               cat:'resin', pinTop:22, pinLeft:36, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
-  { id:'p21', name:'Ashtray',                       cat:'resin', pinTop:22, pinLeft:55, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
-  { id:'p22', name:'Boots',                         cat:'resin', pinTop:75, pinLeft:44, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
+  { id:'p20', name:'Oil Level Gauge',               cat:'resin', pinTop:54, pinLeft:23, img:'automobile/Vehicle Products/20. Oil Level Gauge.png' },
+  { id:'p21', name:'Ashtray',                       cat:'resin', pinTop:39, pinLeft:40, img:'automobile/Vehicle Products/21. Ashtray.png' },
+  { id:'p22', name:'Boots',                         cat:'resin', pinTop:42, pinLeft:72, img:'automobile/Vehicle Products/22. Boots.png' },
 ];
 
 

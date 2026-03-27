@@ -326,46 +326,72 @@ const initialState = {
     ],
   },
 
-  // Products — automobile parts with hotspot pin positions (% based on image)
+  // Products — categories and parts synced with public product pages
   products: {
-    // Custom categories — shared by both automobile and motorcycle editors
+    // ── Automobile categories (5) — matches AutomobileProduct.jsx CATEGORIES ──
     autoCategories: [
-      { id:'ac1', label:'Packing and Seal',  color:'#e74c3c', desc:'Sealing products resistant to oils, fuel, water, air, and dust.' },
-      { id:'ac2', label:'Damper and Mount',  color:'#3498db', desc:'Vibration transmission prevention and interference reduction.' },
-      { id:'ac3', label:'Boot and Cover',    color:'#9b59b6', desc:'Flexible protective covers for joints and assemblies.' },
-      { id:'ac4', label:'Others',            color:'#f39c12', desc:'Grommets, bushings, bump stops, and custom rubber-to-metal parts.' },
-      { id:'ac5', label:'Exterior Products', color:'#1abc9c', desc:'Weather strips, door seals, and body moldings.' },
+      { id:'anti',    label:'Anti-Vibration Rubber', color:'#e74c3c', desc:'Vulcanized rubber products used for the purpose of vibration transmission prevention and interference reduction in automobile components.' },
+      { id:'grommet', label:'Grommets',              color:'#3498db', desc:'Rubber grommets and insulating parts that protect wiring harnesses, cables, and hoses from abrasion through metal panels and brackets.' },
+      { id:'seal',    label:'Packing Seals',         color:'#9b59b6', desc:'Sealing products resistant to oils, fuel, water, air, and dust — preventing leakage across mating surfaces and joints.' },
+      { id:'stop',    label:'Stopper',               color:'#f39c12', desc:'Rubber stoppers and bump stops that absorb impact and limit range of motion in suspension and body components.' },
+      { id:'resin',   label:'Resin',                 color:'#1abc9c', desc:'High-precision resin and plastic parts used in automobile assemblies requiring dimensional stability and chemical resistance.' },
     ],
+
+    // ── Automobile parts (22) — matches AutomobileProduct.jsx PARTS ──
+    // img paths are relative to /public — served as static files, no Firebase needed
+    autoParts: [
+      { id:'ap01', num:1,  cat:'anti',    name:'Exhaust Mount',         pinTop:39, pinLeft:80, img:'automobile/Vehicle Products/1. Exhaust Mount.png' },
+      { id:'ap02', num:2,  cat:'anti',    name:'Spring Lower Mount',    pinTop:35, pinLeft:77, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+      { id:'ap03', num:3,  cat:'anti',    name:'Radiator Mount',        pinTop:78, pinLeft:22, img:'automobile/New Update/DAMPER and MOUNT 1.png' },
+      { id:'ap04', num:4,  cat:'anti',    name:'Electric Servo Mount',  pinTop:48, pinLeft:25, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+      { id:'ap05', num:5,  cat:'anti',    name:'Fuel Tank Cushion',     pinTop:60, pinLeft:63, img:'automobile/New Update/DAMPER and MOUNT 1.png' },
+      { id:'ap06', num:6,  cat:'anti',    name:'Stabilize Bush',        pinTop:71, pinLeft:42, img:'automobile/New Update/DAMPER and MOUNT 2.png' },
+      { id:'ap07', num:7,  cat:'anti',    name:'Metal Bonding',         pinTop:57, pinLeft:41, img:'automobile/New Update/DAMPER and MOUNT 1.png' },
+      { id:'ap08', num:8,  cat:'grommet', name:'Hole Grommet',          pinTop:13, pinLeft:58, img:'automobile/New Update/OTHERS.png' },
+      { id:'ap09', num:9,  cat:'grommet', name:'Steering Grommets',     pinTop:52, pinLeft:47, img:'automobile/New Update/OTHERS.png' },
+      { id:'ap10', num:10, cat:'seal',    name:'Head Cover Packing',    pinTop:49, pinLeft:33, img:'automobile/New Update/PACKING and SEAL.png' },
+      { id:'ap11', num:11, cat:'seal',    name:'Fuel Packing',          pinTop:64, pinLeft:60, img:'automobile/New Update/PACKING and SEAL.png' },
+      { id:'ap12', num:12, cat:'seal',    name:'Water Pump Packing',    pinTop:44, pinLeft:30, img:'automobile/New Update/PACKING and SEAL.png' },
+      { id:'ap13', num:13, cat:'seal',    name:'Thermomount',           pinTop:57, pinLeft:34, img:'automobile/O-RING.png' },
+      { id:'ap14', num:14, cat:'seal',    name:'Oil Filter Packing',    pinTop:59, pinLeft:27, img:'automobile/O-RING.png' },
+      { id:'ap15', num:15, cat:'seal',    name:'Filler Cap',            pinTop:51, pinLeft:39, img:'automobile/New Update/PACKING and SEAL.png' },
+      { id:'ap16', num:16, cat:'seal',    name:'In-Mani Packing',       pinTop:53, pinLeft:30, img:'automobile/New Update/PACKING and SEAL.png' },
+      { id:'ap17', num:17, cat:'stop',    name:'Tailgate Stopper',      pinTop:24, pinLeft:79, img:'automobile/New Update/BOOT and COVER.png' },
+      { id:'ap18', num:18, cat:'stop',    name:'Door Stopper',          pinTop:50, pinLeft:63, img:'automobile/New Update/BOOT and COVER (1).png' },
+      { id:'ap19', num:19, cat:'stop',    name:'Trunk Stopper',         pinTop:32, pinLeft:82, img:'automobile/New Update/BOOT and COVER (2).png' },
+      { id:'ap20', num:20, cat:'resin',   name:'Oil Level Gauge',       pinTop:54, pinLeft:23, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
+      { id:'ap21', num:21, cat:'resin',   name:'Ashtray',               pinTop:39, pinLeft:40, img:'automobile/New Update/EXTERIOR PRODUCTS.png' },
+      { id:'ap22', num:22, cat:'resin',   name:'Boots',                 pinTop:42, pinLeft:72, img:'automobile/BOOTCLUTCH.png' },
+    ],
+
+    // ── Motorcycle categories (2) — matches MotorProducts.jsx CATEGORIES ──
     motorCategories: [
-      { id:'mc1', label:'Sealing & Gaskets',   color:'#3498db', desc:'Seals head cover and joints to prevent oil leaks.' },
-      { id:'mc2', label:'Heat Management',     color:'#e67e22', desc:'Reduces heat transfer to maintain component performance.' },
-      { id:'mc3', label:'Mounting & Support',  color:'#c0392b', desc:'Secure mounting and vibration reduction for motorcycle parts.' },
-      { id:'mc4', label:'Vibration Damping',   color:'#9b59b6', desc:'Reduces vibration and improves durability.' },
-      { id:'mc5', label:'Lighting Protection', color:'#c75194', desc:'Absorbs vibration and protects lighting assemblies.' },
-      { id:'mc6', label:'Fuel System',         color:'#16a085', desc:'Secure mounting for fuel system components.' },
+      { id:'seal',  label:'Packing Seals', color:'#3498db', desc:'Rubber sealing components that prevent leakage of oil, fuel, coolant, and other fluids across motorcycle engine and body joints.' },
+      { id:'frame', label:'Frame Parts',   color:'#c0392b', desc:'Rubber and composite parts mounted to the motorcycle frame — including mounts, dampers, grommets, covers, and body-protection components.' },
     ],
+
+    // ── Motorcycle parts (15) — matches MotorProducts.jsx PARTS (catId = cat) ──
     motorParts: [
-      // pinTop / pinLeft are % positions on the Motor Image.png
-      { id:'mp1', name:'HEAD COVER GASKET',                               category:'sealing',  categoryName:'Sealing & Gaskets',   pinTop:45, pinLeft:43, desc:'Seals the head cover to prevent oil leaks.',                             img:null },
-      { id:'mp2', name:'INSULATOR CARB',                                  category:'heat',     categoryName:'Heat Management',     pinTop:55, pinLeft:37, desc:'Reduces heat transfer to maintain carburetor performance.',              img:null },
-      { id:'mp3', name:'PLUG, RUBBER STAND & BAND TOOL',                  category:'mounting', categoryName:'Mounting & Support',  pinTop:68, pinLeft:50, desc:'Provides secure mounting and vibration reduction.',                      img:null },
-      { id:'mp4', name:'RUBBER RADIATOR MT, DAMPER CONNECTOR & GROMMET',  category:'mounting', categoryName:'Mounting & Support',  pinTop:38, pinLeft:26, desc:'Stabilizes radiator and protects connections.',                          img:null },
-      { id:'mp5', name:'DAMPER, RUBBER SIDE COVER & DAMPER CONNECTOR',    category:'damping',  categoryName:'Vibration Damping',   pinTop:50, pinLeft:60, desc:'Reduces vibration and improves durability.',                             img:null },
-      { id:'mp6', name:'RUBBER RADIATOR MOUNT & BAND TOOL, DAMPER & DUST',category:'mounting', categoryName:'Mounting & Support',  pinTop:30, pinLeft:30, desc:'Secures radiator and prevents dust intrusion.',                          img:null },
-      { id:'mp7', name:'RUBBER TAIL LIGHT',                               category:'lighting', categoryName:'Lighting Protection', pinTop:28, pinLeft:80, desc:'Absorbs vibration and protects the tail light assembly from road shock.',  img:null },
-      { id:'mp8', name:'TRAY FUEL',                                       category:'fuel',     categoryName:'Fuel System',         pinTop:22, pinLeft:52, desc:'Provides secure mounting for fuel system components.',                    img:null },
+      { id:'mp01', num:1,  cat:'seal',  name:'Throttle Body Insulator', pinTop:52, pinLeft:40 },
+      { id:'mp02', num:2,  cat:'seal',  name:'Diaphragm',               pinTop:48, pinLeft:48 },
+      { id:'mp03', num:3,  cat:'seal',  name:'Fuel Packing',            pinTop:22, pinLeft:52 },
+      { id:'mp04', num:4,  cat:'seal',  name:'Head Cover Packing',      pinTop:42, pinLeft:44 },
+      { id:'mp05', num:5,  cat:'seal',  name:'Water Pump Packing',      pinTop:36, pinLeft:30 },
+      { id:'mp06', num:6,  cat:'seal',  name:'Oil Filter Packing',      pinTop:58, pinLeft:36 },
+      { id:'mp07', num:7,  cat:'seal',  name:'Thermo Mount Rubber',     pinTop:46, pinLeft:56 },
+      { id:'mp08', num:8,  cat:'frame', name:'Handle Grip',             pinTop:16, pinLeft:16 },
+      { id:'mp09', num:9,  cat:'frame', name:'Step Rubber',             pinTop:72, pinLeft:38 },
+      { id:'mp10', num:10, cat:'frame', name:'Fuel Tank Tray',          pinTop:26, pinLeft:50 },
+      { id:'mp11', num:11, cat:'frame', name:'Fuel Tank Pads',          pinTop:30, pinLeft:44 },
+      { id:'mp12', num:12, cat:'frame', name:'Seat Pads',               pinTop:34, pinLeft:62 },
+      { id:'mp13', num:13, cat:'frame', name:'USB Charger Cover',       pinTop:20, pinLeft:62 },
+      { id:'mp14', num:14, cat:'frame', name:'Grommet',                 pinTop:44, pinLeft:68 },
+      { id:'mp15', num:15, cat:'frame', name:'Heat Guard Rubber',       pinTop:62, pinLeft:58 },
     ],
-    parts: [
-      { id: 'pt1', name: 'Packing and Seal',  category: 'seal',     categoryName: 'Packing and Seal',  pinTop: 57, pinLeft: 30, desc: 'Products for sealing applications to prevent or seal passage of oil, fuel oil, water, air, dust, and other contaminants across mating surfaces and joints.',                                                          img: null },
-      { id: 'pt2', name: 'Damper and Mount',  category: 'mount',    categoryName: 'Damper and Mount',   pinTop: 63, pinLeft: 59, desc: 'Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.',                                                                                               img: null },
-      { id: 'pt3', name: 'Damper and Mount',  category: 'mount',    categoryName: 'Damper and Mount',   pinTop: 54, pinLeft: 42, desc: 'Vulcanized rubber products used for the purpose of vibration transmission prevention and interference.',                                                                                               img: null },
-      { id: 'pt4', name: 'Boot and Cover',    category: 'cover',    categoryName: 'Boot and Cover',     pinTop: 77, pinLeft: 39, desc: 'Flexible rubber boots designed to protect steering and suspension joints from dust, moisture, and road debris.',                                                                                       img: null },
-      { id: 'pt5', name: 'Boot and Cover',    category: 'cover',    categoryName: 'Boot and Cover',     pinTop: 59, pinLeft: 65, desc: 'Accordion-style rubber covers engineered to shield driveshaft CV joints and rack-and-pinion assemblies from contamination.',                                                                           img: null },
-      { id: 'pt6', name: 'Boot and Cover',    category: 'cover',    categoryName: 'Boot and Cover',     pinTop: 51, pinLeft: 48, desc: 'Protective rubber covers for brake and clutch components, preventing fluid contamination and extending service life.',                                                                                  img: null },
-      { id: 'pt7', name: 'Others',            category: 'others',   categoryName: 'Others',             pinTop: 30, pinLeft: 81, desc: 'Specialized components including grommets, bushings, bump stops, and custom-molded rubber-to-metal parts suited for diverse automotive and industrial applications.',                                    img: null },
-      { id: 'pt8', name: 'Exterior Products', category: 'products', categoryName: 'Exterior Products',  pinTop: 22, pinLeft: 55, desc: 'High-grade exterior rubber parts such as weather strips, door seals, and body moldings that provide weather resistance, acoustic insulation, and a refined finish.',                                    img: null },
-    ],
-  },
+
+    // Legacy parts array (kept for backward compatibility — not used by public pages)
+    parts: [],
+  }
 };
 
 // ─── Reducer ─────────────────────────────────────────────────────────────────

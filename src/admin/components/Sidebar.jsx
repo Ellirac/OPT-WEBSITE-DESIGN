@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useCMS } from '../context/CMSContext';
-import optLogo from '../../assets/images/opt_logo2.png';
+import optLogo from '../../assets/images/opt_logo2 copy.png';
 
 const NAV = [
   { to: '/admin',             label: 'Dashboard',   icon: '⊞', end: true },
@@ -21,21 +21,15 @@ export default function Sidebar({ onLogout }) {
   const statusInfo = {
     saved:   { color: '#22c55e', icon: '✓', text: 'All changes saved' },
     saving:  { color: '#f59e0b', icon: '↻', text: 'Saving…' },
-    error:   { color: '#ef4444', icon: '⚠', text: 'Save failed — export data!' },
+    error:   { color: '#ef4444', icon: '⚠', text: 'Failed to export your DATA!!' },
   }[saveStatus] || { color: '#22c55e', icon: '✓', text: 'Saved' };
 
   return (
     <aside className="cms-sidebar">
       {/* Logo */}
       <div className="cms-sidebar-logo">
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <img src={optLogo} alt="OPT" style={{ width:32, height:32, objectFit:'contain', flexShrink:0 }} />
-          <div>
-            <div className="cms-logo-brand">OPT CMS</div>
-            <div className="cms-logo-sub">Content Manager</div>
-          </div>
+          <img src={optLogo} alt="OPT" style={{ width:200, height:60, objectFit:'inherit' }} />
         </div>
-      </div>
 
       {/* Save status pill */}
       <div style={{

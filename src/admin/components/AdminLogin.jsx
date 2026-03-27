@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import optLogo from '../../assets/images/opt_logo2.png';
+import optLogo from '../../assets/images/opt_logo.png';
 
 // ─── Password rules — exported so SettingsPage reuses them ────────────────────
 export const PASSWORD_RULES = [
