@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import MotorProductsAdmin from './MotorProductsAdmin';
-import { useCMS, uid } from '../context/CMSContext';
+import { useCMS, uid } from '../../admin/context/CMSContext';
 import { useToast } from '../components/Toast';
 import Modal, { ModalActions } from '../components/Modal';
 import ConfirmDelete from '../components/ConfirmDelete';
