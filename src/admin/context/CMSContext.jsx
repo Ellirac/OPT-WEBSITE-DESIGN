@@ -19,14 +19,18 @@ import {
  * activities.posts     → replaces hardcoded `activities` array in Activities.jsx (YouTube-based)
  * careers.jobs         → replaces hardcoded `jobList` + `jobRequirement` in Careers.jsx
  * products.parts       → replaces hardcoded `parts` + `pinPositions` in AutomobileProduct.jsx
+ *
+ * NOTE: parts[].desc and motorParts[].desc are HARDCODED here and NEVER saved to Firestore.
+ * They are stripped in stripForFirestore() before every save, and re-merged on __HYDRATE__.
+ * To update a description, edit the initialState below and redeploy — zero Firebase cost.
  */
 const initialState = {
   home: {
     certifications: [
-      { id: 'c1', code: 'ISO 9001',   label: 'Quality Management',     img: null, issuedBy: 'Bureau Veritas', validUntil: '' },
+      { id: 'c1', code: 'ISO 9001',   label: 'Quality Management',       img: null, issuedBy: 'Bureau Veritas', validUntil: '' },
       { id: 'c2', code: 'ISO 14001',  label: 'Environmental Management', img: null, issuedBy: 'Bureau Veritas', validUntil: '' },
-      { id: 'c3', code: 'IATF 16949', label: 'Automotive Quality',     img: null, issuedBy: 'Bureau Veritas', validUntil: '' },
-      { id: 'c4', code: '5S',         label: 'Workplace Excellence',   img: null, issuedBy: '',              validUntil: '' },
+      { id: 'c3', code: 'IATF 16949', label: 'Automotive Quality',       img: null, issuedBy: 'Bureau Veritas', validUntil: '' },
+      { id: 'c4', code: '5S',         label: 'Workplace Excellence',     img: null, issuedBy: '',              validUntil: '' },
     ],
     partners: [
       { id: 'p1',  name: 'BIGMATE PHILIPPINES INC.' },
@@ -120,15 +124,13 @@ const initialState = {
       { id: 'h9', year: 2023, event: 'OHTSUKA POLY-TECH (PHILIPPINES) INC. FACTORY 3 was established.' },
     ],
 
-    // Organization section of OurTeam (people with photos)
     organization: [
-      { id: 'o1', name: 'MR. KO OTSUKA',        role: 'OWNER',                img: null },
-      { id: 'o2', name: 'MR. KEI OTSUKA',        role: 'CHAIRMAN & PRESIDENT', img: null },
-      { id: 'o3', name: 'MS. MARIETTA CANAYON',  role: 'OPT-P DIRECTOR',       img: null },
-      { id: 'o4', name: 'MR. KIKUO NAKAYAMA',    role: 'VICE-PRESIDENT',        img: null },
+      { id: 'o1', name: 'MR. KO OTSUKA',       role: 'OWNER',                img: null },
+      { id: 'o2', name: 'MR. KEI OTSUKA',       role: 'CHAIRMAN & PRESIDENT', img: null },
+      { id: 'o3', name: 'MS. MARIETTA CANAYON', role: 'OPT-P DIRECTOR',       img: null },
+      { id: 'o4', name: 'MR. KIKUO NAKAYAMA',   role: 'VICE-PRESIDENT',       img: null },
     ],
 
-    // Management section of OurTeam (departments + sub-teams, no photos)
     management: [
       { id: 'm1', department: 'ADMINISTRATION', teams: ['Human Resources', 'Accounting', 'IT'] },
       { id: 'm2', department: 'PLANNING',       teams: ['Planning', 'Purchasing'] },
@@ -205,7 +207,6 @@ const initialState = {
     ],
   },
 
-  // Activities — YouTube-based (youtubeId + title + category)
   activities: {
     folders: [
       { id:'af1', name:'Corporate Events',   date:'2024-01-01' },
@@ -214,16 +215,15 @@ const initialState = {
     ],
     images: [],
     posts: [
-      { id: 'a1', title: 'APV Expo Philippines 2025',                    category: 'Event',               youtubeId: 'QNpJaWDy-0Y' },
-      { id: 'a2', title: 'Christmas Spirit Program 2024',                category: 'CSR',                 youtubeId: '5GC7A5Wedm8' },
-      { id: 'a3', title: 'Inauguration & 30th Anniversary Celebration',  category: 'Corporate Milestone', youtubeId: 'vNhD8no4sj4' },
-      { id: 'a4', title: 'Annual Company Sportfest 2023',                category: 'Employee Engagement', youtubeId: 'cELpR9JUUww' },
-      { id: 'a5', title: 'Community Donation Drive 2023',                category: 'CSR',                 youtubeId: 'XgbeoEwirXM' },
-      { id: 'a6', title: 'COVID-19 Prevention & Safety Program',         category: 'Health & Safety',     youtubeId: 'lSA6sG039K4' },
+      { id: 'a1', title: 'APV Expo Philippines 2025',                   category: 'Event',               youtubeId: 'QNpJaWDy-0Y' },
+      { id: 'a2', title: 'Christmas Spirit Program 2024',               category: 'CSR',                 youtubeId: '5GC7A5Wedm8' },
+      { id: 'a3', title: 'Inauguration & 30th Anniversary Celebration', category: 'Corporate Milestone', youtubeId: 'vNhD8no4sj4' },
+      { id: 'a4', title: 'Annual Company Sportfest 2023',               category: 'Employee Engagement', youtubeId: 'cELpR9JUUww' },
+      { id: 'a5', title: 'Community Donation Drive 2023',               category: 'CSR',                 youtubeId: 'XgbeoEwirXM' },
+      { id: 'a6', title: 'COVID-19 Prevention & Safety Program',        category: 'Health & Safety',     youtubeId: 'lSA6sG039K4' },
     ],
   },
 
-  // Careers — full job objects matching existing Careers.jsx structure
   careers: {
     jobs: [
       {
@@ -238,7 +238,7 @@ const initialState = {
           'Familiar with the area of Metro Manila, Laguna and nearby provinces route',
           'Preferably with own motorcycle vehicle',
         ],
-        experience: "Preferably with experience as a Company Driver",
+        experience: 'Preferably with experience as a Company Driver',
         requirements: [],
         benefits: [
           'Meal allowance upon regularization',
@@ -326,62 +326,196 @@ const initialState = {
     ],
   },
 
-  // Products — categories and parts synced with public product pages
   products: {
-  autoCategories: [
-    { id:'anti',   label:'Anti-Vibration Rubber', color:'#e74c3c', desc:'Vulcanized rubber products used for the purpose of vibration transmission prevention and interference reduction in automobile components.' },
-    { id:'grommet',label:'Grommets',              color:'#3498db', desc:'Rubber grommets and insulating parts that protect wiring harnesses, cables, and hoses from abrasion through metal panels and brackets.' },
-    { id:'seal',   label:'Packing Seals',         color:'#9b59b6', desc:'Sealing products resistant to oils, fuel, water, air, and dust — preventing leakage across mating surfaces and joints.' },
-    { id:'stop',   label:'Stopper',               color:'#f39c12', desc:'Rubber stoppers and bump stops that absorb impact and limit range of motion in suspension and body components.' },
-    { id:'resin',  label:'Resin',                 color:'#1abc9c', desc:'High-precision resin and plastic parts used in automobile assemblies requiring dimensional stability and chemical resistance.' },
-  ],
-  parts: [
-    { id:'p1',  name:'Exhaust Mount',          categoryId:'anti',    pinTop:39, pinLeft:80, img:'automobile/Vehicle Products/1. Exhaust Mount.png' },
-    { id:'p2',  name:'Spring Lower Mount',     categoryId:'anti',    pinTop:35, pinLeft:77, img:'automobile/Vehicle Products/2. Spring Lower Mount.png' },
-    { id:'p3',  name:'Radiator Mount',         categoryId:'anti',    pinTop:78, pinLeft:22, img:'automobile/Vehicle Products/3. Radiator Mount.png' },
-    { id:'p4',  name:'Electric servo mount',   categoryId:'anti',    pinTop:48, pinLeft:25, img:'automobile/Vehicle Products/4. Electric Serrvo Mount.png' },
-    { id:'p5',  name:'Fuel Tank Cushion',      categoryId:'anti',    pinTop:60, pinLeft:63, img:'automobile/Vehicle Products/5. Fuel Tank Cushion.png' },
-    { id:'p6',  name:'Stabilize bush',         categoryId:'anti',    pinTop:71, pinLeft:42, img:'automobile/Vehicle Products/6. Stabilizer Bushings.png' },
-    { id:'p7',  name:'Metal Bonding',          categoryId:'anti',    pinTop:57, pinLeft:41, img:'automobile/Vehicle Products//7. Metal Adhesion.png' },
-    { id:'p8',  name:'Hole Grommet',           categoryId:'grommet', pinTop:13, pinLeft:58, img:'automobile/Vehicle Products/8. Hole Grommets.png' },
-    { id:'p9',  name:'Steering Grommets',      categoryId:'grommet', pinTop:52, pinLeft:47, img:'automobile/Vehicle Products/9. Steering Grommet.png' },
-    { id:'p10', name:'Head cover packing',     categoryId:'seal',    pinTop:49, pinLeft:33, img:'automobile/Vehicle Products/10. Head Cover Gasket.png' },
-    { id:'p11', name:'Fuel Packing',           categoryId:'seal',    pinTop:64, pinLeft:60, img:'automobile/Vehicle Products/11. Fuel Packing.png' },
-    { id:'p12', name:'Water Pump Packing',     categoryId:'seal',    pinTop:44, pinLeft:30, img:'automobile/Vehicle Products/12. Water Pump Gasket.png' },
-    { id:'p13', name:'Thermomount',            categoryId:'seal',    pinTop:57, pinLeft:34, img:'automobile/Vehicle Products/13. Thermo Mount.png' },
-    { id:'p14', name:'Oil filter packing',     categoryId:'seal',    pinTop:59, pinLeft:27, img:'automobile/Vehicle Products/14. Oil Filter Gasket.png' },
-    { id:'p15', name:'Filler Cap',             categoryId:'seal',    pinTop:51, pinLeft:39, img:'automobile/Vehicle Products/15. Filter Cap.png' },
-    { id:'p16', name:'In-mani Packing',        categoryId:'seal',    pinTop:53, pinLeft:30, img:'automobile/Vehicle Products/16. Intake Manifold Gasket.png' },
-    { id:'p17', name:'Tailgate Stopper',       categoryId:'stop',    pinTop:24, pinLeft:79, img:'automobile/Vehicle Products/17. Tailgate Stopper.png' },
-    { id:'p18', name:'Door Stopper',           categoryId:'stop',    pinTop:50, pinLeft:63, img:'automobile/Vehicle Products/18. Door Stopper.png' },
-    { id:'p19', name:'Trunk Stopper',          categoryId:'stop',    pinTop:32, pinLeft:82, img:'automobile/Vehicle Products/19. Trunk Stopper.png' },
-    { id:'p20', name:'Oil Level Gauge',        categoryId:'resin',   pinTop:54, pinLeft:23, img:'automobile/Vehicle Products/20. Oil Level Gauge.png' },
-    { id:'p21', name:'Ashtray',                categoryId:'resin',   pinTop:39, pinLeft:40, img:'automobile/Vehicle Products/21. Ashtray.png' },
-    { id:'p22', name:'Boots',                  categoryId:'resin',   pinTop:42, pinLeft:72, img:'automobile/Vehicle Products/22. Boots.png' },
-  ],
-  motorCategories: [
-    { id:'seal',  label:'Packing Seals', color:'#3498db', desc:'Rubber sealing components that prevent leakage of oil, fuel, coolant, and other fluids across motorcycle engine and body joints.' },
-    { id:'frame', label:'Frame Parts',   color:'#c0392b', desc:'Rubber and composite parts mounted to the motorcycle frame — including mounts, dampers, grommets, covers, and body-protection components.' },
-  ],
-  motorParts: [
-    { id:'m1',  name:'Head Cover Gasket',                             categoryId:'seal',  pinTop:42, pinLeft:44, img:null },
-    { id:'m2',  name:'Insulator Carb',                                categoryId:'seal',  pinTop:52, pinLeft:37, img:null },
-    { id:'m3',  name:'Cylinder Head Gasket',                          categoryId:'seal',  pinTop:48, pinLeft:50, img:null },
-    { id:'m4',  name:'Oil Drain Gasket',                              categoryId:'seal',  pinTop:65, pinLeft:46, img:null },
-    { id:'m5',  name:'Exhaust Pipe Gasket',                           categoryId:'seal',  pinTop:60, pinLeft:58, img:null },
-    { id:'m6',  name:'Fuel Tank Seal',                                categoryId:'seal',  pinTop:22, pinLeft:50, img:null },
-    { id:'m7',  name:'Coolant Hose Seal',                             categoryId:'seal',  pinTop:36, pinLeft:28, img:null },
-    { id:'m8',  name:'Plug, Rubber Stand & Band Tool',                categoryId:'frame', pinTop:68, pinLeft:50, img:null },
-    { id:'m9',  name:'Rubber Radiator Mount & Damper Connector',      categoryId:'frame', pinTop:38, pinLeft:26, img:null },
-    { id:'m10', name:'Damper, Rubber Side Cover & Damper Connector',  categoryId:'frame', pinTop:50, pinLeft:62, img:null },
-    { id:'m11', name:'Rubber Radiator Mount, Band Tool & Dust Cover', categoryId:'frame', pinTop:30, pinLeft:30, img:null },
-    { id:'m12', name:'Rubber Tail Light',                             categoryId:'frame', pinTop:28, pinLeft:80, img:null },
-    { id:'m13', name:'Frame Grommet Set',                             categoryId:'frame', pinTop:44, pinLeft:72, img:null },
-    { id:'m14', name:'Handlebar Grip & Damper',                       categoryId:'frame', pinTop:16, pinLeft:16, img:null },
-    { id:'m15', name:'Footpeg Rubber & Bracket',                      categoryId:'frame', pinTop:72, pinLeft:34, img:null },
-  ],
-},
+    autoCategories: [
+      { id:'anti',    label:'Anti-Vibration Rubber', color:'#e74c3c', desc:'Vulcanized rubber products used for the purpose of vibration transmission prevention and interference reduction in automobile components.' },
+      { id:'grommet', label:'Grommets',              color:'#3498db', desc:'Rubber grommets and insulating parts that protect wiring harnesses, cables, and hoses from abrasion through metal panels and brackets.' },
+      { id:'seal',    label:'Packing Seals',         color:'#9b59b6', desc:'Sealing products resistant to oils, fuel, water, air, and dust — preventing leakage across mating surfaces and joints.' },
+      { id:'stop',    label:'Stopper',               color:'#f39c12', desc:'Rubber stoppers and bump stops that absorb impact and limit range of motion in suspension and body components.' },
+      { id:'resin',   label:'Resin',                 color:'#1abc9c', desc:'High-precision resin and plastic parts used in automobile assemblies requiring dimensional stability and chemical resistance.' },
+    ],
 
+    parts: [
+      {
+        id:'p1', name:'Exhaust Mount', categoryId:'anti', pinTop:39, pinLeft:80,
+        img:'automobile/Vehicle Products/1. Exhaust Mount.png',
+        desc:'Rubber mount that isolates exhaust system vibration from the vehicle body, reducing interior noise and preventing metal fatigue in exhaust hangers.',
+      },
+      {
+        id:'p2', name:'Spring Lower Mount', categoryId:'anti', pinTop:35, pinLeft:77,
+        img:'automobile/Vehicle Products/2. Spring Lower Mount.png',
+        desc:'Cushions the coil spring base against the suspension strut, absorbing road shock and preventing metal-to-metal contact that causes noise and wear.',
+      },
+      {
+        id:'p3', name:'Radiator Mount', categoryId:'anti', pinTop:78, pinLeft:22,
+        img:'automobile/Vehicle Products/3. Radiator Mount.png',
+        desc:'Isolates the radiator from engine and chassis vibration, protecting cooling fins and hose connections from fatigue cracking over time.',
+      },
+      {
+        id:'p4', name:'Electric Servo Mount', categoryId:'anti', pinTop:48, pinLeft:25,
+        img:'automobile/Vehicle Products/4. Electric Serrvo Mount.png',
+        desc:'Anti-vibration mount for electric power steering servo motors, dampening motor oscillation to prevent steering wheel shimmy and cabin noise.',
+      },
+      {
+        id:'p5', name:'Fuel Tank Cushion', categoryId:'anti', pinTop:60, pinLeft:63,
+        img:'automobile/Vehicle Products/5. Fuel Tank Cushion.png',
+        desc:'Rubber cushion placed between the fuel tank and chassis brackets, absorbing vibration and preventing tank surface abrasion during vehicle operation.',
+      },
+      {
+        id:'p6', name:'Stabilizer Bush', categoryId:'anti', pinTop:71, pinLeft:42,
+        img:'automobile/Vehicle Products/6. Stabilizer Bushings.png',
+        desc:'Vulcanized rubber bushing that secures the stabilizer bar to the chassis, reducing body roll transfer vibration and controlling lateral movement.',
+      },
+      {
+        id:'p7', name:'Metal Bonding', categoryId:'anti', pinTop:57, pinLeft:41,
+        img:'automobile/Vehicle Products/7. Metal Adhesion.png',
+        desc:'Rubber-to-metal bonded component combining structural rigidity with vibration damping, used in engine mounts and suspension link assemblies.',
+      },
+      {
+        id:'p8', name:'Hole Grommet', categoryId:'grommet', pinTop:13, pinLeft:58,
+        img:'automobile/Vehicle Products/8. Hole Grommets.png',
+        desc:'Rubber grommet inserted into body panel holes to protect wiring harnesses and cables from sharp metal edges, preventing insulation damage and short circuits.',
+      },
+      {
+        id:'p9', name:'Steering Grommet', categoryId:'grommet', pinTop:52, pinLeft:47,
+        img:'automobile/Vehicle Products/9. Steering Grommet.png',
+        desc:'Sealing grommet fitted around the steering column pass-through in the firewall, blocking engine bay noise, dust, and moisture from entering the cabin.',
+      },
+      {
+        id:'p10', name:'Head Cover Packing', categoryId:'seal', pinTop:49, pinLeft:33,
+        img:'automobile/Vehicle Products/10. Head Cover Gasket.png',
+        desc:'Precision rubber gasket that seals the valve cover to the cylinder head, preventing engine oil leaks while withstanding high heat and chemical exposure.',
+      },
+      {
+        id:'p11', name:'Fuel Packing', categoryId:'seal', pinTop:64, pinLeft:60,
+        img:'automobile/Vehicle Products/11. Fuel Packing.png',
+        desc:'Fuel-resistant rubber seal used at fuel system joints and sender unit flanges, ensuring zero-leak performance under pressure and temperature cycling.',
+      },
+      {
+        id:'p12', name:'Water Pump Packing', categoryId:'seal', pinTop:44, pinLeft:30,
+        img:'automobile/Vehicle Products/12. Water Pump Gasket.png',
+        desc:'Coolant-resistant gasket that seals the water pump housing to the engine block, maintaining system pressure and preventing coolant leaks.',
+      },
+      {
+        id:'p13', name:'Thermomount', categoryId:'seal', pinTop:57, pinLeft:34,
+        img:'automobile/Vehicle Products/13. Thermo Mount.png',
+        desc:'Rubber sealing mount for the thermostat housing, combining a leak-proof seal with vibration isolation to protect the thermostat from engine oscillation.',
+      },
+      {
+        id:'p14', name:'Oil Filter Packing', categoryId:'seal', pinTop:59, pinLeft:27,
+        img:'automobile/Vehicle Products/14. Oil Filter Gasket.png',
+        desc:'High-pressure rubber seal used at the oil filter base, preventing oil leaks under engine operating pressures and high temperature conditions.',
+      },
+      {
+        id:'p15', name:'Filler Cap', categoryId:'seal', pinTop:51, pinLeft:39,
+        img:'automobile/Vehicle Products/15. Filter Cap.png',
+        desc:'Rubber-sealed filler cap for engine oil or coolant reservoirs, providing an airtight closure that prevents contamination and fluid spillage.',
+      },
+      {
+        id:'p16', name:'Intake Manifold Packing', categoryId:'seal', pinTop:53, pinLeft:30,
+        img:'automobile/Vehicle Products/16. Intake Manifold Gasket.png',
+        desc:'Seals the intake manifold to the cylinder head ports, preventing air leaks that would disrupt the air-fuel mixture and cause rough engine idle.',
+      },
+      {
+        id:'p17', name:'Tailgate Stopper', categoryId:'stop', pinTop:24, pinLeft:79,
+        img:'automobile/Vehicle Products/17. Tailgate Stopper.png',
+        desc:'Rubber bump stop mounted on the tailgate frame, cushioning the tailgate on closing to prevent panel damage and eliminate metal impact noise.',
+      },
+      {
+        id:'p18', name:'Door Stopper', categoryId:'stop', pinTop:50, pinLeft:63,
+        img:'automobile/Vehicle Products/18. Door Stopper.png',
+        desc:'Rubber stopper that limits door travel at full open position, protecting hinges and adjacent body panels from impact damage during door operation.',
+      },
+      {
+        id:'p19', name:'Trunk Stopper', categoryId:'stop', pinTop:32, pinLeft:82,
+        img:'automobile/Vehicle Products/19. Trunk Stopper.png',
+        desc:'Bump stop fitted to the trunk lid or boot area, absorbing closing impact force and preventing lid rattle during driving over rough surfaces.',
+      },
+      {
+        id:'p20', name:'Oil Level Gauge', categoryId:'resin', pinTop:54, pinLeft:23,
+        img:'automobile/Vehicle Products/20. Oil Level Gauge.png',
+        desc:'Precision resin dipstick for checking engine oil level, designed for dimensional accuracy and chemical resistance to motor oil and high temperatures.',
+      },
+      {
+        id:'p21', name:'Ashtray', categoryId:'resin', pinTop:39, pinLeft:40,
+        img:'automobile/Vehicle Products/21. Ashtray.png',
+        desc:'Injection-molded resin interior component designed for dimensional stability, heat resistance, and a precise fit within the vehicle cabin assembly.',
+      },
+      {
+        id:'p22', name:'Boots', categoryId:'resin', pinTop:42, pinLeft:72,
+        img:'automobile/Vehicle Products/22. Boots.png',
+        desc:'Flexible rubber-resin boot that covers and protects CV joints or steering rack ends from dirt, water, and road contaminants, extending joint service life.',
+      },
+    ],
+
+    motorCategories: [
+      { id:'seal',  label:'Packing Seals', color:'#3498db', desc:'Rubber sealing components that prevent leakage of oil, fuel, coolant, and other fluids across motorcycle engine and body joints.' },
+      { id:'frame', label:'Frame Parts',   color:'#c0392b', desc:'Rubber and composite parts mounted to the motorcycle frame — including mounts, dampers, grommets, covers, and body-protection components.' },
+    ],
+
+    motorParts: [
+      {
+        id:'m1', name:'Throttle Body Insulator', categoryId:'seal', pinTop:47, pinLeft:56, img:null,
+        desc:'Rubber gasket sealing the cylinder head cover to the engine block, preventing oil leaks while withstanding motorcycle engine heat cycles.',
+      },
+      {
+        id:'m2', name:'Diaphragm', categoryId:'seal', pinTop:27, pinLeft:76, img:null,
+        desc:'Rubber insulator boot connecting the carburetor to the intake port, sealing the air-fuel path and isolating engine vibration from the carb body.',
+      },
+      {
+        id:'m3', name:'Fuel Packing', categoryId:'seal', pinTop:22, pinLeft:62, img:null,
+        desc:'Critical sealing gasket between the cylinder head and engine block, maintaining compression and preventing coolant or oil from entering the combustion chamber.',
+      },
+      {
+        id:'m4', name:'Head Cover Packing', categoryId:'seal', pinTop:47, pinLeft:62, img:null,
+        desc:'Crush-type rubber gasket for the engine oil drain plug, ensuring a leak-free seal after every oil change service.',
+      },
+      {
+        id:'m5', name:'Water Pump Packing', categoryId:'seal', pinTop:57, pinLeft:67, img:null,
+        desc:'High-temperature rubber gasket at the exhaust pipe flange joint, sealing combustion gases and preventing exhaust leaks that cause noise and performance loss.',
+      },
+      {
+        id:'m6', name:'Oil Filter Packing', categoryId:'seal', pinTop:76, pinLeft:43, img:null,
+        desc:'Fuel-resistant rubber seal at the tank-to-frame interface or fuel petcock mounting, preventing fuel leaks and vapor seepage from the tank assembly.',
+      },
+      {
+        id:'m7', name:'Thermo Mount Rubber', categoryId:'seal', pinTop:64, pinLeft:63, img:null,
+        desc:'Rubber sealing ring at coolant hose connection points, maintaining system pressure integrity and preventing coolant loss on liquid-cooled motorcycle engines.',
+      },
+      {
+        id:'m8', name:'Handle Grip', categoryId:'frame', pinTop:33, pinLeft:75, img:null,
+        desc:'Set of rubber plugs and side-stand pad providing ground grip and frame protection, reducing vibration transfer through the stand and protecting painted surfaces.',
+      },
+      {
+        id:'m9', name:'Step Rubber', categoryId:'frame', pinTop:67, pinLeft:37, img:null,
+        desc:'Anti-vibration rubber mount isolating the radiator from frame oscillation, protecting the radiator core and coolant hoses from stress fatigue.',
+      },
+      {
+        id:'m10', name:'Fuel Tank Tray', categoryId:'frame', pinTop:29, pinLeft:53, img:null,
+        desc:'Rubber damper assembly for side cover panels, absorbing vibration to prevent panel rattles and protecting cover mounting points from cracking.',
+      },
+      {
+        id:'m11', name:'Fuel Tank Pads', categoryId:'frame', pinTop:29, pinLeft:45, img:null,
+        desc:'Combined radiator mounting and dust cover system that secures the radiator while shielding the core from large debris and road contamination.',
+      },
+      {
+        id:'m12', name:'Seat Pads', categoryId:'frame', pinTop:29, pinLeft:26, img:null,
+        desc:'Rubber mounting gasket and seal for the tail light assembly, providing weatherproofing and vibration isolation to protect the lamp housing and wiring.',
+      },
+      {
+        id:'m13', name:'USB Charger Cover', categoryId:'frame', pinTop:40, pinLeft:25, img:null,
+        desc:'Set of rubber grommets for motorcycle frame pass-through points, protecting wiring harnesses and cables from abrasion against bare metal edges.',
+      },
+      {
+        id:'m14', name:'Grommet', categoryId:'frame', pinTop:42, pinLeft:45, img:null,
+        desc:"Rubber handlebar grip with integrated vibration damper, reducing high-frequency engine and road vibration transmitted to the rider's hands for improved comfort.",
+      },
+      {
+        id:'m15', name:'Heat Guard Rubber', categoryId:'frame', pinTop:38, pinLeft:55, img:null,
+        desc:'Rubber footpeg pad providing grip and vibration damping for rider comfort, fitted to the footpeg bracket to reduce road and engine vibration through the feet.',
+      },
+    ],
+  },
 };
 
 // ─── Reducer ─────────────────────────────────────────────────────────────────
@@ -393,9 +527,9 @@ function cmsReducer(state, { type, payload }) {
 
   switch (type) {
     // HOME — CERTIFICATIONS
-    case 'HOME_ADD_CERT':    return up('home', 'certifications', list => [...list, payload]);
-    case 'HOME_UPDATE_CERT': return up('home', 'certifications', list => list.map(x => x.id === payload.id ? payload : x));
-    case 'HOME_DEL_CERT':    return up('home', 'certifications', list => list.filter(x => x.id !== payload));
+    case 'HOME_ADD_CERT':      return up('home', 'certifications', list => [...list, payload]);
+    case 'HOME_UPDATE_CERT':   return up('home', 'certifications', list => list.map(x => x.id === payload.id ? payload : x));
+    case 'HOME_DEL_CERT':      return up('home', 'certifications', list => list.filter(x => x.id !== payload));
     case 'HOME_REORDER_CERTS': return up('home', 'certifications', () => payload);
 
     // HOME — PARTNERS
@@ -432,14 +566,14 @@ function cmsReducer(state, { type, payload }) {
     case 'ABOUT_DEL_BASE':    return up('about', 'bases', list => list.filter(x => x.id !== payload));
 
     // ACTIVITIES — FOLDERS
-    case 'ACT_FOLDER_ADD':    return up('activities','folders', list=>[...list,payload]);
-    case 'ACT_FOLDER_UPDATE': return up('activities','folders', list=>list.map(x=>x.id===payload.id?payload:x));
-    case 'ACT_FOLDER_DEL':    return up('activities','folders', list=>list.filter(x=>x.id!==payload));
+    case 'ACT_FOLDER_ADD':    return up('activities', 'folders', list => [...list, payload]);
+    case 'ACT_FOLDER_UPDATE': return up('activities', 'folders', list => list.map(x => x.id === payload.id ? payload : x));
+    case 'ACT_FOLDER_DEL':    return up('activities', 'folders', list => list.filter(x => x.id !== payload));
 
     // ACTIVITIES — IMAGES
-    case 'ACT_IMG_ADD':    return up('activities','images', list=>[...list,payload]);
-    case 'ACT_IMG_UPDATE': return up('activities','images', list=>list.map(x=>x.id===payload.id?payload:x));
-    case 'ACT_IMG_DEL':    return up('activities','images', list=>list.filter(x=>x.id!==payload));
+    case 'ACT_IMG_ADD':    return up('activities', 'images', list => [...list, payload]);
+    case 'ACT_IMG_UPDATE': return up('activities', 'images', list => list.map(x => x.id === payload.id ? payload : x));
+    case 'ACT_IMG_DEL':    return up('activities', 'images', list => list.filter(x => x.id !== payload));
 
     // ACTIVITIES — POSTS
     case 'ACT_ADD':    return up('activities', 'posts', list => [...list, payload]);
@@ -452,45 +586,54 @@ function cmsReducer(state, { type, payload }) {
     case 'CAREER_DEL':    return up('careers', 'jobs', list => list.filter(x => x.id !== payload));
 
     // PRODUCTS — AUTO CATEGORIES
-    case 'AUTO_CAT_ADD':    return up('products','autoCategories', list=>[...list,payload]);
-    case 'AUTO_CAT_UPDATE': return up('products','autoCategories', list=>list.map(x=>x.id===payload.id?payload:x));
-    case 'AUTO_CAT_DEL':    return up('products','autoCategories', list=>list.filter(x=>x.id!==payload));
+    case 'AUTO_CAT_ADD':    return up('products', 'autoCategories', list => [...list, payload]);
+    case 'AUTO_CAT_UPDATE': return up('products', 'autoCategories', list => list.map(x => x.id === payload.id ? payload : x));
+    case 'AUTO_CAT_DEL':    return up('products', 'autoCategories', list => list.filter(x => x.id !== payload));
 
     // PRODUCTS — MOTOR CATEGORIES
-    case 'MOTOR_CAT_ADD':    return up('products','motorCategories', list=>[...list,payload]);
-    case 'MOTOR_CAT_UPDATE': return up('products','motorCategories', list=>list.map(x=>x.id===payload.id?payload:x));
-    case 'MOTOR_CAT_DEL':    return up('products','motorCategories', list=>list.filter(x=>x.id!==payload));
-
-    // PRODUCTS — MOTOR PARTS
-    case 'MOTOR_PART_ADD':    return up('products', 'motorParts', list => [...list, payload]);
-    case 'MOTOR_PART_UPDATE': return up('products', 'motorParts', list => list.map(x => x.id === payload.id ? payload : x));
-    case 'MOTOR_PART_DEL':    return up('products', 'motorParts', list => list.filter(x => x.id !== payload));
+    case 'MOTOR_CAT_ADD':    return up('products', 'motorCategories', list => [...list, payload]);
+    case 'MOTOR_CAT_UPDATE': return up('products', 'motorCategories', list => list.map(x => x.id === payload.id ? payload : x));
+    case 'MOTOR_CAT_DEL':    return up('products', 'motorCategories', list => list.filter(x => x.id !== payload));
 
     // PRODUCTS — AUTOMOBILE PARTS
     case 'PART_ADD':    return up('products', 'parts', list => [...list, payload]);
     case 'PART_UPDATE': return up('products', 'parts', list => list.map(x => x.id === payload.id ? payload : x));
     case 'PART_DEL':    return up('products', 'parts', list => list.filter(x => x.id !== payload));
 
+    // PRODUCTS — MOTOR PARTS
+    case 'MOTOR_PART_ADD':    return up('products', 'motorParts', list => [...list, payload]);
+    case 'MOTOR_PART_UPDATE': return up('products', 'motorParts', list => list.map(x => x.id === payload.id ? payload : x));
+    case 'MOTOR_PART_DEL':    return up('products', 'motorParts', list => list.filter(x => x.id !== payload));
+
     // Internal: hydrate full state from Firestore on first load / real-time updates
     case '__HYDRATE__': {
       const p = payload;
       return {
-        home:       { ...initialState.home,       ...p.home },
-        about:      { ...initialState.about,       ...p.about },
+        home:       { ...initialState.home,  ...p.home },
+        about:      { ...initialState.about, ...p.about },
         activities: {
           ...initialState.activities, ...p.activities,
           folders: p.activities?.folders ?? initialState.activities.folders,
           images:  p.activities?.images  ?? initialState.activities.images,
           posts:   p.activities?.posts   ?? initialState.activities.posts,
         },
-        careers:    { ...initialState.careers,     ...p.careers },
-        products:   {
+        careers: { ...initialState.careers, ...p.careers },
+        products: {
           ...initialState.products,
           ...p.products,
-          parts:           p.products?.parts           ?? initialState.products.parts,
-          motorParts:      p.products?.motorParts      ?? initialState.products.motorParts,
           autoCategories:  p.products?.autoCategories  ?? initialState.products.autoCategories,
           motorCategories: p.products?.motorCategories ?? initialState.products.motorCategories,
+
+          // Re-attach hardcoded desc from initialState after hydrating from Firestore.
+          // desc is never stored in Firestore — it always comes from source code only.
+          parts: (p.products?.parts ?? initialState.products.parts).map(fsPart => {
+            const local = initialState.products.parts.find(lp => lp.id === fsPart.id);
+            return { ...fsPart, desc: local?.desc ?? '' };
+          }),
+          motorParts: (p.products?.motorParts ?? initialState.products.motorParts).map(fsPart => {
+            const local = initialState.products.motorParts.find(lp => lp.id === fsPart.id);
+            return { ...fsPart, desc: local?.desc ?? '' };
+          }),
         },
       };
     }
@@ -499,17 +642,28 @@ function cmsReducer(state, { type, payload }) {
   }
 }
 
+// ─── Strip hardcoded-only fields before saving to Firestore ──────────────────
+// desc lives only in source code — never in the database.
+function stripForFirestore(state) {
+  return {
+    ...state,
+    products: {
+      ...state.products,
+      parts:      state.products.parts.map(({ desc, ...rest }) => rest),
+      motorParts: state.products.motorParts.map(({ desc, ...rest }) => rest),
+    },
+  };
+}
+
 // ─── Firebase-powered Context & Provider ─────────────────────────────────────
 
 const CMSContext = createContext(null);
 
-// uid — module-level, always unique
 let _counter = 0;
 export function uid() {
-  return `${Date.now()}-${(++_counter).toString(36)}-${Math.random().toString(36).slice(2,6)}`;
+  return `${Date.now()}-${(++_counter).toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-// Image compression — max 900px wide, JPEG 75%
 function compressImage(dataUrl, maxW = 900, quality = 0.82) {
   return new Promise(resolve => {
     const img = new Image();
@@ -520,15 +674,12 @@ function compressImage(dataUrl, maxW = 900, quality = 0.82) {
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
-      // Preserve transparency: only use JPEG for non-transparent images
       const isPng = dataUrl.startsWith('data:image/png');
       if (!isPng) {
-        // Fill white background for JPEG (avoids black transparency)
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, w, h);
       }
       ctx.drawImage(img, 0, 0, w, h);
-      // Use PNG for transparent images, JPEG for everything else
       const format = isPng ? 'image/png' : 'image/jpeg';
       const q      = isPng ? 1 : quality;
       resolve(canvas.toDataURL(format, q));
@@ -543,19 +694,17 @@ const FIRESTORE_DOC = 'cms/opt-data';
 
 export function CMSProvider({ children }) {
   const [state,      dispatch]      = useReducer(cmsReducer, initialState);
-  const [loading,    setLoading]    = useState(true);   // waiting for first Firestore load
-  const [saveStatus, setSaveStatus] = useState('saved'); // 'saved' | 'saving' | 'error'
+  const [loading,    setLoading]    = useState(true);
+  const [saveStatus, setSaveStatus] = useState('saved');
 
-  // ── Load from Firestore on mount, then listen for real-time changes ──────────
+  // ── Real-time Firestore listener ─────────────────────────────────────────────
   useEffect(() => {
     const [col, docId] = FIRESTORE_DOC.split('/');
     const ref = doc(db, col, docId);
 
-    // Real-time listener — any change in Firestore instantly updates all devices
     const unsubscribe = onSnapshot(ref, (snap) => {
       if (snap.exists()) {
-        const data = snap.data();
-        dispatch({ type: '__HYDRATE__', payload: data });
+        dispatch({ type: '__HYDRATE__', payload: snap.data() });
       }
       setLoading(false);
     }, (err) => {
@@ -566,10 +715,9 @@ export function CMSProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  // ── Save to Firestore whenever state changes (debounced 600ms) ───────────────
+  // ── Debounced Firestore save (600ms) ─────────────────────────────────────────
   const saveTimer = React.useRef(null);
   useEffect(() => {
-    // Skip the very first render (loading phase)
     if (loading) return;
 
     setSaveStatus('saving');
@@ -577,15 +725,18 @@ export function CMSProvider({ children }) {
     saveTimer.current = setTimeout(async () => {
       try {
         const [col, docId] = FIRESTORE_DOC.split('/');
-        // Firestore has a 1MB document limit — check size before saving
-        const jsonStr = JSON.stringify(state);
+
+        // Strip desc before saving — keeps Firestore lean
+        const stateToSave = stripForFirestore(state);
+
+        const jsonStr = JSON.stringify(stateToSave);
         const sizeKB  = Math.round((new Blob([jsonStr]).size) / 1024);
         if (sizeKB > 950) {
           console.warn(`[OPT CMS] Data size is ${sizeKB}KB — approaching Firestore 1MB limit. Remove large images.`);
           setSaveStatus('error');
           return;
         }
-        await setDoc(doc(db, col, docId), state, { merge: true });
+        await setDoc(doc(db, col, docId), stateToSave, { merge: true });
         setSaveStatus('saved');
       } catch (err) {
         console.error('[OPT CMS] Firestore save error:', err);

@@ -24,21 +24,21 @@ import M15 from '../../assets/images/Vehicle Products/15. Filter Cap.png';
 
 // Static fallback by part name — never goes to Firebase
 const MOTOR_STATIC = {
-  'HEAD COVER GASKET':                                M1,
-  'INSULATOR CARB':                                   M2,
-  'PLUG, RUBBER STAND & BAND TOOL':                   M3,
-  'RUBBER RADIATOR MT, DAMPER CONNECTOR & GROMMET':   M4,
-  'DAMPER, RUBBER SIDE COVER & DAMPER CONNECTOR':     M5,
-  'RUBBER RADIATOR MOUNT & BAND TOOL, DAMPER & DUST': M6,
-  'RUBBER TAIL LIGHT':                                M7,
-  'TRAY FUEL':                                        M8,
-  'TRAY FUEL2':                                       M9,
-  'TRAY FUEL3':                                       M10,
-  'TRAY FUEL4':                                       M11,
-  'TRAY FUEL5':                                       M12,
-  'TRAY FUEL6':                                       M13,
-  'TRAY FUEL7':                                       M14,
-  'TRAY FUEL8':                                       M15,
+  'Exhaust Mount':            M1,
+  'Spring Lower Mount':       M2,
+  'Radiator Mount':           M3,
+  'Electric Servo Mount':     M4,
+  'Fuel Tank Cushion':        M5,
+  'Stabilizer Bushings':      M6,
+  'Metal Adhesion':           M7,
+  'Hole Grommets':            M8,
+  'Steering Grommet':         M9,
+  'Head Cover Gasket':        M10,
+  'Fuel Packing':             M11,
+  'Water Pump Gasket':        M12,
+  'Thermo Mount':             M13,
+  'Oil Filter Gasket':        M14,
+  'Filter Cap':               M15,
                 
 };
 

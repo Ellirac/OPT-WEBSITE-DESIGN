@@ -1,25 +1,29 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useCMS } from "../../admin/context/CMSContext"; // adjust path as needed
+import { useCMS } from "../../admin/context/CMSContext";
 import "../../styles/MotorProducts.css";
 import MOTOR from "../../assets/images/motor/Motor Image.png";
 
 // Static image map — keeps existing motor images as defaults when CMS img is null
-import M1    from "../../assets/images/motor/1.png";
-import M2    from "../../assets/images/motor/2.png";
-import M3    from "../../assets/images/motor/3.png";
-import M4    from "../../assets/images/motor/4.png";
-import M5    from "../../assets/images/motor/5.png";
-import M6    from "../../assets/images/motor/6.png";
-import M7    from "../../assets/images/motor/7.png";
-import M8    from "../../assets/images/motor/8.png";
-import M9    from "../../assets/images/motor/9.png";
-import MTRAY from "../../assets/images/motor/TRAY FUEL.png";
+import M1    from "../../assets/images/Motor Products/1. Throttle Body Insulator.png";
+import M2    from "../../assets/images/Motor Products/2. Diaphragm.png";
+import M3    from "../../assets/images/Motor Products/3. Fuel Packing.png";
+import M4    from "../../assets/images/Motor Products/4. Head Cover Packing.png";
+import M5    from "../../assets/images/Motor Products/5. Water Pump Packing.png";
+import M6    from "../../assets/images/Motor Products/6. Oil Filter.png";
+import M7    from "../../assets/images/Motor Products/7. Thermo Mount Rubber.png";
+import M8    from "../../assets/images/Motor Products/8. Handle Grip.png";
+import M9    from "../../assets/images/Motor Products/9. Step Rubber.png";
+import M10   from "../../assets/images/Motor Products/10. Fuel Tank Tray.png";
+import M11   from "../../assets/images/Motor Products/11. Fuel Tank Pads.png";
+import M12   from "../../assets/images/Motor Products/12. Seat Pads.png"; 
+import M13   from "../../assets/images/Motor Products/13. USB Charger Cover.png";
+import M14   from "../../assets/images/Motor Products/14. Grommet.png";
+import M15   from "../../assets/images/Motor Products/15. Heat Guard Rubber.png";
 
-// Map part id → default static image (matches original MotorProducts.jsx order)
 const DEFAULT_IMG = {
-  m1: M1, m2: M3, m3: M4, m4: M2, m5: M8,
-  m6: MTRAY, m7: M5, m8: M4, m9: M5, m10: M6,
-  m11: M7, m12: M9, m13: M6, m14: M7, m15: M8,
+  m1: M1, m2: M2, m3: M3, m4: M4, m5: M5,
+  m6: M6, m7: M7, m8: M8, m9: M9, m10: M10,
+  m11: M11, m12: M12, m13: M13, m14: M14, m15: M15,
 };
 
 // ── Pin ──────────────────────────────────────────────────────────────────────
