@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react';
 
-import { db } from '../firebase';
+import { db, storage } from '../../admin/firebase.js';
 import {
   doc, setDoc, onSnapshot
 } from 'firebase/firestore';
+import {
+  ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject
+} from 'firebase/storage';
 
 /**
  * CMS State shape — mirrors the actual hardcoded data in each site component.
@@ -161,7 +164,7 @@ const initialState = {
         name: 'JAPAN HEAD OFFICE',
         address: '4962, Ooaza Haneo, Namegawa-machi, Hiki-Gun, Saitama Japan 355-0811',
         website: 'https://www.poly-tech.co.jp/', websiteName: '大塚ポリテック株式会社',
-        mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d46900.171157463206!2d139.359019!3d36.063575!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x601ed57b986b8a25%3A0x64d3b57b6f18caae!2z5pel5pys44CB44CSMzU1LTA4MTEg5Z-8546J55yM5q-U5LyB6YOh5ruR5bed55S657695bC-77yU77yZ77yS!5e1!3m2!1sja!2sph!4v1770796474645!5m2!1sja!2sph',
+        mapUrl: 'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d46900.171157463206!2d139.359019!3d36.063575!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x601ed57b986b8a25%3A0x64d3b57b6f18caae!2z5pel5pys44CB44CSMzU1LTA4MTEg5Z-8546J55yM5q-U5LyB6YOh5ruR5bed55S657695bC-77yU77yY77yS!5e1!3m2!1sja!2sph!4v1770796474645!5m2!1sja!2sph',
         img: null,
       },
       {
@@ -213,7 +216,7 @@ const initialState = {
       { id:'af2', name:'CSR Activities',     date:'2024-01-01' },
       { id:'af3', name:'Company Milestones', date:'2024-01-01' },
     ],
-    images: [],
+    images: [],   // each item: { id, url, name, folderId, type:'image'|'video', size, uploadedAt }
     posts: [
       { id: 'a1', title: 'APV Expo Philippines 2025',                   category: 'Event',               youtubeId: 'QNpJaWDy-0Y' },
       { id: 'a2', title: 'Christmas Spirit Program 2024',               category: 'CSR',                 youtubeId: '5GC7A5Wedm8' },
@@ -605,36 +608,55 @@ function cmsReducer(state, { type, payload }) {
     case 'MOTOR_PART_UPDATE': return up('products', 'motorParts', list => list.map(x => x.id === payload.id ? payload : x));
     case 'MOTOR_PART_DEL':    return up('products', 'motorParts', list => list.filter(x => x.id !== payload));
 
-    // Internal: hydrate full state from Firestore on first load / real-time updates
+    // Internal: hydrate one section at a time from Firestore.
+    // Each onSnapshot listener fires independently with only its own section key
+    // (e.g. { home: ... } or { about: ... }). We must spread ...state first so
+    // the other sections are never wiped — this was the root cause of uploaded
+    // images disappearing for end users (the race between 5 parallel listeners).
     case '__HYDRATE__': {
-      const p = payload;
-      return {
-        home:       { ...initialState.home,  ...p.home },
-        about:      { ...initialState.about, ...p.about },
-        activities: {
-          ...initialState.activities, ...p.activities,
-          folders: p.activities?.folders ?? initialState.activities.folders,
-          images:  p.activities?.images  ?? initialState.activities.images,
-          posts:   p.activities?.posts   ?? initialState.activities.posts,
-        },
-        careers: { ...initialState.careers, ...p.careers },
-        products: {
-          ...initialState.products,
-          ...p.products,
-          autoCategories:  p.products?.autoCategories  ?? initialState.products.autoCategories,
-          motorCategories: p.products?.motorCategories ?? initialState.products.motorCategories,
+      const section  = Object.keys(payload)[0];
+      const incoming = payload[section];
 
-          // Re-attach hardcoded desc from initialState after hydrating from Firestore.
-          // desc is never stored in Firestore — it always comes from source code only.
-          parts: (p.products?.parts ?? initialState.products.parts).map(fsPart => {
-            const local = initialState.products.parts.find(lp => lp.id === fsPart.id);
-            return { ...fsPart, desc: local?.desc ?? '' };
-          }),
-          motorParts: (p.products?.motorParts ?? initialState.products.motorParts).map(fsPart => {
-            const local = initialState.products.motorParts.find(lp => lp.id === fsPart.id);
-            return { ...fsPart, desc: local?.desc ?? '' };
-          }),
-        },
+      if (!section || !incoming) return state;
+
+      if (section === 'activities') {
+        return {
+          ...state,
+          activities: {
+            ...initialState.activities,
+            ...incoming,
+            folders: incoming.folders ?? state.activities.folders,
+            images:  incoming.images  ?? state.activities.images,
+            posts:   incoming.posts   ?? state.activities.posts,
+          },
+        };
+      }
+
+      if (section === 'products') {
+        return {
+          ...state,
+          products: {
+            ...initialState.products,
+            ...incoming,
+            autoCategories:  incoming.autoCategories  ?? state.products.autoCategories,
+            motorCategories: incoming.motorCategories ?? state.products.motorCategories,
+            // Re-attach hardcoded desc — never stored in Firestore.
+            parts: (incoming.parts ?? state.products.parts).map(fsPart => {
+              const local = initialState.products.parts.find(lp => lp.id === fsPart.id);
+              return { ...fsPart, desc: local?.desc ?? '' };
+            }),
+            motorParts: (incoming.motorParts ?? state.products.motorParts).map(fsPart => {
+              const local = initialState.products.motorParts.find(lp => lp.id === fsPart.id);
+              return { ...fsPart, desc: local?.desc ?? '' };
+            }),
+          },
+        };
+      }
+
+      // home, about, careers — simple merge into current state
+      return {
+        ...state,
+        [section]: { ...initialState[section], ...incoming },
       };
     }
 
@@ -664,6 +686,7 @@ export function uid() {
   return `${Date.now()}-${(++_counter).toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
+// ─── compressImage (still used for non-activity images e.g. org photos) ────────
 function compressImage(dataUrl, maxW = 900, quality = 0.82) {
   return new Promise(resolve => {
     const img = new Image();
@@ -690,56 +713,151 @@ function compressImage(dataUrl, maxW = 900, quality = 0.82) {
 }
 export { compressImage };
 
-const FIRESTORE_DOC = 'cms/opt-data';
+// ─── uploadToStorage ─────────────────────────────────────────────────────────
+/**
+ * Upload a File object to Firebase Storage and return its public download URL.
+ *
+ * @param {File}     file          - The File object from an <input type="file">
+ * @param {string}   folder        - Storage folder, e.g. 'activities/images' or 'activities/videos'
+ * @param {Function} onProgress    - Optional callback (0–100) for upload progress
+ * @returns {Promise<string>}      - Resolves to the public download URL
+ *
+ * Usage in your CMS upload handler:
+ *   const url = await uploadToStorage(file, 'activities/videos', pct => setProgress(pct));
+ *   dispatch({ type: 'ACT_IMG_ADD', payload: { id: uid(), url, name: file.name, folderId } });
+ */
+export function uploadToStorage(file, folder = 'activities/images', onProgress = null) {
+  return new Promise((resolve, reject) => {
+    // Build a unique path so filenames never collide
+    const ext      = file.name.split('.').pop();
+    const safeName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const path     = `${folder}/${safeName}`;
+    const fileRef  = storageRef(storage, path);
+
+    const uploadTask = uploadBytesResumable(fileRef, file, {
+      contentType: file.type,
+    });
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        if (onProgress) {
+          const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          onProgress(pct);
+        }
+      },
+      (err) => {
+        console.error('[CMS] Storage upload error:', err);
+        reject(err);
+      },
+      async () => {
+        const url = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve(url);
+      }
+    );
+  });
+}
+
+// ─── deleteFromStorage ────────────────────────────────────────────────────────
+/**
+ * Delete a file from Firebase Storage by its download URL.
+ * Call this when removing an image or video from the CMS so Storage stays clean.
+ *
+ * Usage:
+ *   await deleteFromStorage(image.url);
+ *   dispatch({ type: 'ACT_IMG_DEL', payload: image.id });
+ */
+export async function deleteFromStorage(downloadUrl) {
+  try {
+    const fileRef = storageRef(storage, downloadUrl);
+    await deleteObject(fileRef);
+  } catch (err) {
+    // Ignore 'object-not-found' — file may have already been deleted
+    if (err.code !== 'storage/object-not-found') {
+      console.error('[CMS] Storage delete error:', err);
+    }
+  }
+}
+
+// 🔥 MULTI-DOCUMENT SETUP
+const CMS_DOCS = {
+  home:       doc(db, 'cms', 'home'),
+  about:      doc(db, 'cms', 'about'),
+  activities: doc(db, 'cms', 'activities'),
+  careers:    doc(db, 'cms', 'careers'),
+  products:   doc(db, 'cms', 'products'),
+};
 
 export function CMSProvider({ children }) {
   const [state,      dispatch]      = useReducer(cmsReducer, initialState);
   const [loading,    setLoading]    = useState(true);
   const [saveStatus, setSaveStatus] = useState('saved');
 
-  // ── Real-time Firestore listener ─────────────────────────────────────────────
+  // 🟢 MULTI-DOC REAL-TIME LISTENERS
+  // Wait for ALL 5 docs to respond before hiding the loader so data is
+  // fully hydrated before end users see the page.
   useEffect(() => {
-    const [col, docId] = FIRESTORE_DOC.split('/');
-    const ref = doc(db, col, docId);
+    const unsubscribers = [];
+    const total  = Object.keys(CMS_DOCS).length;
+    let resolved = 0;
 
-    const unsubscribe = onSnapshot(ref, (snap) => {
-      if (snap.exists()) {
-        dispatch({ type: '__HYDRATE__', payload: snap.data() });
-      }
-      setLoading(false);
-    }, (err) => {
-      console.error('[OPT CMS] Firestore listen error:', err);
-      setLoading(false);
+    const onResolved = () => {
+      resolved += 1;
+      if (resolved >= total) setLoading(false);
+    };
+
+    Object.entries(CMS_DOCS).forEach(([key, ref]) => {
+      const unsub = onSnapshot(ref, (snap) => {
+        if (snap.exists()) {
+          dispatch({
+            type: '__HYDRATE__',
+            payload: { [key]: snap.data() },
+          });
+        }
+        onResolved();
+      }, (err) => {
+        console.error(`[CMS] Error loading ${key}:`, err);
+        onResolved();
+      });
+
+      unsubscribers.push(unsub);
     });
 
-    return () => unsubscribe();
+    return () => unsubscribers.forEach(unsub => unsub());
   }, []);
 
-  // ── Debounced Firestore save (600ms) ─────────────────────────────────────────
+  // 🟡 SAVE PER SECTION (DEBOUNCED)
   const saveTimer = React.useRef(null);
+
   useEffect(() => {
     if (loading) return;
 
     setSaveStatus('saving');
     clearTimeout(saveTimer.current);
+
     saveTimer.current = setTimeout(async () => {
       try {
-        const [col, docId] = FIRESTORE_DOC.split('/');
-
-        // Strip desc before saving — keeps Firestore lean
         const stateToSave = stripForFirestore(state);
 
-        const jsonStr = JSON.stringify(stateToSave);
-        const sizeKB  = Math.round((new Blob([jsonStr]).size) / 1024);
-        if (sizeKB > 950) {
-          console.warn(`[OPT CMS] Data size is ${sizeKB}KB — approaching Firestore 1MB limit. Remove large images.`);
-          setSaveStatus('error');
-          return;
-        }
-        await setDoc(doc(db, col, docId), stateToSave, { merge: true });
+        // Optional size check per section
+        Object.entries(stateToSave).forEach(([key, val]) => {
+          const sizeKB = Math.round(new Blob([JSON.stringify(val)]).size / 1024);
+          if (sizeKB > 950) {
+            console.warn(`[CMS] ${key} is ${sizeKB}KB (approaching 1MB limit)`);
+          }
+        });
+
+        await Promise.all([
+          setDoc(CMS_DOCS.home,       stateToSave.home,       { merge: true }),
+          setDoc(CMS_DOCS.about,      stateToSave.about,      { merge: true }),
+          setDoc(CMS_DOCS.activities, stateToSave.activities, { merge: true }),
+          setDoc(CMS_DOCS.careers,    stateToSave.careers,    { merge: true }),
+          setDoc(CMS_DOCS.products,   stateToSave.products,   { merge: true }),
+        ]);
+
         setSaveStatus('saved');
       } catch (err) {
-        console.error('[OPT CMS] Firestore save error:', err);
+        console.error('[CMS] Save error:', err);
         setSaveStatus('error');
       }
     }, 600);
@@ -747,25 +865,33 @@ export function CMSProvider({ children }) {
     return () => clearTimeout(saveTimer.current);
   }, [state, loading]);
 
-  // ── Export JSON ───────────────────────────────────────────────────────────────
+  // 📤 EXPORT
   const exportData = useCallback(() => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-    const a    = document.createElement('a');
-    a.href     = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
     a.download = 'opt_cms_data.json';
     a.click();
   }, [state]);
 
+  // ⏳ LOADING UI
   if (loading) {
     return (
       <div style={{
-        minHeight: '100vh', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        background: '#f3f4f8', gap: 16,
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f3f4f8',
+        gap: 16,
       }}>
         <div style={{
-          width: 48, height: 48, border: '4px solid #e5e7eb',
-          borderTop: '4px solid #c0392b', borderRadius: '50%',
+          width: 48,
+          height: 48,
+          border: '4px solid #e5e7eb',
+          borderTop: '4px solid #c0392b',
+          borderRadius: '50%',
           animation: 'cms-spin 0.8s linear infinite',
         }} />
         <p style={{ color: '#6b7280', fontSize: 14, fontWeight: 500 }}>
