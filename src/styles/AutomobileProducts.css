@@ -89,16 +89,17 @@ body {
 }
 
 /* CAR */
-.car-container { flex: 1; max-width: 520px; }
+.car-container { flex: 1; max-width: 560px; }
 .car-model { position: relative; }
 
 .car-wrapper { position: relative; }
 
 .car-img {
-  width: 118%;
-  height: 500px;
+  width: 150%;
+  height: 550px;
   display: block;
   border-radius: 10px;
+  margin-left: -25%;
 }
 
 .car-glow {

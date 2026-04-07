@@ -99,7 +99,7 @@
 /* ── Motorcycle Section ───────────────────────────────────── */
 .moto-car-container {
     flex: 1;
-    max-width: 800px;
+    max-width: 600px;
 }
 
 .moto-car-model {
@@ -112,10 +112,11 @@
 
 .moto-car-img {
     margin-top: 30px;
-    width: 100%;
+    width: 120%;
     height: 420px;
     display: block;
     border-radius: 10px;
+    margin-left: -15%;
 }
 
 .moto-car-glow {
