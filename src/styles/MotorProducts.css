@@ -39,6 +39,7 @@
             var(--primary) 50%,
             var(--primary-light) 100%);
     padding: 10px;
+    margin: 90px 0 10px;
     overflow: hidden;
     box-shadow: 0 2px 15px rgba(139, 28, 28, 0.2);
 }
@@ -431,6 +432,7 @@
     }
 
     .moto-product-header {
+        margin-top: 70px;
         padding: 25px 20px;
     }
 
@@ -485,6 +487,7 @@
     }
 
     .moto-product-header {
+        margin-top: 70px;
         padding: 22px 20px;
     }
 

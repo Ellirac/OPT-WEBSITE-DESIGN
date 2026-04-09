@@ -21,7 +21,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+  background: white;
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
   padding-top: 60px;
@@ -178,7 +178,7 @@ body {
 }
 
 .part-content {
-  background: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
+  background: transparent;
   display: none;
   animation: fadeIn 0.4s ease;
   border-radius: 16px;
