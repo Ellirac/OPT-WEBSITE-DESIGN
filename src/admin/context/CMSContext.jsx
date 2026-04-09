@@ -331,17 +331,41 @@ const initialState = {
 
   products: {
     autoCategories: [
-      { id:'anti',    label:'Anti-Vibration Rubber', color:'#e74c3c', desc:'Vulcanized rubber products used for the purpose of vibration transmission prevention and interference reduction in automobile components.' },
-      { id:'grommet', label:'Grommets',              color:'#3498db', desc:'Rubber grommets and insulating parts that protect wiring harnesses, cables, and hoses from abrasion through metal panels and brackets.' },
-      { id:'seal',    label:'Packing Seals',         color:'#9b59b6', desc:'Sealing products resistant to oils, fuel, water, air, and dust — preventing leakage across mating surfaces and joints.' },
-      { id:'stop',    label:'Stopper',               color:'#f39c12', desc:'Rubber stoppers and bump stops that absorb impact and limit range of motion in suspension and body components.' },
-      { id:'resin',   label:'Resin',                 color:'#1abc9c', desc:'High-precision resin and plastic parts used in automobile assemblies requiring dimensional stability and chemical resistance.' },
+      {
+        id:'anti', label:'Anti-Vibration Rubber', color:'#e74c3c',
+        shortDesc:'Oil, fuel oil, and water resistance — optimized for various automobile applications.',
+        desc:'Vulcanized rubber products used for the purpose of suppressing vibration transmission and reducing noise. We mainly optimize the shape and select materials for applications that support various functional units of automobiles.',
+      },
+      {
+        id:'grommet', label:'Grommets', color:'#3498db',
+        shortDesc:'Selected materials with excellent weather resistance',
+        desc:'These parts are intended for the protection of through holes and for waterproofing and dustproofing. It is made of high-quality rubber material with excellent weather resistance.',
+      },
+      {
+        id:'seal', label:'Packing Seals', color:'#9b59b6',
+        shortDesc:'Oil, fuel oil, and water resistance and can be optimized for application',
+        desc:'Sealing applications are used to prevent or seal the ingress of oil, fuel oil, water, air and dust. It can be used for optimized design and material selection for various geometries.',
+      },
+      {
+        id:'stop', label:'Stopper', color:'#f39c12',
+        shortDesc:'Selecting materials with excellent elasticity',
+        desc:'These are components intended for shock absorption and movement restriction. It is made of high-quality rubber material with excellent elasticity.',
+      },
+      {
+        id:'resin', label:'Resin', color:'#1abc9c',
+        shortDesc:'Compatible with a wide range of resin materials',
+        desc:[
+        'By utilizing 3D CAD, we support part development with a sense of speed from design to molding.',
+        'We handle a wide range of materials, from general thermoplastics (PE and PP) to engineering plastics (POM, PA (brand name: NYLON)) and other elastomeric resins (PVC, EVA, TPE (TPO)).' ,
+        'We also have a track record of metal fittings, painting, and two-color molding on resins. Both thermoplastics and thermosets can be used. In particular, phenolic resins are installed at all of our bases (Fukushima, Shanghai, and the Philippines).'
+      ]
+      },
     ],
 
     parts: [
       {
         id:'p1', name:'Exhaust Mount', categoryId:'anti', pinTop:39, pinLeft:80,
-        img:'../../assets/images/Vehicle Products/1. Exhaust Mount.png',
+        img:null,
         desc:'Rubber mount that isolates exhaust system vibration from the vehicle body, reducing interior noise and preventing metal fatigue in exhaust hangers.',
       },
       {
@@ -452,8 +476,16 @@ const initialState = {
     ],
 
     motorCategories: [
-      { id:'seal',  label:'Packing Seals', color:'#3498db', desc:'Rubber sealing components that prevent leakage of oil, fuel, coolant, and other fluids across motorcycle engine and body joints.' },
-      { id:'frame', label:'Frame Parts',   color:'#c0392b', desc:'Rubber and composite parts mounted to the motorcycle frame — including mounts, dampers, grommets, covers, and body-protection components.' },
+      {
+        id:'seal', label:'Packing Seals', color:'#3498db',
+        shortDesc:'Oil-resistant, fuel oil-resistant, weather-resistant, etc., and can be optimized according to the application',
+        desc:'Sealing applications are used to prevent or seal the ingress of oil, fuel oil, water, air and dust. It can be used for optimized design and material selection for various geometries.',
+      },
+      {
+        id:'frame', label:'Frame Parts', color:'#c0392b',
+        shortDesc:'Selected materials with excellent weather resistance',
+        desc:'It is made of high-quality rubber material with excellent weather resistance that can withstand harsh driving environments.',
+      },
     ],
 
     motorParts: [

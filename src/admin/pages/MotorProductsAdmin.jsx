@@ -1,272 +1,247 @@
-import React, { useState, useRef } from 'react';
-import { useCMS, uid } from '../../admin/context/CMSContext';
+import React, { useState } from 'react';
+import { useCMS } from '../context/CMSContext';
 import { useToast } from '../components/Toast';
-import Modal, { ModalActions } from '../components/Modal';
-import ConfirmDelete from '../components/ConfirmDelete';
-import UploadArea from '../components/UploadArea';
-import CategoryManager from '../components/CategoryManager';
-import MOTOR_IMAGE from '../../assets/images/motor/Motor Image.png';
-import M1 from '../../assets/images/Vehicle Products/1. Exhaust Mount.png';
-import M2 from '../../assets/images/Vehicle Products/2. Spring Lower Mount.png';
-import M3 from '../../assets/images/Vehicle Products/3. Radiator Mount.png';
-import M4 from '../../assets/images/Vehicle Products/4. Electric Serrvo Mount.png';
-import M5 from '../../assets/images/Vehicle Products/5. Fuel Tank Cushion.png';
-import M6 from '../../assets/images/Vehicle Products/6. Stabilizer Bushings.png';
-import M7 from '../../assets/images/Vehicle Products/7. Metal Adhesion.png';
-import M8 from '../../assets/images/Vehicle Products/8. Hole Grommets.png';
-import M9 from '../../assets/images/Vehicle Products/9. Steering Grommet.png';
-import M10 from '../../assets/images/Vehicle Products/10. Head Cover Gasket.png';
-import M11 from '../../assets/images/Vehicle Products/11. Fuel Packing.png';
-import M12 from '../../assets/images/Vehicle Products/12. Water Pump Gasket.png';
-import M13 from '../../assets/images/Vehicle Products/13. Thermo Mount.png';
-import M14 from '../../assets/images/Vehicle Products/14. Oil Filter Gasket.png';
-import M15 from '../../assets/images/Vehicle Products/15. Filter Cap.png';
 
-// Static fallback by part name — never goes to Firebase
-const MOTOR_STATIC = {
-  'Exhaust Mount':            M1,
-  'Spring Lower Mount':       M2,
-  'Radiator Mount':           M3,
-  'Electric Servo Mount':     M4,
-  'Fuel Tank Cushion':        M5,
-  'Stabilizer Bushings':      M6,
-  'Metal Adhesion':           M7,
-  'Hole Grommets':            M8,
-  'Steering Grommet':         M9,
-  'Head Cover Gasket':        M10,
-  'Fuel Packing':             M11,
-  'Water Pump Gasket':        M12,
-  'Thermo Mount':             M13,
-  'Oil Filter Gasket':        M14,
-  'Filter Cap':               M15,
-                
-};
+const PRESET_COLORS = [
+  '#e74c3c','#c0392b','#e67e22','#f39c12','#2ecc71',
+  '#16a085','#3498db','#2980b9','#9b59b6','#8e44ad',
+  '#1abc9c','#1d4ed8','#0f766e','#b45309','#374151',
+];
 
-export default function MotorProductsAdmin() {
-  const { state, dispatch } = useCMS();
-  const toast = useToast();
-
-  const motorCategories = state.products.motorCategories || [];
-  const motorParts      = state.products.motorParts || [];
-
-  const catColor = (id) => motorCategories.find(c => c.id === id)?.color || '#c0392b';
-  const catLabel = (id) => motorCategories.find(c => c.id === id)?.label || id;
-
-  const [activeTab,     setActiveTab]     = useState('hotspots');
-  const [modal,         setModal]         = useState(null);
-  const [confirmTarget, setConfirmTarget] = useState(null);
-  const [form,          setForm]          = useState({});
-  const [partImg,       setPartImg]       = useState(null);
-  const [pendingPin,    setPendingPin]    = useState(null);
-
-  const imgRef = useRef(null);
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  const handleImgClick = (e) => {
-    if (e.target !== imgRef.current) return;
-    const rect    = imgRef.current.getBoundingClientRect();
-    const pinTop  = parseFloat(((e.clientY - rect.top)  / rect.height * 100).toFixed(2));
-    const pinLeft = parseFloat(((e.clientX - rect.left) / rect.width  * 100).toFixed(2));
-    setPendingPin({ pinTop, pinLeft });
-    const defaultCat = motorCategories[0] || { id:'', label:'', color:'#c0392b' };
-    setForm({ name:'', categoryId: defaultCat.id, categoryName: defaultCat.label, desc:'' });
-    setPartImg(null);
-    setModal('add');
-  };
-
-  const openEdit = (pt) => {
-    setForm(pt);
-    setPartImg(pt.img || null);
-    setPendingPin(null);
-    setModal(pt.id);
-  };
+function CategoryEditor({ categories, parts, onUpdateCat }) {
+  const toast   = useToast();
+  const [editing, setEditing] = useState(null);
+  const [form,    setForm]    = useState({});
+  const set = (k,v) => setForm(f=>({...f,[k]:v}));
 
   const save = () => {
-    if (!form.name?.trim()) { toast('Part name required', 'error'); return; }
-    const cat     = motorCategories.find(c => c.id === form.categoryId) || motorCategories[0];
-    const payload = {
-      ...form,
-      categoryId:   cat?.id    || form.categoryId,
-      categoryName: cat?.label || form.categoryName,
-      color:        cat?.color || '#c0392b',
-      img: partImg ?? form.img ?? null,
-      ...(pendingPin || {}),
-    };
-    if (modal === 'add') {
-      dispatch({ type:'MOTOR_PART_ADD', payload:{ id:uid(), ...payload } });
-      toast('Part added!');
-    } else {
-      dispatch({ type:'MOTOR_PART_UPDATE', payload });
-      toast('Updated!');
-    }
-    setModal(null); setPendingPin(null);
+    if (!form.label?.trim()) { toast('Name required','error'); return; }
+    onUpdateCat({...form, label:form.label.trim()});
+    toast('Category updated!');
+    setEditing(null);
+  };
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      {categories.map(cat => {
+        const count     = parts.filter(p => p.categoryId === cat.id).length;
+        const isEditing = editing === cat.id;
+        return (
+          <div key={cat.id} style={{
+            background:'#fff', border:`1.5px solid ${isEditing ? cat.color : '#e5e7eb'}`,
+            borderRadius:12, overflow:'hidden',
+          }}>
+            <div style={{ height:4, background:cat.color }}/>
+            <div style={{ padding:'16px 18px' }}>
+              {isEditing ? (
+                <div>
+                  <div className="cms-form-group" style={{ marginBottom:10 }}>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Category Name</label>
+                    <input value={form.label||''} onChange={e=>set('label',e.target.value)}
+                      autoFocus style={{ fontSize:14, fontWeight:700 }} />
+                  </div>
+
+                  <div className="cms-form-group" style={{ marginBottom:10 }}>
+                    <label style={{ fontSize:12, fontWeight:600 }}>
+                      Short Description <span style={{ fontWeight:400, color:'#9ca3af' }}>(bold — first line in legend)</span>
+                    </label>
+                    <input value={form.shortDesc||''} onChange={e=>set('shortDesc',e.target.value)}
+                      placeholder="e.g. Oil, fuel, and coolant resistance — leak-free sealing."
+                      style={{ fontSize:13 }} />
+                  </div>
+
+                  <div className="cms-form-group" style={{ marginBottom:10 }}>
+                    <label style={{ fontSize:12, fontWeight:600 }}>
+                      Description <span style={{ fontWeight:400, color:'#9ca3af' }}>(normal weight — second line in legend)</span>
+                    </label>
+                    <textarea value={form.desc||''} onChange={e=>set('desc',e.target.value)}
+                      style={{ width:'100%', padding:'8px 11px', border:'1px solid #e5e7eb', borderRadius:7,
+                        fontSize:13, fontFamily:'inherit', resize:'vertical', minHeight:72 }} />
+                  </div>
+
+                  <div className="cms-form-group" style={{ marginBottom:14 }}>
+                    <label style={{ fontSize:12, fontWeight:600 }}>Color</label>
+                    <div style={{ height:34, background:form.color, borderRadius:8, marginBottom:10,
+                      border:'1px solid rgba(0,0,0,0.08)', display:'flex', alignItems:'center', paddingLeft:12 }}>
+                      <span style={{ color:'#fff', fontSize:12.5, fontWeight:700, textShadow:'0 1px 3px rgba(0,0,0,.3)' }}>
+                        {form.label || 'Preview'} · {form.color}
+                      </span>
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                      <input type="color" value={form.color||'#c0392b'} onChange={e=>set('color',e.target.value)}
+                        style={{ width:40, height:34, border:'1px solid #e5e7eb', borderRadius:7, cursor:'pointer', padding:2 }} />
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+                        {PRESET_COLORS.map(col=>(
+                          <div key={col} onClick={()=>set('color',col)} style={{
+                            width:22, height:22, borderRadius:'50%', background:col, cursor:'pointer',
+                            border: form.color===col ? '2.5px solid #111827' : '2px solid rgba(0,0,0,0.1)',
+                            transform: form.color===col ? 'scale(1.2)' : 'scale(1)', transition:'all .1s',
+                          }}/>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display:'flex', gap:8 }}>
+                    <button className="cms-btn cms-btn--ghost" onClick={()=>setEditing(null)}>Cancel</button>
+                    <button className="cms-btn cms-btn--primary" onClick={save}>Save Category</button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display:'flex', alignItems:'flex-start', gap:12 }}>
+                  <div style={{ width:40, height:40, borderRadius:10, flexShrink:0,
+                    background:cat.color+'18', border:`1px solid ${cat.color}30`,
+                    display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <div style={{ width:16, height:16, borderRadius:'50%', background:cat.color }}/>
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:14.5, fontWeight:700, color:'#111827', marginBottom:2 }}>{cat.label}</div>
+                    {cat.shortDesc && (
+                      <div style={{ fontSize:12.5, fontWeight:700, color:'#374151', lineHeight:1.4, marginBottom:3 }}>
+                        {cat.shortDesc}
+                      </div>
+                    )}
+                    <div style={{ fontSize:12, color:'#6b7280', lineHeight:1.5 }}>{cat.desc}</div>
+                    <div style={{ fontSize:11, color:'#9ca3af', marginTop:4 }}>
+                      {count} parts · <code style={{ background:'#f3f4f6', padding:'1px 5px', borderRadius:4, fontSize:10 }}>{cat.color}</code>
+                    </div>
+                  </div>
+                  <button className="cms-btn cms-btn--edit cms-btn--sm"
+                    onClick={()=>{ setForm({...cat}); setEditing(cat.id); }}>Edit</button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PartsEditor({ categories, parts, onUpdatePart }) {
+  const toast   = useToast();
+  const [editing, setEditing] = useState(null);
+  const [form,    setForm]    = useState({ name:'', desc:'' });
+
+  const save = (pt) => {
+    if (!form.name.trim()) { toast('Name required','error'); return; }
+    onUpdatePart({ ...pt, name: form.name.trim(), desc: form.desc });
+    toast('Part updated!');
+    setEditing(null);
   };
 
   return (
     <div>
-      {/* Sub-tabs */}
+      {categories.map(cat => {
+        const catParts = parts.filter(p => p.categoryId === cat.id);
+        if (!catParts.length) return null;
+        return (
+          <div key={cat.id} style={{ marginBottom:22 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+              <div style={{ width:10, height:10, borderRadius:'50%', background:cat.color, flexShrink:0 }}/>
+              <span style={{ fontSize:12, fontWeight:800, color:'#374151', textTransform:'uppercase', letterSpacing:0.5 }}>
+                {cat.label}
+              </span>
+              <div style={{ flex:1, height:1, background:'#e5e7eb' }}/>
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              {catParts.map(pt => (
+                <div key={pt.id} style={{ background:'#f9fafb', border:'1px solid #e5e7eb', borderRadius:9, padding:'10px 13px' }}>
+                  {editing === pt.id ? (
+                    <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                      <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                        <div style={{ width:26, height:26, borderRadius:'50%', flexShrink:0, background:cat.color,
+                          display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:'#fff' }}>
+                          {parts.findIndex(p=>p.id===pt.id)+1}
+                        </div>
+                        <input value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))}
+                          autoFocus placeholder="Part name" style={{ flex:1, fontSize:13.5, fontWeight:600 }}
+                          onKeyDown={e=>{ if(e.key==='Escape') setEditing(null); }} />
+                        <button className="cms-btn cms-btn--ghost cms-btn--sm" onClick={()=>setEditing(null)}>✕</button>
+                        <button className="cms-btn cms-btn--primary cms-btn--sm" onClick={()=>save(pt)}>Save</button>
+                      </div>
+                      <textarea value={form.desc} onChange={e=>setForm(f=>({...f,desc:e.target.value}))}
+                        placeholder="Part description (shown when visitor clicks this pin)…"
+                        style={{ width:'100%', padding:'7px 10px', border:'1px solid #e5e7eb', borderRadius:7,
+                          fontSize:12.5, fontFamily:'inherit', resize:'vertical', minHeight:56, lineHeight:1.5 }} />
+                    </div>
+                  ) : (
+                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                      <div style={{ width:26, height:26, borderRadius:'50%', flexShrink:0, background:cat.color,
+                        display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:800, color:'#fff' }}>
+                        {parts.findIndex(p=>p.id===pt.id)+1}
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <span style={{ fontSize:13.5, fontWeight:600, color:'#111827' }}>{pt.name}</span>
+                        {pt.desc && <p style={{ fontSize:11.5, color:'#9ca3af', margin:'2px 0 0', lineHeight:1.4 }}>{pt.desc.substring(0,80)}{pt.desc.length>80?'…':''}</p>}
+                      </div>
+                      <button className="cms-btn cms-btn--edit cms-btn--sm"
+                        onClick={()=>{ setForm({name:pt.name, desc:pt.desc||''}); setEditing(pt.id); }}>Edit</button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function MotorProductsAdmin() {
+  const { state, dispatch } = useCMS();
+  const [tab, setTab] = useState('categories');
+  const categories = state.products.motorCategories || [];
+  const parts      = state.products.motorParts      || [];
+
+  return (
+    <div>
+      <div style={{ background:'#fff5f5', border:'1px solid #fecaca', borderRadius:10,
+        padding:'11px 15px', marginBottom:18, fontSize:13, color:'#991b1b',
+        display:'flex', alignItems:'flex-start', gap:9 }}>
+        <span style={{ flexShrink:0 }}>ℹ️</span>
+        <span>
+          The motorcycle image and pin positions are fixed. You can <strong>rename any part</strong>,
+          edit its description, and <strong>edit each category's name, colors, and descriptions</strong>
+          — changes show instantly on the public page.
+        </span>
+      </div>
+
       <div className="cms-tab-bar" style={{ marginBottom:18 }}>
-        <button className={`cms-tab${activeTab==='hotspots'?' active':''}`} onClick={()=>setActiveTab('hotspots')}>
-          📍 Hotspot Editor
+        <button className={`cms-tab${tab==='categories'?' active':''}`} onClick={()=>setTab('categories')}>
+          🎨 Categories ({categories.length})
         </button>
-        <button className={`cms-tab${activeTab==='categories'?' active':''}`} onClick={()=>setActiveTab('categories')}>
-          🎨 Manage Categories
+        <button className={`cms-tab${tab==='parts'?' active':''}`} onClick={()=>setTab('parts')}>
+          📌 Parts ({parts.length})
         </button>
       </div>
 
-      {/* ── Categories Tab ── */}
-      {activeTab === 'categories' && (
+      {tab === 'categories' && (
         <div className="cms-card">
-          <CategoryManager
-            title="Motorcycle Product Categories"
-            categories={motorCategories}
-            onAdd={(cat)    => dispatch({ type:'MOTOR_CAT_ADD',    payload: cat })}
-            onUpdate={(cat) => dispatch({ type:'MOTOR_CAT_UPDATE', payload: cat })}
-            onDelete={(id)  => dispatch({ type:'MOTOR_CAT_DEL',    payload: id  })}
+          <div className="cms-card-title" style={{ marginBottom:14 }}>
+            Motorcycle Categories — edit name, color, and descriptions
+          </div>
+          <CategoryEditor
+            categories={categories}
+            parts={parts}
+            onUpdateCat={(cat) => dispatch({ type:'MOTOR_CAT_UPDATE', payload:cat })}
           />
         </div>
       )}
 
-      {/* ── Hotspot Editor Tab ── */}
-      {activeTab === 'hotspots' && (
+      {tab === 'parts' && (
         <div className="cms-card">
-          <div className="cms-card-title">Motorcycle Parts Hotspot Editor</div>
-          <p className="cms-hint">Click anywhere on the motorcycle image to drop a new pin. Click an existing pin to edit it.</p>
-
-          {motorCategories.length === 0 && (
-            <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:9, padding:'11px 14px', marginBottom:16, fontSize:13, color:'#92400e' }}>
-              ⚠ No categories yet — go to <strong>Manage Categories</strong> tab to add some before placing pins.
-            </div>
-          )}
-
-          {/* Motorcycle image + pins */}
-          <div className="cms-hs-wrap" style={{ cursor:'crosshair' }}>
-            <img
-              ref={imgRef}
-              src={MOTOR_IMAGE}
-              alt="Motorcycle"
-              className="cms-hs-img"
-              onClick={handleImgClick}
-              draggable={false}
-            />
-            {motorParts.map((pt, i) => (
-              <div
-                key={pt.id}
-                className="cms-hs-marker"
-                style={{ left:`${pt.pinLeft}%`, top:`${pt.pinTop}%`, background: pt.color || catColor(pt.categoryId) || '#c0392b' }}
-                onClick={e => { e.stopPropagation(); openEdit(pt); }}
-                title={pt.name}
-              >
-                {i + 1}
-              </div>
-            ))}
+          <div className="cms-card-title" style={{ marginBottom:14 }}>
+            Motorcycle Parts — click Edit to rename or update description
           </div>
-
-
-
-          {/* Parts list */}
-          {motorParts.length > 0 && (
-            <div className="cms-parts-grid" style={{ marginTop:20 }}>
-              {motorParts.map((pt, i) => (
-                <div key={pt.id} className="cms-part-card">
-                  <div className="cms-part-num" style={{ background: pt.color || catColor(pt.categoryId) || '#c0392b' }}>{i + 1}</div>
-                  <div className="cms-part-info">
-                    <div className="cms-part-name">{pt.name}</div>
-                    <span className="cms-badge cms-badge--gray" style={{ fontSize:10 }}>{pt.categoryName || catLabel(pt.categoryId)}</span>
-                    <div className="cms-part-desc">{(pt.desc||'').substring(0,60)}{(pt.desc||'').length > 60 ? '…' : ''}</div>
-                    {pt.img && <img src={pt.img} alt={pt.name} className="cms-part-thumb" />}
-                    <div className="cms-part-actions">
-                      <button className="cms-btn cms-btn--edit cms-btn--sm" onClick={() => openEdit(pt)}>Edit</button>
-                      <button className="cms-btn cms-btn--danger cms-btn--sm" onClick={() => setConfirmTarget({ id:pt.id, label:pt.name })}>Delete</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <PartsEditor
+            categories={categories}
+            parts={parts}
+            onUpdatePart={(pt) => dispatch({ type:'MOTOR_PART_UPDATE', payload:pt })}
+          />
         </div>
       )}
-
-      {/* Add / Edit modal */}
-      {modal && (
-        <Modal
-          title={pendingPin ? 'Add Motorcycle Part' : `Edit: ${form.name || ''}`}
-          onClose={() => { setModal(null); setPendingPin(null); }}
-        >
-          {pendingPin && (
-            <p style={{ fontSize:12.5, color:'#6b7280', marginBottom:12 }}>
-              Pin position — top: {pendingPin.pinTop}%, left: {pendingPin.pinLeft}%
-            </p>
-          )}
-
-          <div className="cms-form-group">
-            <label>Part Name *</label>
-            <input value={form.name||''} onChange={e=>set('name',e.target.value)} placeholder="e.g. Head Cover Gasket" />
-          </div>
-
-          {/* Category selector */}
-          <div className="cms-form-group">
-            <label>Category</label>
-            {motorCategories.length === 0 ? (
-              <div style={{ fontSize:13, color:'#9ca3af', padding:'8px 0' }}>
-                No categories — add them in the <strong>Manage Categories</strong> tab first.
-              </div>
-            ) : (
-              <div style={{ position:'relative' }}>
-                <select value={form.categoryId||''} onChange={e=>set('categoryId',e.target.value)}
-                  style={{ paddingLeft:40 }}>
-                  {motorCategories.map(cat=>(
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
-                  ))}
-                </select>
-                {form.categoryId && (
-                  <div style={{
-                    position:'absolute', left:12, top:'50%', transform:'translateY(-50%)',
-                    width:16, height:16, borderRadius:'50%', pointerEvents:'none',
-                    background: motorCategories.find(c=>c.id===form.categoryId)?.color||'#c0392b',
-                    border:'2px solid rgba(0,0,0,0.1)',
-                  }}/>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="cms-form-group">
-            <label>Description</label>
-            <textarea value={form.desc||''} onChange={e=>set('desc',e.target.value)}
-              style={{ width:'100%', padding:'8px 11px', border:'1px solid #e5e7eb', borderRadius:7, fontSize:13.5, fontFamily:'inherit', resize:'vertical', minHeight:80 }} />
-          </div>
-
-          {!pendingPin && (
-            <div className="cms-form-row">
-              <div className="cms-form-group"><label>Pin Top (%)</label><input type="number" value={form.pinTop||''} onChange={e=>set('pinTop',Number(e.target.value))} min="0" max="100" step="0.1" /></div>
-              <div className="cms-form-group"><label>Pin Left (%)</label><input type="number" value={form.pinLeft||''} onChange={e=>set('pinLeft',Number(e.target.value))} min="0" max="100" step="0.1" /></div>
-            </div>
-          )}
-
-          <div className="cms-form-group">
-            <label>Part Image <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional — defaults to static part image)</span></label>
-            <UploadArea onUpload={setPartImg} preview={partImg || MOTOR_STATIC[form.name] || null} />
-            {partImg && (
-              <button type="button" onClick={() => setPartImg(null)}
-                style={{ marginTop:6, fontSize:11.5, color:'#dc2626', background:'none', border:'none', cursor:'pointer', padding:0 }}>
-                ✕ Remove custom image (revert to default)
-              </button>
-            )}
-          </div>
-
-          <ModalActions>
-            <button className="cms-btn cms-btn--ghost" onClick={() => { setModal(null); setPendingPin(null); }}>Cancel</button>
-            <button className="cms-btn cms-btn--primary" onClick={save}>Save Part</button>
-          </ModalActions>
-        </Modal>
-      )}
-
-      <ConfirmDelete
-        target={confirmTarget}
-        onConfirm={(id) => { dispatch({ type:'MOTOR_PART_DEL', payload:id }); toast('Part removed'); }}
-        onCancel={() => setConfirmTarget(null)}
-      />
     </div>
   );
 }

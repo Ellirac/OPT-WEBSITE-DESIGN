@@ -199,7 +199,12 @@ export default function MotorcycleProducts() {
                 <span className="jleg-cat-dot" style={{ background: group.color }} />
                 <div>
                   <h3 className="jleg-cat-name">{group.label}</h3>
-                  <p className="jleg-cat-desc">{group.desc}</p>
+                  {group.shortDesc && (
+                    <p className="jleg-cat-short">{group.shortDesc}</p>
+                  )}
+                  {group.desc && (
+                    <p className="jleg-cat-desc">{group.desc}</p>
+                  )}
                 </div>
               </div>
 

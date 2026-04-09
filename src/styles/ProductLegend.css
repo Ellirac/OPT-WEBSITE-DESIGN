@@ -84,11 +84,19 @@
   line-height: 1.2;
 }
 
+.jleg-cat-short {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 2px 0 6px;
+  line-height: 1.45;
+}
+
 .jleg-cat-desc {
   font-size: 0.875rem;
   color: #6b7280;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 /* ── Parts grid ────────────────────────────────────────────── */

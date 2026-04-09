@@ -31,7 +31,7 @@ body {
 .product-header {
   position: relative;
   background: linear-gradient(to bottom, #9d3434 0%, #8a1515df 100%);  padding: 30px 30px;
-  margin: -10px 0 10px;
+  margin: 90px 0 10px;
   overflow: hidden;
   box-shadow: 0 2px 15px rgba(139, 28, 28, 0.2);
   z-index: 1;
@@ -334,7 +334,7 @@ body {
 @media (max-width: 768px) {
   :root { --pin-size: 22px; --pin-font-size: 10px; }
   body { padding-top: 60px; }
-  .product-header { padding: 25px 20px; margin-top: 15px; }
+  .product-header { padding: 25px 20px; margin-top: 70px; }
   .header-content h1 { font-size: 1.8rem; }
   .header-content p { font-size: 0.88rem; }
   .part-title { font-size: 1.35rem; }
@@ -349,7 +349,7 @@ body {
 
 @media (max-width: 600px) {
   :root { --pin-size: 20px; --pin-font-size: 9px; --pin-border-width: 2px; }
-  .product-header { padding: 22px 20px; margin-top: 15px; margin-bottom: 20px; }
+  .product-header { padding: 22px 20px; margin-top: 70px; margin-bottom: 20px; }
   .header-content h1 { font-size: 1.65rem; }
   .header-content p { font-size: 0.87rem; }
   .main-container { padding: 15px; gap: 22px; }

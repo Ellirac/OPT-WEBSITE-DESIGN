@@ -119,7 +119,7 @@ export default function AutomobileProducts() {
           <div className="car-container">
             <div className="car-model">
               <div className="car-wrapper" ref={wrapperRef}>
-                <img ref={imgRef} src="OPTJ Car.png" className="car-img" alt="Automobile" onLoad={positionPins} />
+                <img ref={imgRef} img="OPTJ Car1.png" className="car-img" alt="Automobile" onLoad={positionPins} />
                 <div className="car-glow" />
               </div>
               {PARTS.map((pt, i) => (
@@ -186,7 +186,12 @@ export default function AutomobileProducts() {
                 <span className="jleg-cat-dot" style={{ background: group.color }} />
                 <div>
                   <h3 className="jleg-cat-name">{group.label}</h3>
-                  <p className="jleg-cat-desc">{group.desc}</p>
+                  {group.shortDesc && (
+                    <p className="jleg-cat-short">{group.shortDesc}</p>
+                  )}
+                  {group.desc && (
+                    <p className="jleg-cat-desc">{group.desc}</p>
+                  )}
                 </div>
               </div>
 
