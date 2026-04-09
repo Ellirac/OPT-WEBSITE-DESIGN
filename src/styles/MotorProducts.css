@@ -90,10 +90,9 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 20px;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 15px;
+    gap: 24px;
+    width: 100%;
+    padding: 20px 0;
 }
 
 /* ── Motorcycle Section ───────────────────────────────────── */
@@ -324,7 +323,7 @@
 
 /* ── Legend ───────────────────────────────────────────────── */
 .moto-legend-container {
-    max-width: 1100px;
+    max-width: 1320px;
     margin: 40px auto 40px;
     padding: 0 15px;
 }
