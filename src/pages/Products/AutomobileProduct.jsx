@@ -119,7 +119,7 @@ export default function AutomobileProducts() {
           <div className="car-container">
             <div className="car-model">
               <div className="car-wrapper" ref={wrapperRef}>
-                <img ref={imgRef} img="OPTJ Car1.png" className="car-img" alt="Automobile" onLoad={positionPins} />
+                <img ref={imgRef} src="/OPTJ Car1.png" className="car-img" alt="Automobile" onLoad={positionPins} />
                 <div className="car-glow" />
               </div>
               {PARTS.map((pt, i) => (
