@@ -14,6 +14,7 @@ import ActivitiesAdmin from './pages/ActivitiesAdmin';
 import CareersAdmin    from './pages/CareersAdmin';
 import SettingsPage    from './pages/SettingsPage';
 
+import { useCMS } from './context/CMSContext';
 import './admin.css';
 
 // ─── Auth helpers ─────────────────────────────────────────────────────────────
@@ -63,7 +64,8 @@ export default function AdminApp() {
   }
 
   if (!loggedIn) {
-    return <AdminLogin onLogin={handleLogin} />;
+    const { state } = {useCMS};
+    return <AdminLogin onLogin={handleLogin} adminSettings={state?.adminSettings} />;
   }
 
   return <AdminLayout onLogout={handleLogout} />;

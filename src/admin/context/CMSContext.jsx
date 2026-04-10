@@ -210,6 +210,12 @@ const initialState = {
     ],
   },
 
+  adminSettings: {
+    username: 'admin',
+    password: 'OPT@Admin2025',
+    recoveryEmail: '',
+  },
+
   activities: {
     folders: [
       { id:'af1', name:'Corporate Events',   date:'2024-01-01' },
@@ -338,27 +344,23 @@ const initialState = {
       },
       {
         id:'grommet', label:'Grommets', color:'#3498db',
-        shortDesc:'Selected materials with excellent weather resistance',
-        desc:'These parts are intended for the protection of through holes and for waterproofing and dustproofing. It is made of high-quality rubber material with excellent weather resistance.',
+        shortDesc:'Protects cables and hoses from abrasion through metal panels and brackets.',
+        desc:'Rubber grommets and insulating parts that protect wiring harnesses, cables, and hoses from abrasion through metal panels and brackets, preventing insulation damage and reducing road noise.',
       },
       {
         id:'seal', label:'Packing Seals', color:'#9b59b6',
-        shortDesc:'Oil, fuel oil, and water resistance and can be optimized for application',
-        desc:'Sealing applications are used to prevent or seal the ingress of oil, fuel oil, water, air and dust. It can be used for optimized design and material selection for various geometries.',
+        shortDesc:'Oil, fuel oil, water, air, and dust resistance — leak-free sealing performance.',
+        desc:'High-performance sealing components resistant to oils, fuel, water, air, and dust. Engineered to prevent leakage across mating surfaces and joints under pressure and temperature cycling.',
       },
       {
         id:'stop', label:'Stopper', color:'#f39c12',
-        shortDesc:'Selecting materials with excellent elasticity',
-        desc:'These are components intended for shock absorption and movement restriction. It is made of high-quality rubber material with excellent elasticity.',
+        shortDesc:'Impact absorption and travel limiting for doors, hoods, and tailgates.',
+        desc:'Rubber stoppers and bump stops that absorb impact, reduce rattling, and limit the travel range of moving body panels. Protects bodywork and eliminates metal-to-metal contact noise.',
       },
       {
         id:'resin', label:'Resin', color:'#1abc9c',
-        shortDesc:'Compatible with a wide range of resin materials',
-        desc:[
-        'By utilizing 3D CAD, we support part development with a sense of speed from design to molding.',
-        'We handle a wide range of materials, from general thermoplastics (PE and PP) to engineering plastics (POM, PA (brand name: NYLON)) and other elastomeric resins (PVC, EVA, TPE (TPO)).' ,
-        'We also have a track record of metal fittings, painting, and two-color molding on resins. Both thermoplastics and thermosets can be used. In particular, phenolic resins are installed at all of our bases (Fukushima, Shanghai, and the Philippines).'
-      ]
+        shortDesc:'Dimensional stability and chemical resistance for precision automobile parts.',
+        desc:'High-precision resin and plastic components used in automobile assemblies requiring strict dimensional accuracy, heat resistance, and resistance to fuel and oil contact.',
       },
     ],
 
@@ -478,13 +480,13 @@ const initialState = {
     motorCategories: [
       {
         id:'seal', label:'Packing Seals', color:'#3498db',
-        shortDesc:'Oil-resistant, fuel oil-resistant, weather-resistant, etc., and can be optimized according to the application',
-        desc:'Sealing applications are used to prevent or seal the ingress of oil, fuel oil, water, air and dust. It can be used for optimized design and material selection for various geometries.',
+        shortDesc:'Oil, fuel, and coolant resistance — leak-free sealing across engine joints.',
+        desc:'Rubber sealing components that prevent leakage of oil, fuel, coolant, and other fluids across motorcycle engine surfaces. Engineered for high heat cycles and pressure resistance specific to motorcycle applications.',
       },
       {
         id:'frame', label:'Frame Parts', color:'#c0392b',
-        shortDesc:'Selected materials with excellent weather resistance',
-        desc:'It is made of high-quality rubber material with excellent weather resistance that can withstand harsh driving environments.',
+        shortDesc:'Vibration damping and protection for motorcycle frame and body components.',
+        desc:'Rubber and composite parts mounted to the motorcycle frame — including handle grips, step rubbers, fuel tank pads, seat pads, grommets, and heat guards — providing vibration isolation and body protection.',
       },
     ],
 
@@ -561,6 +563,9 @@ function cmsReducer(state, { type, payload }) {
   });
 
   switch (type) {
+    // ADMIN SETTINGS (stored in Firestore for cross-device sync)
+    case 'ADMIN_UPDATE_SETTINGS': return { ...state, adminSettings: { ...state.adminSettings, ...payload } };
+
     // HOME — CERTIFICATIONS
     case 'HOME_ADD_CERT':      return up('home', 'certifications', list => [...list, payload]);
     case 'HOME_UPDATE_CERT':   return up('home', 'certifications', list => list.map(x => x.id === payload.id ? payload : x));

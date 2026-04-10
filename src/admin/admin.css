@@ -521,15 +521,74 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ─── Hamburger / Mobile Sidebar ──────────────────────────────────────────── */
+.cms-sidebar--desktop { display: flex; }
+.cms-hamburger-bar    { display: none; }
+.cms-sidebar-overlay  { display: none; }
+.cms-sidebar--mobile  { display: none; }
+
+@media (max-width: 768px) {
+  /* Hide desktop sidebar */
+  .cms-sidebar--desktop { display: none !important; }
+
+  /* Show hamburger top bar */
+  .cms-hamburger-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: #111827;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    height: 54px;
+  }
+
+  .cms-hamburger-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 20px;
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s;
+  }
+  .cms-hamburger-btn:hover { background: rgba(255,255,255,0.1); }
+
+  /* Full-screen overlay */
+  .cms-sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 299;
+  }
+
+  /* Slide-in mobile drawer */
+  .cms-sidebar--mobile {
+    display: flex !important;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 260px;
+    z-index: 300;
+    animation: cmsDrawerIn 0.22s ease;
+  }
+  @keyframes cmsDrawerIn {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
+  }
+
+  /* Main content offset for the hamburger bar */
+  .cms-main { margin-left: 0; padding-top: 70px; padding-left: 16px; padding-right: 16px; }
+  .cms-root  { flex-direction: row; }
+}
+
 /* ─── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .cms-products-layout { grid-template-columns: 1fr; }
   .cms-form-row { grid-template-columns: 1fr; }
-}
-@media (max-width: 768px) {
-  .cms-sidebar { width: 100%; height: auto; position: relative; }
-  .cms-main { margin-left: 0; }
-  .cms-root { flex-direction: column; }
 }
 
 /* ─── OPT Brand Overrides (red/maroon accent) ─────────────────────────────── */
