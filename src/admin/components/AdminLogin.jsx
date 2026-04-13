@@ -84,15 +84,18 @@ const fRed  = e => { e.target.style.borderColor = '#c0392b'; };
 const fGray = e => { e.target.style.borderColor = '#e5e7eb'; };
 
 // ─── Credential store helpers ─────────────────────────────────────────────────
-const DEFAULT_CREDS = { username:'admin', password:'OPT@Admin2026' };
-function loadCreds() {
+const DEFAULT_CREDS = { username:'admin', password:'OPT@Admin2025' };
+
+// Module-level credential readers — localStorage kept in sync with Firestore by AdminLogin
+function getCreds() {
   try { return JSON.parse(localStorage.getItem('opt_admin_creds')) || DEFAULT_CREDS; }
   catch { return DEFAULT_CREDS; }
 }
+// Write to localStorage so login works instantly without waiting for Firestore
 function saveCreds(obj) {
   localStorage.setItem('opt_admin_creds', JSON.stringify(obj));
 }
-function loadRecovery() {
+function getRecovery() {
   try { return JSON.parse(localStorage.getItem('opt_admin_recovery')) || { email:'' }; }
   catch { return { email:'' }; }
 }
@@ -155,7 +158,7 @@ function StepLogin({ onLogin, onForgot }) {
   const submit = e => {
     e.preventDefault();
     setErr('');
-    const c = loadCreds();
+    const c = getCreds();
     if (user.trim() === c.username && pass === c.password) {
       onLogin();
     } else {
@@ -224,7 +227,7 @@ function StepLogin({ onLogin, onForgot }) {
 
 // ─── STEP 2: Forgot — email only ──────────────────────────────────────────────
 function StepForgotPick({ onBack, onSendOtp }) {
-  const recovery = loadRecovery();
+  const recovery = getRecovery();
   const hasEmail = !!recovery.email;
   const [loading, setLoading] = useState(false);
   const [err,     setErr]     = useState('');
@@ -345,7 +348,7 @@ function StepNewPassword({ onDone }) {
   const save = () => {
     if (!isStrongPassword(np)) { setErr('Password does not meet all requirements.'); return; }
     if (np !== cp)             { setErr('Passwords do not match.'); return; }
-    const c = loadCreds();
+    const c = getCreds();
     saveCreds({ ...c, password: np });
     onDone();
   };
@@ -416,7 +419,10 @@ function StepSuccess({ onBack }) {
 }
 
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
-export default function AdminLogin({ onLogin }) {
+export default function AdminLogin({ onLogin, adminSettings }) {
+  // adminSettings from Firestore — mirrors to localStorage so sub-components can read it
+  if (adminSettings?.password) { localStorage.setItem('opt_admin_creds', JSON.stringify({ username: adminSettings.username, password: adminSettings.password })); }
+  if (adminSettings?.recoveryEmail) { localStorage.setItem('opt_admin_recovery', JSON.stringify({ email: adminSettings.recoveryEmail })); }
   const [step,    setStep]    = useState('login');
   const [otp,     setOtp]     = useState('');
   const [method,  setMethod]  = useState('');
