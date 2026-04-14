@@ -17,7 +17,8 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-const PROXY = process.env.REACT_APP_GDRIVE_PROXY || 'http://localhost:3001';
+const PROXY = process.env.REACT_APP_GDRIVE_PROXY
+  || (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://opt-cms-gdrive-proxy.onrender.com');
 
 // ─── uploadToDrive ────────────────────────────────────────────────────────────
 /**
