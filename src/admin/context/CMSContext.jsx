@@ -677,14 +677,23 @@ function cmsReducer(state, { type, payload }) {
             ...incoming,
             autoCategories:  incoming.autoCategories  ?? state.products.autoCategories,
             motorCategories: incoming.motorCategories ?? state.products.motorCategories,
-            // Re-attach hardcoded desc — never stored in Firestore.
+            // Re-attach hardcoded desc for the original 22 parts (p1–p22).
+            // Admin-added parts (new IDs) keep their own desc from Firestore.
             parts: (incoming.parts ?? state.products.parts).map(fsPart => {
               const local = initialState.products.parts.find(lp => lp.id === fsPart.id);
-              return { ...fsPart, desc: local?.desc ?? '' };
+              if (local) {
+                // Known hardcoded part — always use source-code desc (never from DB)
+                return { ...fsPart, desc: local.desc ?? '' };
+              }
+              // Admin-added part — keep every field as stored, including desc
+              return fsPart;
             }),
             motorParts: (incoming.motorParts ?? state.products.motorParts).map(fsPart => {
               const local = initialState.products.motorParts.find(lp => lp.id === fsPart.id);
-              return { ...fsPart, desc: local?.desc ?? '' };
+              if (local) {
+                return { ...fsPart, desc: local.desc ?? '' };
+              }
+              return fsPart;
             }),
           },
         };
@@ -702,14 +711,29 @@ function cmsReducer(state, { type, payload }) {
 }
 
 // ─── Strip hardcoded-only fields before saving to Firestore ──────────────────
-// desc lives only in source code — never in the database.
+// desc lives only in source code for the original 22 parts — never store those in the DB.
+// Admin-added parts (new IDs) DO have their own desc and it must be saved.
 function stripForFirestore(state) {
+  const hardcodedPartIds      = new Set(initialState.products.parts.map(p => p.id));
+  const hardcodedMotorPartIds = new Set(initialState.products.motorParts.map(p => p.id));
   return {
     ...state,
     products: {
       ...state.products,
-      parts:      state.products.parts.map(({ desc, ...rest }) => rest),
-      motorParts: state.products.motorParts.map(({ desc, ...rest }) => rest),
+      parts: state.products.parts.map((part) => {
+        if (hardcodedPartIds.has(part.id)) {
+          const { desc, ...rest } = part;
+          return rest;
+        }
+        return part; // admin-added — preserve desc
+      }),
+      motorParts: state.products.motorParts.map((part) => {
+        if (hardcodedMotorPartIds.has(part.id)) {
+          const { desc, ...rest } = part;
+          return rest;
+        }
+        return part;
+      }),
     },
   };
 }
@@ -911,7 +935,7 @@ export function CMSProvider({ children }) {
     a.click();
   }, [state]);
 
-  // ⏳ LOADING UI
+  // ⏳ LOADING UI — neutral spinner, no internal tooling references visible to visitors
   if (loading) {
     return (
       <div style={{
@@ -920,7 +944,7 @@ export function CMSProvider({ children }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#f3f4f8',
+        background: '#fff',
         gap: 16,
       }}>
         <div style={{
@@ -931,9 +955,6 @@ export function CMSProvider({ children }) {
           borderRadius: '50%',
           animation: 'cms-spin 0.8s linear infinite',
         }} />
-        <p style={{ color: '#6b7280', fontSize: 14, fontWeight: 500 }}>
-          Loading CMS data…
-        </p>
         <style>{`@keyframes cms-spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );

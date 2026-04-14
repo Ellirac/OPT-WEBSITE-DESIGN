@@ -60,10 +60,28 @@ const Activities = () => {
     catch { return d; }
   };
 
+  // ── Resolve the best displayable URL for a Drive-hosted image ──────────────
+  // Google Drive's `uc?export=view` URLs break in <img> tags (redirects / CORS).
+  // The Thumbnail API is far more reliable for inline display.
+  const driveImgUrl = (item, size = 'w800') =>
+    item.driveFileId
+      ? `https://drive.google.com/thumbnail?id=${item.driveFileId}&sz=${size}`
+      : item.src || '';
+
   // Thumbnail for grid card
   const Thumbnail = ({ item }) => {
     if (item.type === 'image') {
-      return <img src={item.src} alt={item.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />;
+      return (
+        <img
+          src={driveImgUrl(item, 'w600')}
+          alt={item.title}
+          style={{ width:'100%', height:'100%', objectFit:'cover' }}
+          onError={e => {
+            // Fallback to raw src if thumbnail API fails
+            if (item.src && e.target.src !== item.src) e.target.src = item.src;
+          }}
+        />
+      );
     }
     if (item.type === 'youtube') {
       return <img src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`} alt={item.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />;
@@ -299,9 +317,12 @@ const Activities = () => {
             {/* Image */}
             {activeItem.type === 'image' && (
               <img
-                src={activeItem.src}
+                src={driveImgUrl(activeItem, 'w1600')}
                 alt={activeItem.title}
                 style={{ width:'100%', borderRadius:12, maxHeight:'72vh', objectFit:'contain', display:'block' }}
+                onError={e => {
+                  if (activeItem.src && e.target.src !== activeItem.src) e.target.src = activeItem.src;
+                }}
               />
             )}
           </div>

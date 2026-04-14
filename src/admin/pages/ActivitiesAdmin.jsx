@@ -67,10 +67,13 @@ function FolderList({ folders, posts, images, onOpenFolder, onAddFolder, onEditF
                   style={{ height:110, background:'linear-gradient(135deg,#1a0000,#5c0a00)',
                     display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
                   {(() => {
-                    const firstImg     = images.find(i=>i.folderId===folder.id && i.src);
+                    const firstImg     = images.find(i=>i.folderId===folder.id && (i.src || i.driveFileId));
                     const firstVid     = posts.find(p=>p.folderId===folder.id && p.youtubeId);
                     const firstDriveV  = posts.find(p=>p.folderId===folder.id && p.driveUrl);
-                    if (firstImg)    return <img src={firstImg.src} alt={firstImg.title} style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.6 }} />;
+                    const imgSrc = firstImg?.driveFileId
+                      ? `https://drive.google.com/thumbnail?id=${firstImg.driveFileId}&sz=w400`
+                      : firstImg?.src;
+                    if (firstImg)    return <img src={imgSrc} alt={firstImg.title} style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.6 }} onError={e=>{ if(firstImg.src && e.target.src!==firstImg.src) e.target.src=firstImg.src; }} />;
                     if (firstVid)    return <img src={`https://img.youtube.com/vi/${firstVid.youtubeId}/hqdefault.jpg`} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.6 }} />;
                     if (firstDriveV) return <div style={{ fontSize:44 }}>🎬</div>;
                     return <span style={{ fontSize:44, filter:'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' }}>📁</span>;
@@ -346,8 +349,15 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
             {allFolderItems.map(item => (
               <div key={item.id} className="cms-item-card">
                 <div style={{ position:'relative', height:148, background:'#111', overflow:'hidden' }}>
-                  {item._collection === 'image' && item.src && (
-                    <img src={item.src} alt={item.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                  {item._collection === 'image' && (item.src || item.driveFileId) && (
+                    <img
+                      src={item.driveFileId
+                        ? `https://drive.google.com/thumbnail?id=${item.driveFileId}&sz=w400`
+                        : item.src}
+                      alt={item.title}
+                      style={{ width:'100%', height:'100%', objectFit:'cover' }}
+                      onError={e => { if (item.src && e.target.src !== item.src) e.target.src = item.src; }}
+                    />
                   )}
                   {item._collection === 'post' && item.youtubeId && (
                     <>
@@ -569,7 +579,16 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
           {editTarget._collection==='image' && (
             <div className="cms-form-group">
               <label>Current Photo</label>
-              {editForm.src && <img src={editForm.src} alt="" style={{ width:'100%', borderRadius:8, marginBottom:8, maxHeight:150, objectFit:'cover', border:'1px solid #e5e7eb' }} />}
+              {(editForm.src || editForm.driveFileId) && (
+                <img
+                  src={editForm.driveFileId
+                    ? `https://drive.google.com/thumbnail?id=${editForm.driveFileId}&sz=w600`
+                    : editForm.src}
+                  alt=""
+                  style={{ width:'100%', borderRadius:8, marginBottom:8, maxHeight:150, objectFit:'cover', border:'1px solid #e5e7eb' }}
+                  onError={e => { if (editForm.src && e.target.src !== editForm.src) e.target.src = editForm.src; }}
+                />
+              )}
               {editForm.driveFileId && <p style={{ fontSize:11.5, color:'#4285f4', margin:'0 0 8px' }}>☁️ Stored in Google Drive</p>}
               <p style={{ fontSize:12, color:'#9ca3af', margin:0 }}>To replace this photo, delete it and re-upload.</p>
             </div>
