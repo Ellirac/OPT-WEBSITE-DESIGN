@@ -5,35 +5,27 @@ import { useCMS } from "../admin/context/CMSContext";
 const Activities = () => {
   const { state } = useCMS();
 
-  const folders = state.activities.folders || [];
+  const folders   = state.activities.folders || [];
+  const allPosts  = useMemo(() => state.activities.posts  || [], [state.activities.posts]);
+  const allImages = useMemo(() => state.activities.images || [], [state.activities.images]);
 
-  const allPosts = useMemo(
-    () => state.activities.posts || [],
-    [state.activities.posts]
-  );
-
-  const allImages = useMemo(
-    () => state.activities.images || [],
-    [state.activities.images]
-  );
-
-  // Merge everything — posts can be YouTube OR local video (has videoSrc)
+  // Merge everything — detect drive video, local video, or youtube
   const allItems = useMemo(() => {
     const videos = allPosts.map(p => ({
       ...p,
-      type: p.videoSrc ? 'local_video' : 'youtube',
+      type: p.driveUrl ? 'drive_video' : p.videoSrc ? 'local_video' : 'youtube',
     }));
     const images = allImages.map(i => ({ ...i, type: 'image' }));
-    return [...videos, ...images].sort((a,b) => {
+    return [...videos, ...images].sort((a, b) => {
       if (a.date && b.date) return b.date.localeCompare(a.date);
       return 0;
     });
   }, [allPosts, allImages]);
 
-  const [activeItem,     setActiveItem]     = useState(null);
-  const [activeFolder,   setActiveFolder]   = useState('all');
-  const [activeMediaType, setActiveMediaType] = useState('all'); // 'all'|'video'|'image'
-  const [activeYear,     setActiveYear]     = useState('all');
+  const [activeItem,      setActiveItem]      = useState(null);
+  const [activeFolder,    setActiveFolder]    = useState('all');
+  const [activeMediaType, setActiveMediaType] = useState('all');
+  const [activeYear,      setActiveYear]      = useState('all');
 
   useEffect(() => {
     const h = e => { if (e.key === 'Escape') setActiveItem(null); };
@@ -52,8 +44,8 @@ const Activities = () => {
 
   const filtered = useMemo(() => allItems.filter(item => {
     if (activeFolder !== 'all' && item.folderId !== activeFolder) return false;
-    if (activeMediaType === 'video' && item.type === 'image')  return false;
-    if (activeMediaType === 'image' && item.type !== 'image')  return false;
+    if (activeMediaType === 'video' && item.type === 'image')     return false;
+    if (activeMediaType === 'image' && item.type !== 'image')     return false;
     if (activeYear !== 'all' && !item.date?.startsWith(activeYear)) return false;
     return true;
   }), [allItems, activeFolder, activeMediaType, activeYear]);
@@ -74,9 +66,24 @@ const Activities = () => {
       return <img src={item.src} alt={item.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />;
     }
     if (item.type === 'youtube') {
-      return <img src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`} alt={item.title} />;
+      return <img src={`https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`} alt={item.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />;
     }
-    // local video — show first-frame via video element
+    if (item.type === 'drive_video') {
+      // Show Drive thumbnail using the file ID
+      return (
+        <img
+          src={`https://drive.google.com/thumbnail?id=${item.driveFileId}&sz=w400`}
+          alt={item.title}
+          style={{ width:'100%', height:'100%', objectFit:'cover' }}
+          onError={e => {
+            // fallback to a dark placeholder if thumbnail not available
+            e.target.style.display = 'none';
+            e.target.parentNode.style.background = '#1a0000';
+          }}
+        />
+      );
+    }
+    // local video — show first frame
     return (
       <video src={item.videoSrc} muted playsInline
         style={{ width:'100%', height:'100%', objectFit:'cover' }}
@@ -84,16 +91,16 @@ const Activities = () => {
     );
   };
 
-  // Play / action icon
+  // Play / action icon overlay
   const ActionIcon = ({ item }) => {
-    if (item.type === 'image')       return <div className="play-btn" style={{ fontSize:20 }}>🔍</div>;
-    if (item.type === 'local_video') return <div className="play-btn">▶</div>;
+    if (item.type === 'image') return <div className="play-btn" style={{ fontSize:20 }}>🔍</div>;
     return <div className="play-btn">▶</div>;
   };
 
-  // Type badge color
+  // Type badge
   const typeBadge = (item) => {
     if (item.type === 'image')       return { label:'🖼 Photo',   bg:'rgba(52,152,219,0.8)' };
+    if (item.type === 'drive_video') return { label:'🎬 Video',   bg:'rgba(142,68,173,0.8)' };
     if (item.type === 'local_video') return { label:'🎬 Video',   bg:'rgba(142,68,173,0.8)' };
     return                                  { label:'▶ YouTube', bg:'rgba(192,57,43,0.8)' };
   };
@@ -240,7 +247,7 @@ const Activities = () => {
               </button>
             </div>
 
-            {/* Lightbox content */}
+            {/* YouTube */}
             {activeItem.type === 'youtube' && (
               <div style={{ position:'relative', paddingBottom:'56.25%', height:0, overflow:'hidden', borderRadius:12 }}>
                 <iframe
@@ -254,6 +261,32 @@ const Activities = () => {
               </div>
             )}
 
+            {/* Google Drive video — opens in new tab for reliable playback */}
+            {activeItem.type === 'drive_video' && (
+              <div style={{ borderRadius:12, overflow:'hidden', background:'#000', textAlign:'center' }}>
+                <div style={{ position:'relative', paddingBottom:'56.25%', height:0 }}>
+                  <iframe
+                    src={`https://drive.google.com/file/d/${activeItem.driveFileId}/preview`}
+                    title={activeItem.title}
+                    frameBorder="0"
+                    allow="autoplay"
+                    allowFullScreen
+                    style={{ position:'absolute', top:0, left:0, width:'100%', height:'100%', border:'none' }}
+                  />
+                </div>
+                <a
+                  href={`https://drive.google.com/file/d/${activeItem.driveFileId}/view`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display:'inline-block', marginTop:10, marginBottom:12,
+                    color:'rgba(255,255,255,0.5)', fontSize:12, textDecoration:'none' }}
+                >
+                  🔗 Open in Google Drive if video doesn't play
+                </a>
+              </div>
+            )}
+
+            {/* Local video (legacy) */}
             {activeItem.type === 'local_video' && (
               <video
                 src={activeItem.videoSrc}
@@ -263,6 +296,7 @@ const Activities = () => {
               />
             )}
 
+            {/* Image */}
             {activeItem.type === 'image' && (
               <img
                 src={activeItem.src}

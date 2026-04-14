@@ -4,6 +4,9 @@ import { useToast } from '../components/Toast';
 import Modal, { ModalActions } from '../components/Modal';
 import ConfirmDelete from '../components/ConfirmDelete';
 import UploadArea from '../components/UploadArea';
+// Drive-aware upload adapter
+const driveUpload = (setter) => (result) => setter(typeof result === 'string' ? result : result?.url ?? result);
+
 
 // ─── Certifications ───────────────────────────────────────────────────────────
 function CertSection() {
@@ -97,7 +100,7 @@ function CertSection() {
           </div>
           <div className="cms-form-group">
             <label>Certificate Image <span style={{fontWeight:400,color:'#9ca3af'}}>(upload a scan or photo of the certificate)</span></label>
-            <UploadArea onUpload={setImgSrc} preview={imgSrc} height={150} label="Upload certificate scan / photo" />
+            <UploadArea onUpload={driveUpload(setImgSrc)} preview={imgSrc} height={150} label="Upload certificate scan / photo" />
           </div>
           <ModalActions>
             <button className="cms-btn cms-btn--ghost" onClick={()=>setModal(null)}>Cancel</button>

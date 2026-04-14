@@ -51,6 +51,8 @@ function AdminLayout({ onLogout }) {
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 export default function AdminApp() {
+  const { state } = useCMS();
+  const adminSettings = state?.adminSettings;
   const [loggedIn, setLoggedIn] = useState(() => getSession());
 
   function handleLogin() {
@@ -64,8 +66,7 @@ export default function AdminApp() {
   }
 
   if (!loggedIn) {
-    const { state } = {useCMS};
-    return <AdminLogin onLogin={handleLogin} adminSettings={state?.adminSettings} />;
+    return <AdminLogin onLogin={handleLogin} adminSettings={adminSettings} />;
   }
 
   return <AdminLayout onLogout={handleLogout} />;

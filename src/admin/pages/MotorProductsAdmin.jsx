@@ -21,6 +21,8 @@ import M12 from '../../assets/images/Vehicle Products/12. Water Pump Gasket.png'
 import M13 from '../../assets/images/Vehicle Products/13. Thermo Mount.png';
 import M14 from '../../assets/images/Vehicle Products/14. Oil Filter Gasket.png';
 import M15 from '../../assets/images/Vehicle Products/15. Filter Cap.png';
+// Drive-aware upload adapter
+const driveUpload = (setter) => (result) => setter(typeof result === 'string' ? result : result?.url ?? result);
 
 // Static fallback by part name — never goes to Firebase
 const MOTOR_STATIC = {
@@ -246,7 +248,7 @@ export default function MotorProductsAdmin() {
 
           <div className="cms-form-group">
             <label>Part Image <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional — defaults to static part image)</span></label>
-            <UploadArea onUpload={setPartImg} preview={partImg || MOTOR_STATIC[form.name] || null} />
+            <UploadArea onUpload={driveUpload(setPartImg)} preview={partImg || MOTOR_STATIC[form.name] || null} />
             {partImg && (
               <button type="button" onClick={() => setPartImg(null)}
                 style={{ marginTop:6, fontSize:11.5, color:'#dc2626', background:'none', border:'none', cursor:'pointer', padding:0 }}>

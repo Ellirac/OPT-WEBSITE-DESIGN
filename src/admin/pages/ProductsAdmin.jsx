@@ -7,6 +7,11 @@ import ConfirmDelete from '../components/ConfirmDelete';
 import UploadArea from '../components/UploadArea';
 import CategoryManager from '../components/CategoryManager';
 
+// Drive-aware upload adapter
+const driveUpload = (setter) => (result) => setter(typeof result === 'string' ? result : result?.url ?? result);
+
+
+
 function AutomobileProductsAdmin() {
   const { state, dispatch } = useCMS();
   const toast = useToast();
@@ -215,7 +220,7 @@ function AutomobileProductsAdmin() {
 
           <div className="cms-form-group">
             <label>Part Image (optional)</label>
-            <UploadArea onUpload={setPartImg} preview={partImg} />
+            <UploadArea onUpload={driveUpload(setPartImg)} preview={partImg} />
           </div>
 
           <ModalActions>

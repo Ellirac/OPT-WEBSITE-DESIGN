@@ -1,8 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { useCMS, uid, compressImage } from '../context/CMSContext';
+import { useCMS, uid } from '../context/CMSContext';
 import { useToast } from '../components/Toast';
 import Modal, { ModalActions } from '../components/Modal';
 import ConfirmDelete from '../components/ConfirmDelete';
+import { uploadToDrive, deleteFromDrive, checkDriveAuth, openDriveAuthWindow } from '../utils/gdriveUpload';
 
 function getYouTubeId(input) {
   const m = input.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/);
@@ -62,18 +63,16 @@ function FolderList({ folders, posts, images, onOpenFolder, onAddFolder, onEditF
                 onMouseEnter={e=>{ e.currentTarget.style.borderColor='#c0392b40'; e.currentTarget.style.boxShadow='0 4px 16px rgba(192,57,43,0.1)'; e.currentTarget.style.transform='translateY(-1px)'; }}
                 onMouseLeave={e=>{ e.currentTarget.style.borderColor='#e5e7eb'; e.currentTarget.style.boxShadow='none'; e.currentTarget.style.transform='none'; }}
               >
-                {/* Folder thumbnail — show first image if exists */}
                 <div onClick={() => onOpenFolder(folder)}
                   style={{ height:110, background:'linear-gradient(135deg,#1a0000,#5c0a00)',
                     display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
-                  {/* Try to show first image thumbnail */}
                   {(() => {
-                    const firstImg = images.find(i=>i.folderId===folder.id && i.src);
-                    const firstVid = posts.find(p=>p.folderId===folder.id && p.youtubeId);
-                    const firstLocalVid = posts.find(p=>p.folderId===folder.id && p.videoSrc);
-                    if (firstImg) return <img src={firstImg.src} alt={firstImg.title} style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.6 }} />;
-                    if (firstVid) return <img src={`https://img.youtube.com/vi/${firstVid.youtubeId}/hqdefault.jpg`} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.6 }} />;
-                    if (firstLocalVid) return <div style={{ fontSize:44 }}>🎬</div>;
+                    const firstImg     = images.find(i=>i.folderId===folder.id && i.src);
+                    const firstVid     = posts.find(p=>p.folderId===folder.id && p.youtubeId);
+                    const firstDriveV  = posts.find(p=>p.folderId===folder.id && p.driveUrl);
+                    if (firstImg)    return <img src={firstImg.src} alt={firstImg.title} style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.6 }} />;
+                    if (firstVid)    return <img src={`https://img.youtube.com/vi/${firstVid.youtubeId}/hqdefault.jpg`} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.6 }} />;
+                    if (firstDriveV) return <div style={{ fontSize:44 }}>🎬</div>;
                     return <span style={{ fontSize:44, filter:'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' }}>📁</span>;
                   })()}
                   <div style={{ position:'absolute', bottom:8, right:8, display:'flex', gap:4 }}>
@@ -125,26 +124,63 @@ function FolderList({ folders, posts, images, onOpenFolder, onAddFolder, onEditF
   );
 }
 
+// ─── Drive Auth Banner ────────────────────────────────────────────────────────
+function DriveAuthBanner({ onConnected }) {
+  const [connecting, setConnecting] = useState(false);
+  return (
+    <div style={{ background:'#f0f4ff', border:'2px dashed #4285f4', borderRadius:12,
+      padding:'20px 24px', marginBottom:16, display:'flex', alignItems:'center', gap:16 }}>
+      <span style={{ fontSize:32 }}>🔗</span>
+      <div style={{ flex:1 }}>
+        <p style={{ margin:0, fontWeight:700, color:'#1a56db', fontSize:14 }}>Connect Google Drive to upload files</p>
+        <p style={{ margin:'4px 0 0', fontSize:12, color:'#6b7280' }}>
+          All photos &amp; videos will be stored in your Google Drive (15 GB free — no payment needed)
+        </p>
+      </div>
+      <button
+        disabled={connecting}
+        onClick={async () => {
+          setConnecting(true);
+          await openDriveAuthWindow();
+          const poll = setInterval(async () => {
+            const ok = await checkDriveAuth();
+            if (ok) { clearInterval(poll); onConnected(); }
+          }, 1500);
+        }}
+        style={{ background:'#4285f4', color:'#fff', border:'none', borderRadius:8,
+          padding:'9px 20px', fontWeight:700, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
+        {connecting ? 'Opening Google…' : 'Sign in with Google'}
+      </button>
+    </div>
+  );
+}
+
 // ─── Folder Contents ──────────────────────────────────────────────────────────
 function FolderContents({ folder, posts, images, dispatch, onBack }) {
   const toast = useToast();
 
-
-  // ── Upload modal state ──
   const [uploadModal,  setUploadModal]  = useState(false);
-  const [uploadType,   setUploadType]   = useState('image'); // 'image'|'video_local'|'video_yt'
+  const [uploadType,   setUploadType]   = useState('image');
   const [uForm,        setUForm]        = useState({ title:'', date: folder.date||'', desc:'' });
-  const [uFiles,       setUFiles]       = useState([]); // [{name, src, mime}]
+  const [uFiles,       setUFiles]       = useState([]); // [{name, file, previewUrl, mime}]
   const [uUploading,   setUUploading]   = useState(false);
+  const [uProgress,    setUProgress]    = useState(0);
   const [ytId,         setYtId]         = useState('');
+  const [driveAuthed,  setDriveAuthed]  = useState(null);
   const fileInputRef = useRef(null);
   const setU = (k,v) => setUForm(f=>({...f,[k]:v}));
 
-  // ── Edit modal state ──
-  const [editTarget,   setEditTarget]   = useState(null); // the item being edited
-  const [editForm,     setEditForm]     = useState({});
+  const [editTarget,    setEditTarget]    = useState(null);
+  const [editForm,      setEditForm]      = useState({});
   const [confirmTarget, setConfirmTarget] = useState(null);
   const setE = (k,v) => setEditForm(f=>({...f,[k]:v}));
+
+  // Check Drive auth when modal opens
+  const openUploadModal = async () => {
+    setUploadModal(true);
+    const ok = await checkDriveAuth();
+    setDriveAuthed(ok);
+  };
 
   const openEdit = (item) => { setEditTarget(item); setEditForm({...item}); };
 
@@ -154,65 +190,42 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
     setYtId('');
     setUForm({ title:'', date: folder.date||'', desc:'' });
     setUUploading(false);
+    setUProgress(0);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Handle image files (multiple)
-  const handleImageFiles = async (files) => {
-    setUUploading(true);
-    const results = [];
+  // Stage files for preview (no upload yet)
+  const stageImageFiles = (files) => {
+    const staged = [];
     for (const file of Array.from(files)) {
       if (!file.type.startsWith('image/')) continue;
-      await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = async ev => {
-          const compressed = await compressImage(ev.target.result, 1200, 0.82);
-          results.push({ name: file.name.replace(/\.[^/.]+$/, ''), src: compressed, mime:'image' });
-          resolve();
-        };
-        reader.readAsDataURL(file);
-      });
+      staged.push({ name: file.name.replace(/\.[^/.]+$/, ''), file, previewUrl: URL.createObjectURL(file), mime:'image' });
     }
-    setUFiles(results);
-    setUUploading(false);
+    setUFiles(prev => [...prev, ...staged]);
   };
 
-  // Handle video files (single, stored as base64 data URL)
-  const handleVideoFile = async (file) => {
+  const stageVideoFile = (file) => {
     if (!file) return;
-    // Warn if file is large
-    const sizeMB = file.size / 1024 / 1024;
-    if (sizeMB > 15) {
-      toast(`Video is ${sizeMB.toFixed(1)}MB — this may exceed storage limits. Try a shorter clip.`, 'error');
-      return;
-    }
-    setUUploading(true);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      setUFiles([{ name: file.name.replace(/\.[^/.]+$/, ''), src: ev.target.result, mime:'video' }]);
-      setUUploading(false);
-    };
-    reader.readAsDataURL(file);
+    setUFiles([{ name: file.name.replace(/\.[^/.]+$/, ''), file, previewUrl: URL.createObjectURL(file), mime:'video' }]);
   };
 
-  // File input handler — routes to image or video handler
   const handleFileInput = (e) => {
     const files = e.target.files;
     if (!files?.length) return;
-    if (uploadType === 'image')       handleImageFiles(files);
-    else if (uploadType === 'video_local') handleVideoFile(files[0]);
+    if (uploadType === 'image')        stageImageFiles(files);
+    else if (uploadType === 'video_local') stageVideoFile(files[0]);
   };
 
-  // Drag & drop
   const handleDrop = (e) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
-    if (uploadType === 'image') handleImageFiles(files);
-    else if (uploadType === 'video_local') handleVideoFile(files[0]);
+    if (uploadType === 'image')        stageImageFiles(files);
+    else if (uploadType === 'video_local') stageVideoFile(files[0]);
   };
 
-  // Save uploaded files
-  const saveUpload = () => {
+  // Upload to Drive then dispatch
+  const saveUpload = async () => {
+    // YouTube — no Drive needed
     if (uploadType === 'video_yt') {
       if (!uForm.title?.trim()) { toast('Title required','error'); return; }
       if (!ytId.trim())         { toast('YouTube URL required','error'); return; }
@@ -223,46 +236,75 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
 
     if (!uFiles.length) { toast('No files selected yet','error'); return; }
 
-    if (uploadType === 'image') {
-      uFiles.forEach((f, idx) => {
-        dispatch({ type:'ACT_IMG_ADD', payload:{
-          id:uid(),
-          title: uFiles.length === 1 ? (uForm.title.trim() || f.name) : (uForm.title ? `${uForm.title} ${idx+1}` : f.name),
-          date: uForm.date, desc: uForm.desc, src: f.src, folderId: folder.id,
+    // Check auth
+    const authed = await checkDriveAuth();
+    if (!authed) { setDriveAuthed(false); return; }
+
+    setUUploading(true);
+    setUProgress(0);
+
+    try {
+      const driveFolder = uploadType === 'image' ? 'activities/images' : 'activities/videos';
+      const total = uFiles.length;
+
+      if (uploadType === 'image') {
+        for (let i = 0; i < total; i++) {
+          const f = uFiles[i];
+          const result = await uploadToDrive(f.file, driveFolder, (pct) => {
+            setUProgress(Math.round(((i + pct / 100) / total) * 100));
+          });
+          dispatch({ type:'ACT_IMG_ADD', payload:{
+            id: uid(),
+            title: total === 1 ? (uForm.title.trim() || f.name) : (uForm.title ? `${uForm.title} ${i+1}` : f.name),
+            date: uForm.date, desc: uForm.desc,
+            src: result.url,         // Drive public URL
+            driveFileId: result.fileId,
+            folderId: folder.id,
+          }});
+        }
+        toast(`${total} image${total>1?'s':''} uploaded to Drive!`);
+
+      } else if (uploadType === 'video_local') {
+        if (!uForm.title?.trim()) { toast('Title required','error'); setUUploading(false); return; }
+        const f = uFiles[0];
+        const result = await uploadToDrive(f.file, driveFolder, (pct) => setUProgress(pct));
+        dispatch({ type:'ACT_ADD', payload:{
+          id: uid(), title: uForm.title.trim(), date: uForm.date, desc: uForm.desc,
+          driveUrl: result.url,
+          driveFileId: result.fileId,
+          driveEmbed: `https://drive.google.com/file/d/${result.fileId}/preview`,
+          folderId: folder.id,
         }});
-      });
-      toast(`${uFiles.length} image${uFiles.length>1?'s':''} added!`);
-    } else if (uploadType === 'video_local') {
-      if (!uForm.title?.trim()) { toast('Title required','error'); return; }
-      dispatch({ type:'ACT_ADD', payload:{
-        id:uid(), title:uForm.title.trim(), date:uForm.date, desc:uForm.desc,
-        videoSrc: uFiles[0].src, folderId:folder.id,
-      }});
-      toast('Video uploaded!');
+        toast('Video uploaded to Drive!');
+      }
+
+      resetUpload();
+    } catch (err) {
+      toast(`Upload failed: ${err.message}`, 'error');
+    } finally {
+      setUUploading(false);
+      setUProgress(0);
     }
-    resetUpload();
   };
 
-  // Save edit
   const saveEdit = () => {
     if (!editForm.title?.trim()) { toast('Title required','error'); return; }
-    if (editTarget._collection === 'image') {
-      dispatch({ type:'ACT_IMG_UPDATE', payload: editForm });
-    } else {
-      dispatch({ type:'ACT_UPDATE', payload: editForm });
-    }
+    if (editTarget._collection === 'image') dispatch({ type:'ACT_IMG_UPDATE', payload: editForm });
+    else                                     dispatch({ type:'ACT_UPDATE',     payload: editForm });
     toast('Updated!');
     setEditTarget(null);
   };
 
-  // Delete
-  const handleDelete = (item) => {
+  const handleDelete = async (item) => {
+    // Clean up from Drive if possible
+    if (item.driveFileId) {
+      deleteFromDrive(item.driveFileId).catch(() => {});
+    }
     if (item._collection === 'image') dispatch({ type:'ACT_IMG_DEL', payload:item.id });
     else                               dispatch({ type:'ACT_DEL',     payload:item.id });
     toast('Deleted');
   };
 
-  // Merge for display
   const allFolderItems = [
     ...posts.filter(p=>p.folderId===folder.id).map(p=>({...p, _collection:'post'})),
     ...images.filter(i=>i.folderId===folder.id).map(i=>({...i, _collection:'image'})),
@@ -287,7 +329,7 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
             {folder.date && <p className="cms-page-sub" style={{ margin:0 }}>{formatDate(folder.date)}</p>}
           </div>
         </div>
-        <button className="cms-btn cms-btn--primary" onClick={() => setUploadModal(true)}>
+        <button className="cms-btn cms-btn--primary" onClick={openUploadModal}>
           + Add Content
         </button>
       </div>
@@ -303,7 +345,6 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
           <div className="cms-grid-3">
             {allFolderItems.map(item => (
               <div key={item.id} className="cms-item-card">
-                {/* Thumbnail */}
                 <div style={{ position:'relative', height:148, background:'#111', overflow:'hidden' }}>
                   {item._collection === 'image' && item.src && (
                     <img src={item.src} alt={item.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
@@ -318,7 +359,18 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
                       </div>
                     </>
                   )}
-                  {item._collection === 'post' && item.videoSrc && (
+                  {item._collection === 'post' && item.driveUrl && (
+                    <>
+                      <iframe src={item.driveEmbed} title={item.title}
+                        style={{ width:'100%', height:'100%', border:'none', pointerEvents:'none' }} />
+                      <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center',
+                        justifyContent:'center', background:'rgba(0,0,0,0.3)' }}>
+                        <span style={{ fontSize:32, color:'#fff' }}>🎬</span>
+                      </div>
+                    </>
+                  )}
+                  {/* Legacy local video */}
+                  {item._collection === 'post' && item.videoSrc && !item.driveUrl && (
                     <>
                       <video src={item.videoSrc} style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.85 }} muted />
                       <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center',
@@ -327,14 +379,13 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
                       </div>
                     </>
                   )}
-                  {/* Type badge */}
                   <div style={{ position:'absolute', top:7, left:7 }}>
                     {item._collection==='image' && <span style={{ background:'#3498db', color:'#fff', fontSize:10, fontWeight:700, borderRadius:5, padding:'2px 7px' }}>🖼 Photo</span>}
                     {item._collection==='post' && item.youtubeId && <span style={{ background:'#c0392b', color:'#fff', fontSize:10, fontWeight:700, borderRadius:5, padding:'2px 7px' }}>▶ YouTube</span>}
-                    {item._collection==='post' && item.videoSrc && <span style={{ background:'#8e44ad', color:'#fff', fontSize:10, fontWeight:700, borderRadius:5, padding:'2px 7px' }}>🎬 Video</span>}
+                    {item._collection==='post' && (item.driveUrl||item.videoSrc) && <span style={{ background:'#8e44ad', color:'#fff', fontSize:10, fontWeight:700, borderRadius:5, padding:'2px 7px' }}>🎬 Video</span>}
+                    {item.driveFileId && <span style={{ background:'#4285f4', color:'#fff', fontSize:10, fontWeight:700, borderRadius:5, padding:'2px 7px', marginLeft:4 }}>☁ Drive</span>}
                   </div>
                 </div>
-                {/* Body */}
                 <div className="cms-item-card-body">
                   {item.date && <span className="cms-badge cms-badge--gray" style={{ fontSize:10, marginBottom:5 }}>{item.date}</span>}
                   <div className="cms-item-card-title">{item.title}</div>
@@ -354,11 +405,16 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
       {uploadModal && (
         <Modal title="Add Content to Folder" onClose={resetUpload}>
 
+          {/* Drive auth banner if not connected */}
+          {driveAuthed === false && (
+            <DriveAuthBanner onConnected={() => setDriveAuthed(true)} />
+          )}
+
           {/* Type selector */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8, marginBottom:18 }}>
             {[
-              { val:'image',       label:'📷 Photos',       sub:'JPG, PNG, WebP' },
-              { val:'video_local', label:'🎬 Video File',   sub:'MP4, WebM, MOV' },
+              { val:'image',       label:'📷 Photos',       sub:'JPG, PNG, WebP → Drive' },
+              { val:'video_local', label:'🎬 Video File',   sub:'MP4, WebM, MOV → Drive' },
               { val:'video_yt',    label:'▶ YouTube Link', sub:'Paste URL / ID' },
             ].map(opt => (
               <div key={opt.val} onClick={()=>{ setUploadType(opt.val); setUFiles([]); setYtId(''); }}
@@ -377,8 +433,22 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
             ))}
           </div>
 
-          {/* ── Photo / Local Video drop zone ── */}
-          {(uploadType === 'image' || uploadType === 'video_local') && (
+          {/* Upload progress */}
+          {uUploading && (
+            <div style={{ background:'#f0f4ff', borderRadius:10, padding:'16px 18px', marginBottom:16 }}>
+              <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
+                <span style={{ fontSize:13, fontWeight:600, color:'#1a56db' }}>☁️ Uploading to Google Drive…</span>
+                <span style={{ fontSize:13, color:'#1a56db' }}>{uProgress}%</span>
+              </div>
+              <div style={{ height:8, background:'#dbeafe', borderRadius:4, overflow:'hidden' }}>
+                <div style={{ width:`${uProgress}%`, height:'100%', background:'#4285f4',
+                  transition:'width 0.3s ease', borderRadius:4 }} />
+              </div>
+            </div>
+          )}
+
+          {/* Photo / Video drop zone */}
+          {!uUploading && (uploadType === 'image' || uploadType === 'video_local') && (
             <div
               onClick={() => fileInputRef.current?.click()}
               onDragOver={e=>{ e.preventDefault(); e.currentTarget.style.borderColor='#c0392b'; }}
@@ -397,21 +467,19 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
                 onChange={handleFileInput}
                 style={{ display:'none' }} />
 
-              {uUploading ? (
-                <p style={{ fontSize:13.5, color:'#9ca3af' }}>⏳ Processing file…</p>
-              ) : uFiles.length > 0 ? (
+              {uFiles.length > 0 ? (
                 <>
-                  {/* Preview thumbnails */}
                   <div style={{ display:'flex', flexWrap:'wrap', gap:6, justifyContent:'center', marginBottom:10 }}>
                     {uFiles.map((f,i) => (
                       f.mime === 'image'
-                        ? <img key={i} src={f.src} alt={f.name} style={{ width:70, height:70, objectFit:'cover', borderRadius:8, border:'1px solid #e5e7eb' }} />
+                        ? <img key={i} src={f.previewUrl} alt={f.name} style={{ width:70, height:70, objectFit:'cover', borderRadius:8, border:'1px solid #e5e7eb' }} />
                         : <div key={i} style={{ width:70, height:70, background:'#111', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:28 }}>🎬</div>
                     ))}
                   </div>
                   <p style={{ fontSize:13, color:'#16a34a', fontWeight:600, marginBottom:4 }}>
                     ✓ {uFiles.length === 1 ? uFiles[0].name : `${uFiles.length} files ready`} — click to change
                   </p>
+                  <p style={{ fontSize:11.5, color:'#9ca3af', margin:0 }}>Will upload to Google Drive on Save</p>
                 </>
               ) : (
                 <>
@@ -419,26 +487,16 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
                   <p style={{ fontSize:13.5, color:'#374151', fontWeight:600, marginBottom:4 }}>
                     {uploadType==='image' ? 'Click to select photos, or drag & drop' : 'Click to select a video file, or drag & drop'}
                   </p>
-                  <p style={{ fontSize:12, color:'#9ca3af', marginBottom:0 }}>
-                    {uploadType==='image' ? 'JPG, PNG, WebP — select multiple at once' : 'MP4, WebM, MOV — max 15MB recommended'}
+                  <p style={{ fontSize:12, color:'#9ca3af', marginBottom:4 }}>
+                    {uploadType==='image' ? 'JPG, PNG, WebP — select multiple at once' : 'MP4, WebM, MOV — any size (stored in Drive)'}
                   </p>
+                  <p style={{ fontSize:11, color:'#4285f4', margin:0 }}>☁️ Files go to your Google Drive</p>
                 </>
               )}
             </div>
           )}
 
-          {/* Storage warning for local video */}
-          {uploadType === 'video_local' && (
-            <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:8,
-              padding:'10px 13px', marginBottom:12, fontSize:12.5, color:'#92400e',
-              display:'flex', gap:8 }}>
-              <span style={{ flexShrink:0 }}>⚠️</span>
-              <span>Video files are stored in your database. Keep clips under <strong>15MB</strong> to avoid storage errors.
-                For longer videos, use <strong>YouTube</strong> instead.</span>
-            </div>
-          )}
-
-          {/* ── YouTube input ── */}
+          {/* YouTube input */}
           {uploadType === 'video_yt' && (
             <>
               <div className="cms-form-group">
@@ -460,7 +518,7 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
           {/* Common fields */}
           <div className="cms-form-group">
             <label>
-              Title {uploadType==='image' && uFiles.length > 1 ? <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional — each file's name used if blank)</span> : '*'}
+              Title {uploadType==='image' && uFiles.length > 1 ? <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional)</span> : '*'}
             </label>
             <input value={uForm.title} onChange={e=>setU('title',e.target.value)}
               placeholder={uploadType==='image' && uFiles.length > 1 ? 'Optional title prefix…' : 'e.g. Team photo at event'} />
@@ -482,8 +540,8 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
           <ModalActions>
             <button className="cms-btn cms-btn--ghost" onClick={resetUpload}>Cancel</button>
             <button className="cms-btn cms-btn--primary" onClick={saveUpload} disabled={uUploading}>
-              {uUploading ? 'Processing…' :
-                uploadType==='image' && uFiles.length > 1 ? `Save ${uFiles.length} Photos` : 'Save'}
+              {uUploading ? `Uploading… ${uProgress}%` :
+                uploadType==='image' && uFiles.length > 1 ? `Upload ${uFiles.length} Photos to Drive` : 'Upload to Drive'}
             </button>
           </ModalActions>
         </Modal>
@@ -503,23 +561,17 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
               style={{ width:'100%', padding:'8px 11px', border:'1px solid #e5e7eb', borderRadius:7,
                 fontSize:13.5, fontFamily:'inherit', resize:'vertical', minHeight:60 }} />
           </div>
-          {/* YouTube edit */}
           {editTarget._collection==='post' && editTarget.youtubeId && (
             <div className="cms-form-group"><label>YouTube URL or ID</label>
               <input value={editForm.youtubeId||''} onChange={e=>setE('youtubeId',e.target.value)} />
             </div>
           )}
-          {/* Image replace */}
           {editTarget._collection==='image' && (
             <div className="cms-form-group">
-              <label>Replace Photo <span style={{ fontWeight:400, color:'#9ca3af' }}>(optional)</span></label>
+              <label>Current Photo</label>
               {editForm.src && <img src={editForm.src} alt="" style={{ width:'100%', borderRadius:8, marginBottom:8, maxHeight:150, objectFit:'cover', border:'1px solid #e5e7eb' }} />}
-              <input type="file" accept="image/*" onChange={async e=>{
-                const file=e.target.files?.[0]; if(!file) return;
-                const r=new FileReader();
-                r.onload=async ev=>{ setE('src', await compressImage(ev.target.result,1200,0.82)); };
-                r.readAsDataURL(file);
-              }} style={{ fontSize:13, color:'#374151', padding:'4px 0' }} />
+              {editForm.driveFileId && <p style={{ fontSize:11.5, color:'#4285f4', margin:'0 0 8px' }}>☁️ Stored in Google Drive</p>}
+              <p style={{ fontSize:12, color:'#9ca3af', margin:0 }}>To replace this photo, delete it and re-upload.</p>
             </div>
           )}
           <ModalActions>

@@ -84,7 +84,7 @@ const fRed  = e => { e.target.style.borderColor = '#c0392b'; };
 const fGray = e => { e.target.style.borderColor = '#e5e7eb'; };
 
 // ─── Credential store helpers ─────────────────────────────────────────────────
-const DEFAULT_CREDS = { username:'admin', password:'OPT@Admin2025' };
+const DEFAULT_CREDS = { username:'admin', password:'OPT@Admin2026' };
 
 // Module-level credential readers — localStorage kept in sync with Firestore by AdminLogin
 function getCreds() {

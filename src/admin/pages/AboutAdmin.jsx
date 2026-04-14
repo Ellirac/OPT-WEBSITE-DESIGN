@@ -5,6 +5,9 @@ import Modal, { ModalActions } from '../components/Modal';
 import ConfirmDelete from '../components/ConfirmDelete';
 import UploadArea from '../components/UploadArea';
 
+// Drive-aware upload adapter: accepts { url, fileId } or plain string
+const driveUpload = (setter) => (result) => setter(typeof result === 'string' ? result : result?.url ?? result);
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const Textarea = ({ value, onChange, placeholder, rows = 3 }) => (
   <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows}
@@ -75,7 +78,7 @@ function FactoriesTab() {
             <div className="cms-form-group"><label>Building Area</label><input value={form.buildingArea||''} onChange={e=>set('buildingArea',e.target.value)} placeholder="e.g. 8,578 m²" /></div>
           </div>
           <div className="cms-form-group"><label>Address</label><input value={form.address||''} onChange={e=>set('address',e.target.value)} /></div>
-          <div className="cms-form-group"><label>Photo</label><UploadArea onUpload={setImg} preview={img} /></div>
+          <div className="cms-form-group"><label>Photo</label><UploadArea onUpload={driveUpload(setImg)} preview={img} /></div>
           <ModalActions>
             <button className="cms-btn cms-btn--ghost" onClick={()=>setModal(null)}>Cancel</button>
             <button className="cms-btn cms-btn--primary" onClick={save}>Save</button>
@@ -293,7 +296,7 @@ function TeamTab() {
         <Modal title={orgModal==='add'?'Add Member':'Edit Member'} onClose={()=>setOrgModal(null)}>
           <div className="cms-form-group"><label>Full Name *</label><input value={orgForm.name||''} onChange={e=>setOrgForm(f=>({...f,name:e.target.value}))} /></div>
           <div className="cms-form-group"><label>Role / Title</label><input value={orgForm.role||''} onChange={e=>setOrgForm(f=>({...f,role:e.target.value}))} /></div>
-          <div className="cms-form-group"><label>Profile Photo</label><UploadArea onUpload={setOrgImg} preview={orgImg} height={90} circle /></div>
+          <div className="cms-form-group"><label>Profile Photo</label><UploadArea onUpload={driveUpload(setOrgImg)} preview={orgImg} height={90} circle /></div>
           <ModalActions>
             <button className="cms-btn cms-btn--ghost" onClick={()=>setOrgModal(null)}>Cancel</button>
             <button className="cms-btn cms-btn--primary" onClick={saveOrg}>Save</button>
@@ -386,7 +389,7 @@ function BasesTab() {
             <input value={form.mapUrl||''} onChange={e=>set('mapUrl',e.target.value)} placeholder="Paste the embed src URL from Google Maps → Share → Embed" />
             <p style={{fontSize:11.5,color:'#9ca3af',marginTop:4}}>Go to Google Maps → Share → Embed a map → copy the src="..." URL only.</p>
           </div>
-          <div className="cms-form-group"><label>Photo</label><UploadArea onUpload={setImg} preview={img} /></div>
+          <div className="cms-form-group"><label>Photo</label><UploadArea onUpload={driveUpload(setImg)} preview={img} /></div>
           <ModalActions>
             <button className="cms-btn cms-btn--ghost" onClick={()=>setModal(null)}>Cancel</button>
             <button className="cms-btn cms-btn--primary" onClick={save}>Save</button>
