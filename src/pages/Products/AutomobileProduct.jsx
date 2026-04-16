@@ -45,8 +45,16 @@ export default function AutomobileProducts() {
   const catLabel = (id) => CATEGORIES.find(c => c.id === id)?.label || '';
   const catDesc  = (id) => CATEGORIES.find(c => c.id === id)?.desc  || '';
 
+  // Convert any Drive URL format to the thumbnail API so <img> renders correctly
+  const driveImgSrc = (url, size = 'w600') => {
+    if (!url) return null;
+    const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+    return url;
+  };
+
   // Resolve image: CMS upload takes priority, then static import, then nothing
-  const imgOf = (pt) => pt.img || DEFAULT_IMG[pt.id] || null;
+  const imgOf = (pt) => pt.img ? driveImgSrc(pt.img) : (DEFAULT_IMG[pt.id] || null);
 
   const LEGEND = useMemo(() => CATEGORIES.map(cat => ({
     ...cat,

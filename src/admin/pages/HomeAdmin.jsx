@@ -4,9 +4,24 @@ import { useToast } from '../components/Toast';
 import Modal, { ModalActions } from '../components/Modal';
 import ConfirmDelete from '../components/ConfirmDelete';
 import UploadArea from '../components/UploadArea';
-// Drive-aware upload adapter
-const driveUpload = (setter) => (result) => setter(typeof result === 'string' ? result : result?.url ?? result);
 
+// Drive-aware upload adapter — stores thumbnail URL so <img> tags render correctly
+const driveUpload = (setter) => (result) => {
+  if (typeof result === 'string') { setter(result); return; }
+  const fileId = result?.fileId;
+  const url = fileId
+    ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
+    : result?.url ?? null;
+  setter(url);
+};
+
+// Normalise any Drive URL (old uc?export=view or new thumbnail) for <img> rendering
+const driveImgSrc = (url, size = 'w400') => {
+  if (!url) return null;
+  const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+  return url;
+};
 
 // ─── Certifications ───────────────────────────────────────────────────────────
 function CertSection() {
@@ -58,7 +73,7 @@ function CertSection() {
                   }}
                 >
                   {c.img
-                    ? <img src={c.img} alt={c.code} style={{ width:'100%', height:'100%', objectFit:'contain', padding:8 }} />
+                    ? <img src={driveImgSrc(c.img, 'w400')} alt={c.code} style={{ width:'100%', height:'100%', objectFit:'contain', padding:8 }} />
                     : <div style={{ textAlign:'center', color:'#9ca3af' }}>
                         <div style={{ fontSize:28 }}>🏅</div>
                         <div style={{ fontSize:11, marginTop:4 }}>No image</div>
@@ -123,7 +138,7 @@ function CertSection() {
               </div>
               <button onClick={()=>setPreview(null)} style={{ background:'rgba(255,255,255,0.1)', border:'none', color:'#fff', borderRadius:8, padding:'6px 14px', cursor:'pointer', fontSize:14 }}>✕ Close</button>
             </div>
-            <img src={preview.img} alt={preview.code} style={{ width:'100%', borderRadius:10, display:'block', maxHeight:'72vh', objectFit:'contain' }} />
+            <img src={driveImgSrc(preview.img, 'w1600')} alt={preview.code} style={{ width:'100%', borderRadius:10, display:'block', maxHeight:'72vh', objectFit:'contain' }} />
           </div>
         </div>
       )}

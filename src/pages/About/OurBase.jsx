@@ -28,12 +28,20 @@ const OurBase = () => {
   const bases = state.about.bases;
   const [activeMap, setActiveMap] = useState(null);
 
+  // Convert any Drive URL format to the thumbnail API so <img> renders correctly
+  const driveImgSrc = (url, size = 'w800') => {
+    if (!url) return null;
+    const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+    return url;
+  };
+
   return (
     <div className="our-base-section company-section">
       <h2>Our Base</h2>
       <div className="row">
         {bases.map((base) => {
-          const imgSrc = base.img || FALLBACK_IMGS[base.name] || null;
+          const imgSrc = base.img ? driveImgSrc(base.img, 'w800') : FALLBACK_IMGS[base.name] || null;
           return (
             <div key={base.id} className="col-md-3 col-sm-6 mb-4">
               <div className="base-card shadow-lg h-100">

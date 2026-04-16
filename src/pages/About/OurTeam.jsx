@@ -19,6 +19,14 @@ const OurTeam = () => {
   const organization = state.about.organization;
   const management   = state.about.management;
 
+  // Convert any Drive URL format to the thumbnail API so <img> renders correctly
+  const driveImgSrc = (url, size = 'w400') => {
+    if (!url) return null;
+    const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+    return url;
+  };
+
   return (
     <div className="our-team-section company-section">
       <h2>Our Team</h2>
@@ -27,7 +35,7 @@ const OurTeam = () => {
         <h3 className="section-title">Organization</h3>
         <div className="row justify-content-center">
           {organization.map((person) => {
-            const imgSrc = person.img || FALLBACK_IMGS[person.name] || null;
+            const imgSrc = person.img ? driveImgSrc(person.img, 'w400') : FALLBACK_IMGS[person.name] || null;
             return (
               <div key={person.id} className="col-6 col-sm-6 col-md-3 mb-4">
                 <div className="team-card shadow-lg h-100">

@@ -365,28 +365,28 @@ const initialState = {
     ],
 
     parts: [
-      {
-        id:'p1', name:'Exhaust Mount', categoryId:'anti', pinTop:39, pinLeft:80,
+        {
+        id:'p1', name:'Exhaust Mount', categoryId:'anti', pinTop:39, pinLeft:86,
         img:null,
         desc:'Rubber mount that isolates exhaust system vibration from the vehicle body, reducing interior noise and preventing metal fatigue in exhaust hangers.',
       },
       {
-        id:'p2', name:'Spring Lower Mount', categoryId:'anti', pinTop:35, pinLeft:77,
+        id:'p2', name:'Spring Lower Mount', categoryId:'anti', pinTop:35, pinLeft:83,
         img:null,
         desc:'Cushions the coil spring base against the suspension strut, absorbing road shock and preventing metal-to-metal contact that causes noise and wear.',
       },
       {
-        id:'p3', name:'Radiator Mount', categoryId:'anti', pinTop:78, pinLeft:22,
+        id:'p3', name:'Radiator Mount', categoryId:'anti', pinTop:75, pinLeft:20,
         img:null,
         desc:'Isolates the radiator from engine and chassis vibration, protecting cooling fins and hose connections from fatigue cracking over time.',
       },
       {
-        id:'p4', name:'Electric Servo Mount', categoryId:'anti', pinTop:48, pinLeft:25,
+        id:'p4', name:'Electric Servo Mount', categoryId:'anti', pinTop:48, pinLeft:22,
         img:null,
         desc:'Anti-vibration mount for electric power steering servo motors, dampening motor oscillation to prevent steering wheel shimmy and cabin noise.',
       },
       {
-        id:'p5', name:'Fuel Tank Cushion', categoryId:'anti', pinTop:60, pinLeft:63,
+        id:'p5', name:'Fuel Tank Cushion', categoryId:'anti', pinTop:59, pinLeft:66,
         img:null,
         desc:'Rubber cushion placed between the fuel tank and chassis brackets, absorbing vibration and preventing tank surface abrasion during vehicle operation.',
       },
@@ -406,7 +406,7 @@ const initialState = {
         desc:'Rubber grommet inserted into body panel holes to protect wiring harnesses and cables from sharp metal edges, preventing insulation damage and short circuits.',
       },
       {
-        id:'p9', name:'Steering Grommet', categoryId:'grommet', pinTop:52, pinLeft:47,
+        id:'p9', name:'Steering Grommet', categoryId:'grommet', pinTop:51, pinLeft:46,
         img:null,
         desc:'Sealing grommet fitted around the steering column pass-through in the firewall, blocking engine bay noise, dust, and moisture from entering the cabin.',
       },
@@ -416,64 +416,49 @@ const initialState = {
         desc:'Precision rubber gasket that seals the valve cover to the cylinder head, preventing engine oil leaks while withstanding high heat and chemical exposure.',
       },
       {
-        id:'p11', name:'Fuel Packing', categoryId:'seal', pinTop:64, pinLeft:60,
+        id:'p11', name:'Fuel Packing', categoryId:'seal', pinTop:62, pinLeft:62,
         img:null,
         desc:'Fuel-resistant rubber seal used at fuel system joints and sender unit flanges, ensuring zero-leak performance under pressure and temperature cycling.',
       },
       {
-        id:'p12', name:'Water Pump Packing', categoryId:'seal', pinTop:44, pinLeft:30,
+        id:'p12', name:'Water Pump Packing', categoryId:'seal', pinTop:44, pinLeft:29,
         img:null,
         desc:'Coolant-resistant gasket that seals the water pump housing to the engine block, maintaining system pressure and preventing coolant leaks.',
       },
       {
-        id:'p13', name:'Thermomount', categoryId:'seal', pinTop:57, pinLeft:34,
+        id:'p13', name:'Thermomount', categoryId:'seal', pinTop:54, pinLeft:34,
         img:null,
         desc:'Rubber sealing mount for the thermostat housing, combining a leak-proof seal with vibration isolation to protect the thermostat from engine oscillation.',
       },
       {
-        id:'p14', name:'Oil Filter Packing', categoryId:'seal', pinTop:59, pinLeft:27,
+        id:'p14', name:'Oil Filter Packing', categoryId:'seal', pinTop:56, pinLeft:23,
         img:null,
         desc:'High-pressure rubber seal used at the oil filter base, preventing oil leaks under engine operating pressures and high temperature conditions.',
       },
       {
-        id:'p15', name:'Filler Cap', categoryId:'seal', pinTop:51, pinLeft:39,
+        id:'p15', name:'Filler Cap', categoryId:'seal', pinTop:50, pinLeft:38,
         img:null,
         desc:'Rubber-sealed filler cap for engine oil or coolant reservoirs, providing an airtight closure that prevents contamination and fluid spillage.',
       },
       {
-        id:'p16', name:'Intake Manifold Packing', categoryId:'seal', pinTop:53, pinLeft:30,
+        id:'p16', name:'Intake Manifold Packing', categoryId:'seal', pinTop:53, pinLeft:28,
         img:null,
         desc:'Seals the intake manifold to the cylinder head ports, preventing air leaks that would disrupt the air-fuel mixture and cause rough engine idle.',
       },
       {
-        id:'p17', name:'Tailgate Stopper', categoryId:'stop', pinTop:24, pinLeft:79,
+        id:'p17', name:'Tailgate Stopper', categoryId:'stop', pinTop:23, pinLeft:85,
         img:null,
         desc:'Rubber bump stop mounted on the tailgate frame, cushioning the tailgate on closing to prevent panel damage and eliminate metal impact noise.',
       },
       {
-        id:'p18', name:'Door Stopper', categoryId:'stop', pinTop:50, pinLeft:63,
+        id:'p18', name:'Door Stopper', categoryId:'stop', pinTop:48, pinLeft:68,
         img:null,
         desc:'Rubber stopper that limits door travel at full open position, protecting hinges and adjacent body panels from impact damage during door operation.',
       },
       {
-        id:'p19', name:'Trunk Stopper', categoryId:'stop', pinTop:32, pinLeft:82,
+        id:'p19', name:'Trunk Stopper', categoryId:'stop', pinTop:32, pinLeft:88,
         img:null,
         desc:'Bump stop fitted to the trunk lid or boot area, absorbing closing impact force and preventing lid rattle during driving over rough surfaces.',
-      },
-      {
-        id:'p20', name:'Oil Level Gauge', categoryId:'resin', pinTop:54, pinLeft:23,
-        img:null,
-        desc:'Precision resin dipstick for checking engine oil level, designed for dimensional accuracy and chemical resistance to motor oil and high temperatures.',
-      },
-      {
-        id:'p21', name:'Ashtray', categoryId:'resin', pinTop:39, pinLeft:40,
-        img:null,
-        desc:'Injection-molded resin interior component designed for dimensional stability, heat resistance, and a precise fit within the vehicle cabin assembly.',
-      },
-      {
-        id:'p22', name:'Boots', categoryId:'resin', pinTop:42, pinLeft:72,
-        img:null,
-        desc:'Flexible rubber-resin boot that covers and protects CV joints or steering rack ends from dirt, water, and road contaminants, extending joint service life.',
       },
     ],
 
@@ -677,13 +662,13 @@ function cmsReducer(state, { type, payload }) {
             ...incoming,
             autoCategories:  incoming.autoCategories  ?? state.products.autoCategories,
             motorCategories: incoming.motorCategories ?? state.products.motorCategories,
-            // Re-attach hardcoded desc for the original 22 parts (p1–p22).
-            // Admin-added parts (new IDs) keep their own desc from Firestore.
+            // For hardcoded parts (p1–p22): use Firestore desc if admin set one,
+            // otherwise fall back to source-code desc. Admin-added parts keep all fields as-is.
             parts: (incoming.parts ?? state.products.parts).map(fsPart => {
               const local = initialState.products.parts.find(lp => lp.id === fsPart.id);
               if (local) {
-                // Known hardcoded part — always use source-code desc (never from DB)
-                return { ...fsPart, desc: local.desc ?? '' };
+                // Use admin-edited desc from Firestore if present, else source-code desc
+                return { ...fsPart, desc: fsPart.desc || local.desc || '' };
               }
               // Admin-added part — keep every field as stored, including desc
               return fsPart;
@@ -691,7 +676,7 @@ function cmsReducer(state, { type, payload }) {
             motorParts: (incoming.motorParts ?? state.products.motorParts).map(fsPart => {
               const local = initialState.products.motorParts.find(lp => lp.id === fsPart.id);
               if (local) {
-                return { ...fsPart, desc: local.desc ?? '' };
+                return { ...fsPart, desc: fsPart.desc || local.desc || '' };
               }
               return fsPart;
             }),
@@ -711,31 +696,10 @@ function cmsReducer(state, { type, payload }) {
 }
 
 // ─── Strip hardcoded-only fields before saving to Firestore ──────────────────
-// desc lives only in source code for the original 22 parts — never store those in the DB.
-// Admin-added parts (new IDs) DO have their own desc and it must be saved.
+// We now save desc for ALL parts (including hardcoded ones) so admins can
+// customise descriptions without a redeploy. img is also always preserved.
 function stripForFirestore(state) {
-  const hardcodedPartIds      = new Set(initialState.products.parts.map(p => p.id));
-  const hardcodedMotorPartIds = new Set(initialState.products.motorParts.map(p => p.id));
-  return {
-    ...state,
-    products: {
-      ...state.products,
-      parts: state.products.parts.map((part) => {
-        if (hardcodedPartIds.has(part.id)) {
-          const { desc, ...rest } = part;
-          return rest;
-        }
-        return part; // admin-added — preserve desc
-      }),
-      motorParts: state.products.motorParts.map((part) => {
-        if (hardcodedMotorPartIds.has(part.id)) {
-          const { desc, ...rest } = part;
-          return rest;
-        }
-        return part;
-      }),
-    },
-  };
+  return { ...state };
 }
 
 // ─── Firebase-powered Context & Provider ─────────────────────────────────────

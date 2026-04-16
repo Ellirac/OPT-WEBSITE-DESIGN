@@ -74,6 +74,16 @@ export default function Home() {
   const certs       = state.home.certifications;
   const allPartners = state.home.partners;
 
+  /* ── Normalise Drive image URLs ──────────────────────────────────────────────
+     Old records stored `uc?export=view` URLs which don't render in <img> tags.
+     Extract the file ID and convert to the thumbnail API which always works.    */
+  const driveImgSrc = (url, size = 'w800') => {
+    if (!url) return null;
+    const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+    return url; // already a thumbnail URL or other URL — use as-is
+  };
+
   /* ── Certificate lightbox ── */
   const [selectedCert, setSelectedCert] = useState(null);
   // Dynamic rows — works for any partner count
@@ -363,7 +373,7 @@ export default function Home() {
                 >
                   {c.img && (
                     <div className="cert-img-thumb">
-                      <img src={c.img} alt={c.code} />
+                      <img src={driveImgSrc(c.img, 'w400')} alt={c.code} />
                     </div>
                   )}
                   <div className="cert-code">{c.code}</div>
@@ -419,7 +429,7 @@ export default function Home() {
                   minHeight:200,
                 }}>
                   <img
-                    src={selectedCert.img}
+                    src={driveImgSrc(selectedCert.img, 'w1600')}
                     alt={selectedCert.code}
                     style={{ width:'100%', maxHeight:'75vh', objectFit:'contain', display:'block' }}
                   />

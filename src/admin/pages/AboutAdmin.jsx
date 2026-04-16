@@ -5,8 +5,23 @@ import Modal, { ModalActions } from '../components/Modal';
 import ConfirmDelete from '../components/ConfirmDelete';
 import UploadArea from '../components/UploadArea';
 
-// Drive-aware upload adapter: accepts { url, fileId } or plain string
-const driveUpload = (setter) => (result) => setter(typeof result === 'string' ? result : result?.url ?? result);
+// Drive-aware upload adapter — stores thumbnail URL so <img> tags render correctly
+const driveUpload = (setter) => (result) => {
+  if (typeof result === 'string') { setter(result); return; }
+  const fileId = result?.fileId;
+  const url = fileId
+    ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
+    : result?.url ?? null;
+  setter(url);
+};
+
+// Normalise any Drive URL (old uc?export=view or new thumbnail) for <img> rendering
+const driveImgSrc = (url, size = 'w400') => {
+  if (!url) return null;
+  const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+  return url;
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const Textarea = ({ value, onChange, placeholder, rows = 3 }) => (
@@ -43,7 +58,7 @@ function FactoriesTab() {
           ? <div className="cms-empty"><div className="cms-empty-icon">🏭</div><p>No factories yet.</p></div>
           : <div className="cms-grid-3">{state.about.factories.map(f => (
               <div key={f.id} className="cms-item-card">
-                {f.img ? <img src={f.img} alt={f.name} className="cms-item-card-img" /> : <div className="cms-item-card-no-img">🏭</div>}
+                {f.img ? <img src={driveImgSrc(f.img)} alt={f.name} className="cms-item-card-img" /> : <div className="cms-item-card-no-img">🏭</div>}
                 <div className="cms-item-card-body">
                   <div className="cms-item-card-title">{f.name}</div>
                   <div className="cms-item-card-meta" style={{fontSize:11.5}}>{f.address}</div>
@@ -245,7 +260,7 @@ function TeamTab() {
           ? <div className="cms-empty"><div className="cms-empty-icon">👤</div><p>No members yet.</p></div>
           : <div className="cms-grid-team">{state.about.organization.map(m=>(
               <div key={m.id} className="cms-team-card">
-                {m.img ? <img src={m.img} alt={m.name} className="cms-team-card-img" /> : <div className="cms-team-card-no-img">👤</div>}
+                {m.img ? <img src={driveImgSrc(m.img)} alt={m.name} className="cms-team-card-img" /> : <div className="cms-team-card-no-img">👤</div>}
                 <div className="cms-team-card-body">
                   <div className="cms-team-name">{m.name}</div>
                   <div className="cms-team-role">{m.role}</div>
@@ -352,7 +367,7 @@ function BasesTab() {
           ? <div className="cms-empty"><div className="cms-empty-icon">📍</div><p>No bases yet.</p></div>
           : <div className="cms-grid-3">{state.about.bases.map(b=>(
               <div key={b.id} className="cms-item-card">
-                {b.img ? <img src={b.img} alt={b.name} className="cms-item-card-img" /> : <div className="cms-item-card-no-img">📍</div>}
+                {b.img ? <img src={driveImgSrc(b.img)} alt={b.name} className="cms-item-card-img" /> : <div className="cms-item-card-no-img">📍</div>}
                 <div className="cms-item-card-body">
                   <div className="cms-item-card-title">{b.name}</div>
                   <div className="cms-item-card-meta" style={{fontSize:11.5}}>{b.address}</div>

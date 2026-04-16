@@ -7,9 +7,23 @@ import ConfirmDelete from '../components/ConfirmDelete';
 import UploadArea from '../components/UploadArea';
 import CategoryManager from '../components/CategoryManager';
 
-// Drive-aware upload adapter
-const driveUpload = (setter) => (result) => setter(typeof result === 'string' ? result : result?.url ?? result);
+// Drive-aware upload adapter — stores thumbnail URL so <img> tags render correctly
+const driveUpload = (setter) => (result) => {
+  if (typeof result === 'string') { setter(result); return; }
+  const fileId = result?.fileId;
+  const url = fileId
+    ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`
+    : result?.url ?? null;
+  setter(url);
+};
 
+// Normalise any Drive URL for <img> rendering
+const driveImgSrc = (url, size = 'w400') => {
+  if (!url) return null;
+  const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
+  return url;
+};
 
 
 function AutomobileProductsAdmin() {
@@ -113,7 +127,7 @@ function AutomobileProductsAdmin() {
           <div className="cms-hs-wrap" style={{ cursor:'crosshair' }}>
             <img
               ref={imgRef}
-              src="/Car Image.png"
+              src="/OPTJ Car1.png"
               alt="OPT Automobile"
               className="cms-hs-img"
               onClick={handleImgClick}
@@ -144,7 +158,7 @@ function AutomobileProductsAdmin() {
                     <div className="cms-part-name">{pt.name}</div>
                     <span className="cms-badge cms-badge--gray" style={{ fontSize:10 }}>{pt.categoryName || catLabel(pt.categoryId)}</span>
                     <div className="cms-part-desc">{(pt.desc||'').substring(0,60)}{(pt.desc||'').length > 60 ? '…' : ''}</div>
-                    {pt.img && <img src={pt.img} alt={pt.name} className="cms-part-thumb" />}
+                    {pt.img && <img src={driveImgSrc(pt.img)} alt={pt.name} className="cms-part-thumb" />}
                     <div className="cms-part-actions">
                       <button className="cms-btn cms-btn--edit cms-btn--sm" onClick={() => openEdit(pt)}>Edit</button>
                       <button className="cms-btn cms-btn--danger cms-btn--sm" onClick={() => setConfirmTarget({ id:pt.id, label:pt.name })}>Delete</button>
