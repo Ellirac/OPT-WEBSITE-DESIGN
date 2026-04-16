@@ -2,14 +2,6 @@ import React from "react";
 import "../../styles/company.css";
 import { useCMS } from "../../admin/context/CMSContext";
 
-// Convert any Drive URL format to the thumbnail API so <img> renders correctly
-const driveImgSrc = (url, size = 'w800') => {
-  if (!url) return null;
-  const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
-  return url;
-};
-
 const CompanyProfile = () => {
   const { state } = useCMS();
   const factories   = state.about.factories;
@@ -25,7 +17,7 @@ const CompanyProfile = () => {
           <div className="col-md-4 mb-4" key={factory.id || index}>
             <div className="card shadow-lg h-100 factory-card">
               {factory.img
-                ? <img src={driveImgSrc(factory.img, 'w800')} className="card-img-top" alt={factory.name} />
+                ? <img src={factory.img} className="card-img-top" alt={factory.name} />
                 : <div style={{ height:200, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', color:'#9ca3af', fontSize:40 }}>🏭</div>
               }
               <div className="card-body">
