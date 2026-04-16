@@ -179,8 +179,6 @@ export default function MotorProductsAdmin() {
             ))}
           </div>
 
-
-
           {/* Parts list */}
           {motorParts.length > 0 && (
             <div className="cms-parts-grid" style={{ marginTop:20 }}>

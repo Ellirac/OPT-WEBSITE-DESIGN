@@ -224,12 +224,128 @@ function PartnersSection() {
   );
 }
 
+// ─── Offices ──────────────────────────────────────────────────────────────────
+function OfficesSection() {
+  const { state, dispatch } = useCMS();
+  const toast = useToast();
+  const [modal,         setModal]         = useState(null); // 'add' | office.id
+  const [form,          setForm]          = useState({});
+  const [imgSrc,        setImgSrc]        = useState(null);
+  const [confirmTarget, setConfirmTarget] = useState(null);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const offices = state.home.offices ?? [];
+
+  const openAdd  = () => { setForm({ name: '', address: '' }); setImgSrc(null); setModal('add'); };
+  const openEdit = (o) => { setForm(o); setImgSrc(o.img || null); setModal(o.id); };
+
+  const save = () => {
+    if (!form.name.trim()) { toast('Office name required', 'error'); return; }
+    const payload = { ...form, img: imgSrc ?? form.img ?? null };
+    if (modal === 'add') {
+      dispatch({ type: 'HOME_ADD_OFFICE', payload: { id: uid(), ...payload } });
+      toast('Office added!');
+    } else {
+      dispatch({ type: 'HOME_UPDATE_OFFICE', payload });
+      toast('Office updated!');
+    }
+    setModal(null);
+  };
+
+  return (
+    <div className="cms-card">
+      <div className="cms-card-title">
+        Offices &amp; Plants
+        <button className="cms-btn cms-btn--primary cms-btn--sm" onClick={openAdd}>+ Add Office</button>
+      </div>
+      <p className="cms-hint">
+        These appear as image cards in the "Our Offices &amp; Plants" section on the Home page. Upload a photo of each location.
+      </p>
+
+      {offices.length === 0
+        ? <div className="cms-empty"><div className="cms-empty-icon">🏢</div><p>No offices yet. Add your first location.</p></div>
+        : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+            {offices.map((o, i) => (
+              <div key={o.id} style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden' }}>
+                {/* Image preview */}
+                <div style={{
+                  height: 130, background: o.img ? '#000' : '#f3f4f6',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  position: 'relative', overflow: 'hidden',
+                }}>
+                  {o.img
+                    ? <img src={driveImgSrc(o.img, 'w400')} alt={o.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : <div style={{ textAlign: 'center', color: '#9ca3af' }}>
+                        <div style={{ fontSize: 32 }}>🏢</div>
+                        <div style={{ fontSize: 11, marginTop: 4 }}>No photo</div>
+                      </div>
+                  }
+                  <div style={{
+                    position: 'absolute', top: 6, left: 8,
+                    background: '#c0392b', color: '#fff',
+                    fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 3,
+                    letterSpacing: 1,
+                  }}>
+                    0{i + 1}
+                  </div>
+                </div>
+
+                <div style={{ padding: '10px 12px' }}>
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#111827', lineHeight: 1.3 }}>{o.name}</div>
+                  {o.address && <div style={{ fontSize: 11.5, color: '#6b7280', marginTop: 4, lineHeight: 1.5 }}>{o.address}</div>}
+                  <div style={{ display: 'flex', gap: 5, marginTop: 9 }}>
+                    <button className="cms-btn cms-btn--edit cms-btn--sm" style={{ flex: 1 }} onClick={() => openEdit(o)}>Edit</button>
+                    <button className="cms-btn cms-btn--danger cms-btn--sm" onClick={() => setConfirmTarget({ id: o.id, label: o.name })}>✕</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      }
+
+      {/* Edit / Add Modal */}
+      {modal && (
+        <Modal title={modal === 'add' ? 'Add Office / Plant' : 'Edit Office / Plant'} onClose={() => setModal(null)} wide>
+          <div className="cms-form-group">
+            <label>Office / Plant Name *</label>
+            <input value={form.name || ''} onChange={e => set('name', e.target.value)} placeholder="e.g. Head Office — Cabuyao, Laguna" />
+          </div>
+          <div className="cms-form-group">
+            <label>Address</label>
+            <input value={form.address || ''} onChange={e => set('address', e.target.value)} placeholder="Full street address" />
+          </div>
+          <div className="cms-form-group">
+            <label>Location Photo <span style={{ fontWeight: 400, color: '#9ca3af' }}>(photo of the building / plant)</span></label>
+            <UploadArea onUpload={driveUpload(setImgSrc)} preview={imgSrc} height={160} label="Upload office / plant photo" />
+          </div>
+          <ModalActions>
+            <button className="cms-btn cms-btn--ghost" onClick={() => setModal(null)}>Cancel</button>
+            <button className="cms-btn cms-btn--primary" onClick={save}>Save</button>
+          </ModalActions>
+        </Modal>
+      )}
+
+      <ConfirmDelete
+        target={confirmTarget}
+        onConfirm={(id) => { dispatch({ type: 'HOME_DEL_OFFICE', payload: id }); toast('Office removed'); }}
+        onCancel={() => setConfirmTarget(null)}
+      />
+    </div>
+  );
+}
+
 export default function HomeAdmin() {
   return (
     <div>
       <div className="cms-page-header">
-        <div><h1 className="cms-page-title">Home</h1><p className="cms-page-sub">Manage certifications and trusted partner companies</p></div>
+        <div>
+          <h1 className="cms-page-title">Home</h1>
+          <p className="cms-page-sub">Manage offices, certifications, and trusted partner companies</p>
+        </div>
       </div>
+      <OfficesSection />
       <CertSection />
       <PartnersSection />
     </div>

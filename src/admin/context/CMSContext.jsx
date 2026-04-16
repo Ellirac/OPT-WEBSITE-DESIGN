@@ -35,6 +35,11 @@ const initialState = {
       { id: 'c3', code: 'IATF 16949', label: 'Automotive Quality',       img: null, issuedBy: 'Bureau Veritas', validUntil: '' },
       { id: 'c4', code: '5S',         label: 'Workplace Excellence',     img: null, issuedBy: '',              validUntil: '' },
     ],
+    offices: [
+      { id: 'o1', name: 'Head Office — Cabuyao, Laguna', address: 'Block 5 Lot 1 Binary St., LISPP-1 SEPZ, Bo. Diezmo, Cabuyao, Laguna 4025', img: null },
+      { id: 'o2', name: 'Factory 2 — Cabuyao, Laguna',  address: 'Block 3 Lot 2 Binary St., LISPP-1 SEPZ, Bo. Diezmo, Cabuyao, Laguna 4025', img: null },
+      { id: 'o3', name: 'Factory 3 — Malvar, Batangas',  address: 'Block 10 Lot 1B & 2A Mega Drive St., LISPP-4 PEZA, Brgy. Bulihan, Malvar, Batangas', img: null },
+    ],
     partners: [
       { id: 'p1',  name: 'BIGMATE PHILIPPINES INC.' },
       { id: 'p2',  name: 'F.TECH PHILIPPINES MFG., INC.' },
@@ -556,6 +561,11 @@ function cmsReducer(state, { type, payload }) {
     case 'HOME_UPDATE_CERT':   return up('home', 'certifications', list => list.map(x => x.id === payload.id ? payload : x));
     case 'HOME_DEL_CERT':      return up('home', 'certifications', list => list.filter(x => x.id !== payload));
     case 'HOME_REORDER_CERTS': return up('home', 'certifications', () => payload);
+
+    // HOME — OFFICES
+    case 'HOME_ADD_OFFICE':    return up('home', 'offices', list => [...list, payload]);
+    case 'HOME_UPDATE_OFFICE': return up('home', 'offices', list => list.map(x => x.id === payload.id ? payload : x));
+    case 'HOME_DEL_OFFICE':    return up('home', 'offices', list => list.filter(x => x.id !== payload));
 
     // HOME — PARTNERS
     case 'HOME_ADD_PARTNER':    return up('home', 'partners', list => [...list, payload]);

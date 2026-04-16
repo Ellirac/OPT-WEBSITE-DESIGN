@@ -73,6 +73,7 @@ export default function Home() {
   const { state } = useCMS();
   const certs       = state.home.certifications;
   const allPartners = state.home.partners;
+  const offices     = state.home.offices ?? [];
 
   /* ── Normalise Drive image URLs ──────────────────────────────────────────────
      Old records stored `uc?export=view` URLs which don't render in <img> tags.
@@ -353,7 +354,48 @@ export default function Home() {
 
       <div className="sep sep--industries-to-certs" />
 
-      {/* ── CERTIFICATIONS ── */}
+      {/* ── OFFICES ── */}
+      {offices.length > 0 && (
+        <>
+          <section className="offices-section">
+            <div className="container">
+              <Reveal direction="up">
+                <h2 className="section-title">Our Offices</h2>
+                <p className="section-sub">
+                  Strategically located across the Philippines to serve our partners efficiently.
+                </p>
+              </Reveal>
+              <div className="offices-grid">
+                {offices.map((office, i) => (
+                  <Reveal key={office.id} direction="pop" delay={i + 1}>
+                    <div className="office-card">
+                      <div className="office-img-wrap">
+                        {office.img
+                          ? <img src={driveImgSrc(office.img, 'w800')} alt={office.name} className="office-img" />
+                          : <div className="office-img-placeholder">
+                              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                              </svg>
+                            </div>
+                        }
+                        <div className="office-img-overlay" />
+                      </div>
+                      <div className="office-info">
+                        <div className="office-num">0{i + 1}</div>
+                        <div className="office-name">{office.name}</div>
+                        {office.address && <div className="office-addr">{office.address}</div>}
+                      </div>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
+          </section>
+          <div className="sep sep--offices-to-certs" />
+        </>
+      )}
+
+      {/* ── CERTIFICATIONS (marquee) ── */}
       <section className="certs-section">
         <div className="container">
           <Reveal direction="up">
@@ -363,27 +405,32 @@ export default function Home() {
               We adhere to the highest international standards to ensure consistent quality across all our products.
             </p>
           </Reveal>
-          <div className="certs-grid">
-            {certs.map((c, i) => (
-              <Reveal key={i} direction="pop" delay={i + 1}>
-                <div
-                  className={`cert-card${c.img ? ' cert-card--clickable' : ''}`}
-                  onClick={() => c.img && setSelectedCert(c)}
-                  style={{ cursor: c.img ? 'pointer' : 'default' }}
-                >
-                  {c.img && (
-                    <div className="cert-img-thumb">
-                      <img src={driveImgSrc(c.img, 'w400')} alt={c.code} />
-                    </div>
-                  )}
-                  <div className="cert-code">{c.code}</div>
-                  <div className="cert-divider" />
-                  <div className="cert-label">{c.label}</div>
-                  {c.img && <div className="cert-view-hint">View Certificate →</div>}
-                </div>
-              </Reveal>
+        </div>
+
+        {/* Scrolling marquee row */}
+        <div className="certs-marquee-wrapper">
+          <div className="certs-track">
+            {[...certs, ...certs].map((c, i) => (
+              <div
+                key={i}
+                className={`cert-card${c.img ? ' cert-card--clickable' : ''}`}
+                onClick={() => c.img && setSelectedCert(c)}
+                style={{ cursor: c.img ? 'pointer' : 'default' }}
+              >
+                {c.img && (
+                  <div className="cert-img-thumb">
+                    <img src={driveImgSrc(c.img, 'w400')} alt={c.code} />
+                  </div>
+                )}
+                <div className="cert-code">{c.code}</div>
+                <div className="cert-divider" />
+                <div className="cert-label">{c.label}</div>
+                {c.img && <div className="cert-view-hint">View Certificate →</div>}
+              </div>
             ))}
           </div>
+        </div>
+        <div className="certs-track-mask" />
 
           {/* Certificate Lightbox */}
           {selectedCert && (
@@ -464,7 +511,6 @@ export default function Home() {
               <style>{`@keyframes certFadeIn{from{opacity:0}to{opacity:1}}`}</style>
             </div>
           )}
-        </div>
       </section>
 
       <div className="sep sep--certs-to-partners" />

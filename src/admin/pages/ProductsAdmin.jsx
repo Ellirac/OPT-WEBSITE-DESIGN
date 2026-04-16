@@ -122,7 +122,6 @@ function AutomobileProductsAdmin() {
               ⚠ No categories yet — go to <strong>Manage Categories</strong> tab to add some before placing pins.
             </div>
           )}
-
           {/* Car image + pins */}
           <div className="cms-hs-wrap" style={{ cursor:'crosshair' }}>
             <img
