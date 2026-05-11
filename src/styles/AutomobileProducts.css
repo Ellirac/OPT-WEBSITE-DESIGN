@@ -21,7 +21,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background: white;
+  background: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
   padding-top: 60px;
@@ -31,6 +31,7 @@ body {
 .product-header {
   position: relative;
   background: linear-gradient(to bottom, #9d3434 0%, #8a1515df 100%);  padding: 30px 30px;
+  padding: 22px;
   margin: 90px 0 10px;
   overflow: hidden;
   box-shadow: 0 2px 15px rgba(139, 28, 28, 0.2);
@@ -94,11 +95,11 @@ body {
 .car-wrapper { position: relative; }
 
 .car-img {
-  width: 150%;
+  width: 130%;
   height: 550px;
   display: block;
   border-radius: 10px;
-  margin-left: -25%;
+  margin-left: -20%;
 }
 
 .car-glow {
@@ -174,7 +175,7 @@ body {
   justify-content: center;
   padding: 60px 30px;
   text-align: center;
-  color: #999;
+  color: #bbb;
 }
 
 .part-content {
@@ -199,6 +200,7 @@ body {
   align-items: center;
   min-height: 350px;
   position: relative;
+  padding-left:60px;
 }
 
 .part-image-wrapper img {
@@ -215,7 +217,6 @@ body {
 
 .part-details {
   padding: 20px 22px 25px;
-  background: white;
 }
 
 .part-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
@@ -339,7 +340,7 @@ body {
   .header-content p { font-size: 0.88rem; }
   .part-title { font-size: 1.35rem; }
   .part-card { min-height: 520px; }
-  .part-image-wrapper { padding: 50px 35px; min-height: 380px; }
+  .part-image-wrapper { padding: 50px 35px; min-height: 400px; }
   .part-image-wrapper img { max-height: 380px; max-width: 95%; }
   .part-details { padding: 24px 26px 30px; }
   .car-container { max-width: 620px; }
@@ -359,7 +360,7 @@ body {
   .empty-state h3 { font-size: 1.3rem; }
   .empty-state p { font-size: 0.88rem; }
   .part-image-wrapper { min-height: 380px; padding: 50px 30px; }
-  .part-image-wrapper img { max-height: 380px; max-width: 95%; }
+  .part-image-wrapper img { max-height: 380px; max-width: 120%; }
   .part-details { padding: 24px 26px 30px; }
   .part-number-badge { width: 44px; height: 44px; font-size: 16px; }
   .part-title { font-size: 1.35rem; }

@@ -13,7 +13,7 @@ const NAV = [
 ];
 
 export default function Sidebar({ onLogout }) {
-  const { exportData, saveStatus } = useCMS();
+  const { saveStatus } = useCMS();
   const { state } = useCMS();
   const username = state?.adminSettings?.username || 'admin';
 
@@ -91,7 +91,6 @@ export default function Sidebar({ onLogout }) {
             <div style={{ fontSize:10.5, color:'#6b7280' }}>Administrator</div>
           </div>
         </div>
-        <button className="cms-export-btn" onClick={exportData}>⬇ Export JSON</button>
         <a href="/" className="cms-back-link">← Back to Website</a>
         <button
           onClick={() => { sessionStorage.removeItem('opt_admin_session'); onLogout(); }}

@@ -23,6 +23,16 @@ const Contact = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Route to correct inbox based on subject
+  const getToEmail = (subject) => {
+    switch (subject) {
+      case "Job Application":   return "hr@optphils.com.ph";
+      case "Sales Inquiry":     return "sales@optphils.com.ph";
+      case "Customer Concern":  return "optp@optphils.com.ph";
+      default:                  return "optp@optphils.com.ph";
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
@@ -33,7 +43,7 @@ const Contact = () => {
       from_email: formData.email,
       contact_number: formData.contact,
       message: formData.message,
-      to_email: "carillezapata00@gmail.com",
+      to_email: getToEmail(formData.subject),
     };
 
     emailjs
@@ -147,6 +157,18 @@ const Contact = () => {
                   <option value="Job Application">Job Application</option>
                   <option value="Others">Others</option>
                 </select>
+                {formData.subject && (
+                  <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "6px", marginBottom: 0 }}>
+                    📩 Your message will be sent to{" "}
+                    <strong>
+                      {formData.subject === "Job Application"
+                        ? "hr@optphils.com.ph"
+                        : formData.subject === "Sales Inquiry"
+                        ? "sales@optphils.com.ph"
+                        : "optp@optphils.com.ph"}
+                    </strong>
+                  </p>
+                )}
 
                 <div className="row mt-3">
                   <div className="col-md-6">

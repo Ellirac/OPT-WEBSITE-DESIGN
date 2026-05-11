@@ -365,28 +365,30 @@ export default function Home() {
                   Strategically located across the Philippines to serve our partners efficiently.
                 </p>
               </Reveal>
-              <div className="offices-grid">
-                {offices.map((office, i) => (
-                  <Reveal key={office.id} direction="pop" delay={i + 1}>
-                    <div className="office-card">
-                      <div className="office-img-wrap">
-                        {office.img
-                          ? <img src={driveImgSrc(office.img, 'w800')} alt={office.name} className="office-img" />
-                          : <div className="office-img-placeholder">
-                              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-                              </svg>
-                            </div>
-                        }
-                        <div className="office-img-overlay" />
-                      </div>
-                      <div className="office-info">
-                        <div className="office-num">0{i + 1}</div>
-                        <div className="office-name">{office.name}</div>
-                        {office.address && <div className="office-addr">{office.address}</div>}
-                      </div>
+            </div>
+
+            {/* Marquee strip — scrolls left continuously */}
+            <div className="offices-marquee-wrapper">
+              <div className="offices-marquee-track">
+                {[...offices, ...offices].map((office, i) => (
+                  <div key={i} className="office-marquee-card">
+                    <div className="office-marquee-img-wrap">
+                      {office.img
+                        ? <img src={driveImgSrc(office.img, 'w800')} alt={office.name} className="office-marquee-img" />
+                        : <div className="office-img-placeholder">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+                              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                            </svg>
+                          </div>
+                      }
+                      <div className="office-img-overlay" />
+                      <div className="office-marquee-badge">0{(i % offices.length) + 1}</div>
                     </div>
-                  </Reveal>
+                    <div className="office-info">
+                      <div className="office-name">{office.name}</div>
+                      {office.address && <div className="office-addr">{office.address}</div>}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>

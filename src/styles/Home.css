@@ -829,40 +829,60 @@
 /* ─────────────────────────────────────
    OFFICES
 ───────────────────────────────────── */
+/* ─────────────────────────────────────
+   OFFICES — Marquee Strip
+───────────────────────────────────── */
 .offices-section {
     background: var(--off);
     padding: var(--section-pad-lg) 0 var(--section-pad-md);
 }
 
-.offices-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+/* Marquee wrapper — clips overflow, fades edges */
+.offices-marquee-wrapper {
     margin-top: 40px;
-}
-
-.office-card {
-    background: var(--white);
-    border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+/* Scrolling track */
+.offices-marquee-track {
+    display: flex;
+    gap: 24px;
+    width: max-content;
+    animation: marquee-ltr 85s linear infinite;
+}
+
+.offices-marquee-track:hover {
+    animation-play-state: paused;
+}
+
+/* Each office card in the marquee */
+.office-marquee-card {
+    background: var(--white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+    flex-shrink: 0;
+    width: 320px;
     transition: transform 0.22s, box-shadow 0.22s;
+    cursor: default;
 }
 
-.office-card:hover {
+.office-marquee-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.10);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.11);
 }
 
-.office-img-wrap {
+.office-marquee-img-wrap {
     position: relative;
     width: 100%;
-    height: 220px;
+    height: 200px;
     overflow: hidden;
     background: var(--off2);
 }
 
-.office-img {
+.office-marquee-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -870,8 +890,32 @@
     transition: transform 0.4s ease;
 }
 
-.office-card:hover .office-img {
+.office-marquee-card:hover .office-marquee-img {
     transform: scale(1.04);
+}
+
+.office-marquee-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #c0392b;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+/* Responsive — narrower cards on small screens */
+@media (max-width: 560px) {
+    .office-marquee-card {
+        width: 260px;
+    }
+    .office-marquee-img-wrap {
+        height: 160px;
+    }
 }
 
 .office-img-placeholder {
@@ -918,22 +962,7 @@
     line-height: 1.6;
 }
 
-/* Responsive offices */
-@media (max-width: 900px) {
-    .offices-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 560px) {
-    .offices-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .office-img-wrap {
-        height: 180px;
-    }
-}
+/* Responsive offices handled per .office-marquee-card above */
 
 /* ─────────────────────────────────────
    PARTNERS

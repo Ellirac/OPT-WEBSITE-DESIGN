@@ -84,7 +84,7 @@ const fRed  = e => { e.target.style.borderColor = '#c0392b'; };
 const fGray = e => { e.target.style.borderColor = '#e5e7eb'; };
 
 // ─── Credential store helpers ─────────────────────────────────────────────────
-const DEFAULT_CREDS = { username:'admin', password:'OPT@Admin2026' };
+const DEFAULT_CREDS = { username:'admin', password:'OPT@Admin2025' };
 
 // Module-level credential readers — localStorage kept in sync with Firestore by AdminLogin
 function getCreds() {
@@ -212,14 +212,6 @@ function StepLogin({ onLogin, onForgot }) {
           </button>
         </div>
 
-        {/* Default credentials hint */}
-        <div style={{ marginTop:20, background:'#f9fafb', border:'1px solid #e5e7eb',
-          borderRadius:8, padding:'10px 14px', fontSize:12, color:'#6b7280', lineHeight:1.8 }}>
-          <strong style={{color:'#374151'}}>Default login credentials:</strong><br/>
-          Username: <code style={{background:'#e5e7eb',padding:'1px 6px',borderRadius:4}}>admin</code>
-          &nbsp;&nbsp;Password: <code style={{background:'#e5e7eb',padding:'1px 6px',borderRadius:4}}>OPT@Admin2026</code><br/>
-          <span style={{fontSize:11,color:'#9ca3af'}}>Change these in Settings after your first login.</span>
-        </div>
       </div>
     </div>
   );
