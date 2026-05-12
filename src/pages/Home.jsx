@@ -397,7 +397,7 @@ export default function Home() {
         </>
       )}
 
-      {/* ── CERTIFICATIONS (marquee) ── */}
+      {/* ── CERTIFICATIONS ── */}
       <section className="certs-section">
         <div className="container">
           <Reveal direction="up">
@@ -409,30 +409,56 @@ export default function Home() {
           </Reveal>
         </div>
 
-        {/* Scrolling marquee row */}
-        <div className="certs-marquee-wrapper">
-          <div className="certs-track">
-            {[...certs, ...certs].map((c, i) => (
+        {/* 1–2 certs → static, left-aligned | 3+ certs → marquee */}
+        {certs.length < 3 ? (
+          <div className="certs-static-wrapper">
+            {certs.map((c) => (
               <div
-                key={i}
+                key={c.id}
                 className={`cert-card${c.img ? ' cert-card--clickable' : ''}`}
                 onClick={() => c.img && setSelectedCert(c)}
                 style={{ cursor: c.img ? 'pointer' : 'default' }}
               >
                 {c.img && (
-                  <div className="cert-img-thumb">
-                    <img src={driveImgSrc(c.img, 'w400')} alt={c.code} />
+                  <div className="cert-img-wrap">
+                    <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" />
+                    <div className="cert-img-overlay" />
                   </div>
                 )}
-                <div className="cert-code">{c.code}</div>
-                <div className="cert-divider" />
-                <div className="cert-label">{c.label}</div>
-                {c.img && <div className="cert-view-hint">View Certificate →</div>}
+                <div className="cert-info">
+                  <div className="cert-code">{c.code}</div>
+                  <div className="cert-label">{c.label}</div>
+                  {c.img && <div className="cert-view-hint">View Certificate →</div>}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-        <div className="certs-track-mask" />
+        ) : (
+          <div className="certs-marquee-wrapper">
+            <div className="certs-track">
+              {[...certs, ...certs].map((c, i) => (
+                <div
+                  key={i}
+                  className={`cert-card${c.img ? ' cert-card--clickable' : ''}`}
+                  onClick={() => c.img && setSelectedCert(c)}
+                  style={{ cursor: c.img ? 'pointer' : 'default' }}
+                >
+                  {c.img && (
+                    <div className="cert-img-wrap">
+                      <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" />
+                      <div className="cert-img-overlay" />
+                    </div>
+                  )}
+                  <div className="cert-info">
+                    <div className="cert-code">{c.code}</div>
+                    <div className="cert-label">{c.label}</div>
+                    {c.img && <div className="cert-view-hint">View Certificate →</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
           {/* Certificate Lightbox */}
           {selectedCert && (
@@ -472,15 +498,14 @@ export default function Home() {
 
                 {/* Certificate image */}
                 <div style={{
-                  background:'#fff', borderRadius:12, overflow:'hidden',
+                  borderRadius:12, overflow:'hidden',
                   boxShadow:'0 32px 80px rgba(0,0,0,0.5)',
                   display:'flex', alignItems:'center', justifyContent:'center',
-                  minHeight:200,
                 }}>
                   <img
                     src={driveImgSrc(selectedCert.img, 'w1600')}
                     alt={selectedCert.code}
-                    style={{ width:'100%', maxHeight:'75vh', objectFit:'contain', display:'block' }}
+                    style={{ width:'100%', maxHeight:'75vh', objectFit:'cover', display:'block', borderRadius:12 }}
                   />
                 </div>
 
