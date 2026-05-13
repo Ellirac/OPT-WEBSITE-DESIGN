@@ -147,22 +147,109 @@ async function sendOtpEmail(toEmail, otp) {
 }
 
 
+// ─── Brute-force protection helpers ──────────────────────────────────────────
+const MAX_ATTEMPTS       = 5;
+// Lockout durations in seconds — escalates each time the limit is hit
+const LOCKOUT_DURATIONS  = [30, 60, 300, 900]; // 30s, 1 min, 5 min, 15 min
+const ATTEMPTS_KEY       = 'opt_login_attempts';
+const LOCKOUT_KEY        = 'opt_login_lockout';
+const LAST_LOGIN_KEY     = 'opt_last_login';
+
+function readAttempts() {
+  try { return JSON.parse(localStorage.getItem(ATTEMPTS_KEY)) || { count: 0, level: 0 }; }
+  catch { return { count: 0, level: 0 }; }
+}
+function readLockout() {
+  try { return JSON.parse(localStorage.getItem(LOCKOUT_KEY)) || { until: 0 }; }
+  catch { return { until: 0 }; }
+}
+function remainingLockout() {
+  return Math.max(0, Math.ceil((readLockout().until - Date.now()) / 1000));
+}
+function recordFail() {
+  const a = readAttempts();
+  a.count += 1;
+  if (a.count >= MAX_ATTEMPTS) {
+    const duration = LOCKOUT_DURATIONS[Math.min(a.level, LOCKOUT_DURATIONS.length - 1)];
+    localStorage.setItem(LOCKOUT_KEY, JSON.stringify({ until: Date.now() + duration * 1000 }));
+    a.count = 0;
+    a.level = Math.min(a.level + 1, LOCKOUT_DURATIONS.length - 1);
+  }
+  localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(a));
+  return { attemptsLeft: MAX_ATTEMPTS - a.count };
+}
+function clearAttempts() {
+  localStorage.removeItem(ATTEMPTS_KEY);
+  localStorage.removeItem(LOCKOUT_KEY);
+}
+function formatCountdown(s) {
+  if (s >= 60) return `${Math.ceil(s / 60)} minute${Math.ceil(s / 60) > 1 ? 's' : ''}`;
+  return `${s} second${s !== 1 ? 's' : ''}`;
+}
+function saveLastLogin() {
+  localStorage.setItem(LAST_LOGIN_KEY, JSON.stringify({ at: Date.now() }));
+}
+function getLastLogin() {
+  try {
+    const d = JSON.parse(localStorage.getItem(LAST_LOGIN_KEY));
+    if (!d?.at) return null;
+    return new Date(d.at).toLocaleString('en-PH', {
+      month: 'short', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  } catch { return null; }
+}
+
 // ─── STEP 1: Login ────────────────────────────────────────────────────────────
 function StepLogin({ onLogin, onForgot }) {
-  const [user,  setUser]  = useState('');
-  const [pass,  setPass]  = useState('');
-  const [show,  setShow]  = useState(false);
-  const [err,   setErr]   = useState('');
-  const [shake, setShake] = useState(false);
+  const [user,      setUser]      = useState('');
+  const [pass,      setPass]      = useState('');
+  const [show,      setShow]      = useState(false);
+  const [err,       setErr]       = useState('');
+  const [shake,     setShake]     = useState(false);
+  const [countdown, setCountdown] = useState(() => remainingLockout());
+  const [attLeft,   setAttLeft]   = useState(() => MAX_ATTEMPTS - readAttempts().count);
+  const lastLogin = getLastLogin();
+
+  // Tick down the lockout countdown every second
+  React.useEffect(() => {
+    if (countdown <= 0) return;
+    const t = setInterval(() => {
+      const r = remainingLockout();
+      setCountdown(r);
+      if (r <= 0) clearInterval(t);
+    }, 1000);
+    return () => clearInterval(t);
+  }, [countdown]);
+
+  const isLocked = countdown > 0;
 
   const submit = e => {
     e.preventDefault();
     setErr('');
+
+    if (isLocked) return; // blocked while locked out
+
     const c = getCreds();
     if (user.trim() === c.username && pass === c.password) {
+      clearAttempts();
+      saveLastLogin();
       onLogin();
     } else {
-      setErr('Incorrect username or password. Please try again.');
+      const { attemptsLeft } = recordFail();
+      const remaining = remainingLockout();
+
+      if (remaining > 0) {
+        setCountdown(remaining);
+        setErr(`Too many failed attempts. Account locked for ${formatCountdown(remaining)}.`);
+      } else {
+        setAttLeft(attemptsLeft);
+        setErr(
+          attemptsLeft <= 2
+            ? `Incorrect credentials. ${attemptsLeft} attempt${attemptsLeft !== 1 ? 's' : ''} left before lockout.`
+            : 'Incorrect username or password. Please try again.'
+        );
+      }
       setShake(true);
       setTimeout(() => setShake(false), 500);
     }
@@ -172,7 +259,27 @@ function StepLogin({ onLogin, onForgot }) {
     <div style={{ animation: shake ? 'opt-shake .5s ease' : 'opt-in .35s ease' }}>
       <div style={S.card}>
         <p style={{ fontSize:16, fontWeight:700, color:'#1a0000', margin:'0 0 3px' }}>Welcome back</p>
-        <p style={{ fontSize:13, color:'#9ca3af', margin:'0 0 24px' }}>Sign in to manage the OPT website content.</p>
+        <p style={{ fontSize:13, color:'#9ca3af', margin:'0 0 4px' }}>Sign in to manage the OPT website content.</p>
+        {lastLogin && (
+          <p style={{ fontSize:11.5, color:'#c0392b', margin:'0 0 20px', display:'flex', alignItems:'center', gap:5 }}>
+            <span>🕐</span> Last login: {lastLogin}
+          </p>
+        )}
+        {!lastLogin && <div style={{ marginBottom:20 }} />}
+
+        {/* Lockout banner */}
+        {isLocked && (
+          <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:8,
+            padding:'14px 16px', marginBottom:16, textAlign:'center' }}>
+            <div style={{ fontSize:28, marginBottom:6 }}>🔒</div>
+            <p style={{ fontSize:13.5, fontWeight:700, color:'#dc2626', margin:'0 0 4px' }}>
+              Account Temporarily Locked
+            </p>
+            <p style={{ fontSize:13, color:'#b91c1c', margin:0 }}>
+              Try again in <strong>{formatCountdown(countdown)}</strong>
+            </p>
+          </div>
+        )}
 
         <form onSubmit={submit}>
           {/* Username */}
@@ -180,7 +287,8 @@ function StepLogin({ onLogin, onForgot }) {
             <label style={S.label}>Username</label>
             <input value={user} onChange={e=>{setUser(e.target.value);setErr('');}}
               placeholder="Enter username" autoComplete="username" required
-              style={S.input} onFocus={fRed} onBlur={fGray} />
+              disabled={isLocked}
+              style={{...S.input, opacity: isLocked ? .5 : 1}} onFocus={fRed} onBlur={fGray} />
           </div>
 
           {/* Password */}
@@ -190,24 +298,38 @@ function StepLogin({ onLogin, onForgot }) {
               <input type={show?'text':'password'} value={pass}
                 onChange={e=>{setPass(e.target.value);setErr('');}}
                 placeholder="Enter password" autoComplete="current-password" required
-                style={{...S.input, paddingRight:40}} onFocus={fRed} onBlur={fGray} />
+                disabled={isLocked}
+                style={{...S.input, paddingRight:40, opacity: isLocked ? .5 : 1}} onFocus={fRed} onBlur={fGray} />
               <button type="button" onClick={()=>setShow(s=>!s)} style={S.eyeBtn}><Eye show={show}/></button>
             </div>
           </div>
 
-          {err && <div style={{...S.err, marginBottom:14}}><span>⚠</span>{err}</div>}
+          {/* Attempts warning */}
+          {!isLocked && attLeft <= 2 && attLeft > 0 && (
+            <div style={{ background:'#fffbeb', border:'1px solid #fde68a', borderRadius:7,
+              padding:'8px 12px', fontSize:12.5, color:'#92400e', marginBottom:12,
+              display:'flex', alignItems:'center', gap:7 }}>
+              <span>⚠️</span>
+              <span><strong>{attLeft} attempt{attLeft !== 1 ? 's' : ''} remaining</strong> before lockout</span>
+            </div>
+          )}
 
-          <button type="submit" style={S.btn}
-            onMouseEnter={e=>e.target.style.opacity='.85'}
-            onMouseLeave={e=>e.target.style.opacity='1'}>
-            Sign In →
+          {err && !isLocked && <div style={{...S.err, marginBottom:14}}><span>⚠</span>{err}</div>}
+
+          <button type="submit" disabled={isLocked}
+            style={{...S.btn, opacity: isLocked ? '.45' : '1', cursor: isLocked ? 'not-allowed' : 'pointer'}}
+            onMouseEnter={e=>{ if(!isLocked) e.target.style.opacity='.85'; }}
+            onMouseLeave={e=>{ if(!isLocked) e.target.style.opacity='1'; }}>
+            {isLocked ? `Locked — ${formatCountdown(countdown)}` : 'Sign In →'}
           </button>
         </form>
 
         {/* Forgot password */}
         <div style={{ textAlign:'center', marginTop:16 }}>
-          <button onClick={onForgot} style={{ background:'none', border:'none', color:'#c0392b',
-            fontSize:13, cursor:'pointer', fontWeight:600, textDecoration:'underline' }}>
+          <button onClick={onForgot} disabled={isLocked}
+            style={{ background:'none', border:'none', color: isLocked ? '#d1d5db' : '#c0392b',
+              fontSize:13, cursor: isLocked ? 'not-allowed' : 'pointer',
+              fontWeight:600, textDecoration:'underline' }}>
             Forgot password?
           </button>
         </div>

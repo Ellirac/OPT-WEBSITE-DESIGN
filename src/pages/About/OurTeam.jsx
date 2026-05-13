@@ -41,7 +41,13 @@ const OurTeam = () => {
                 <div className="team-card shadow-lg h-100">
                   <div className="team-img-wrapper">
                     {imgSrc
-                      ? <img src={imgSrc} alt={person.name} className="team-img" />
+                      ? <img src={imgSrc} alt={person.name} className="team-img"
+                          onError={e => {
+                            const m = imgSrc && (imgSrc.match(/[?&]id=([a-zA-Z0-9_-]+)/) || imgSrc.match(/\/d\/([a-zA-Z0-9_-]+)/));
+                            if (m && !e.target.dataset.fallback) { e.target.dataset.fallback='1'; e.target.src=`https://drive.google.com/uc?export=view&id=${m[1]}`; }
+                            else { e.target.style.opacity='0.3'; }
+                          }}
+                        />
                       : <div style={{ height:200, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:50, color:'#d1d5db' }}>👤</div>
                     }
                   </div>

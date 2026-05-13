@@ -17,7 +17,13 @@ const CompanyProfile = () => {
           <div className="col-md-4 mb-4" key={factory.id || index}>
             <div className="card shadow-lg h-100 factory-card">
               {factory.img
-                ? <img src={factory.img} className="card-img-top" alt={factory.name} />
+                ? <img src={factory.img} className="card-img-top" alt={factory.name}
+                    onError={e => {
+                      const m = factory.img && (factory.img.match(/[?&]id=([a-zA-Z0-9_-]+)/) || factory.img.match(/\/d\/([a-zA-Z0-9_-]+)/));
+                      if (m && !e.target.dataset.fallback) { e.target.dataset.fallback='1'; e.target.src=`https://drive.google.com/uc?export=view&id=${m[1]}`; }
+                      else { e.target.style.opacity='0.3'; }
+                    }}
+                  />
                 : <div style={{ height:200, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', color:'#9ca3af', fontSize:40 }}>🏭</div>
               }
               <div className="card-body">

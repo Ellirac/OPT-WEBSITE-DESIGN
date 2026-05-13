@@ -82,7 +82,18 @@ export default function Home() {
     if (!url) return null;
     const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
     if (m) return `https://drive.google.com/thumbnail?id=${m[1]}&sz=${size}`;
-    return url; // already a thumbnail URL or other URL — use as-is
+    return url;
+  };
+
+  // If thumbnail API fails → retry with uc?export=view (different Drive code-path)
+  const driveImgError = (e, url) => {
+    const m = url && (url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/));
+    if (m && !e.target.dataset.fallback) {
+      e.target.dataset.fallback = '1';
+      e.target.src = `https://drive.google.com/uc?export=view&id=${m[1]}`;
+    } else {
+      e.target.style.opacity = '0.3'; // show broken gracefully
+    }
   };
 
   /* ── Certificate lightbox ── */
@@ -374,7 +385,7 @@ export default function Home() {
                   <div key={i} className="office-marquee-card">
                     <div className="office-marquee-img-wrap">
                       {office.img
-                        ? <img src={driveImgSrc(office.img, 'w800')} alt={office.name} className="office-marquee-img" />
+                        ? <img src={driveImgSrc(office.img, 'w800')} alt={office.name} className="office-marquee-img" onError={e => driveImgError(e, office.img)} />
                         : <div className="office-img-placeholder">
                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
                               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -421,7 +432,7 @@ export default function Home() {
               >
                 {c.img && (
                   <div className="cert-img-wrap">
-                    <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" />
+                    <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" onError={e => driveImgError(e, c.img)} />
                     <div className="cert-img-overlay" />
                   </div>
                 )}
@@ -445,7 +456,7 @@ export default function Home() {
                 >
                   {c.img && (
                     <div className="cert-img-wrap">
-                      <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" />
+                      <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" onError={e => driveImgError(e, c.img)} />
                       <div className="cert-img-overlay" />
                     </div>
                   )}
@@ -506,6 +517,7 @@ export default function Home() {
                     src={driveImgSrc(selectedCert.img, 'w1600')}
                     alt={selectedCert.code}
                     style={{ width:'100%', maxHeight:'75vh', objectFit:'cover', display:'block', borderRadius:12 }}
+                    onError={e => driveImgError(e, selectedCert.img)}
                   />
                 </div>
 

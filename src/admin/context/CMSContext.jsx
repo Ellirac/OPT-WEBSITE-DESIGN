@@ -843,9 +843,25 @@ export function CMSProvider({ children }) {
   const [loading,    setLoading]    = useState(true);
   const [saveStatus, setSaveStatus] = useState('saved');
 
+  // ─── dirtyRef ────────────────────────────────────────────────────────────────
+  // Only set to true when an ADMIN action changes state (not during __HYDRATE__).
+  // This prevents the save effect from firing on page load and overwriting
+  // Firestore with initialState values when a snapshot fails to load.
+  // ROOT CAUSE OF DATA REVERTING: the old code saved on every state change,
+  // including hydration. If a Firestore doc errored, its section stayed as
+  // initialState and was then saved back to Firestore, nuking real data.
+  const dirtyRef = React.useRef(false);
+
+  // Wrap dispatch: only real admin actions mark data dirty.
+  // __HYDRATE__ is internal (reading FROM Firestore) — never mark dirty.
+  const adminDispatch = useCallback((action) => {
+    if (action.type !== '__HYDRATE__') {
+      dirtyRef.current = true;
+    }
+    dispatch(action);
+  }, []);
+
   // 🟢 MULTI-DOC REAL-TIME LISTENERS
-  // Wait for ALL 5 docs to respond before hiding the loader so data is
-  // fully hydrated before end users see the page.
   useEffect(() => {
     const unsubscribers = [];
     const total  = Object.keys(CMS_DOCS).length;
@@ -867,6 +883,8 @@ export function CMSProvider({ children }) {
         onResolved();
       }, (err) => {
         console.error(`[CMS] Error loading ${key}:`, err);
+        // Still resolve so the spinner doesn't hang — but do NOT save this
+        // section since it was never hydrated (dirtyRef stays false).
         onResolved();
       });
 
@@ -876,20 +894,23 @@ export function CMSProvider({ children }) {
     return () => unsubscribers.forEach(unsub => unsub());
   }, []);
 
-  // 🟡 SAVE PER SECTION (DEBOUNCED)
+  // 🟡 SAVE — only fires when admin has actually changed something
   const saveTimer = React.useRef(null);
 
   useEffect(() => {
     if (loading) return;
+    if (!dirtyRef.current) return; // ← KEY FIX: skip saves from hydration
 
     setSaveStatus('saving');
     clearTimeout(saveTimer.current);
 
     saveTimer.current = setTimeout(async () => {
+      // Reset before the async save so a rapid second edit queues correctly
+      dirtyRef.current = false;
+
       try {
         const stateToSave = stripForFirestore(state);
 
-        // Optional size check per section
         Object.entries(stateToSave).forEach(([key, val]) => {
           const sizeKB = Math.round(new Blob([JSON.stringify(val)]).size / 1024);
           if (sizeKB > 950) {
@@ -908,6 +929,7 @@ export function CMSProvider({ children }) {
         setSaveStatus('saved');
       } catch (err) {
         console.error('[CMS] Save error:', err);
+        dirtyRef.current = true; // re-mark dirty so it retries
         setSaveStatus('error');
       }
     }, 600);
@@ -950,7 +972,7 @@ export function CMSProvider({ children }) {
   }
 
   return (
-    <CMSContext.Provider value={{ state, dispatch, uid, exportData, saveStatus }}>
+    <CMSContext.Provider value={{ state, dispatch: adminDispatch, uid, exportData, saveStatus }}>
       {children}
     </CMSContext.Provider>
   );

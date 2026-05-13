@@ -46,7 +46,13 @@ const OurBase = () => {
             <div key={base.id} className="col-md-3 col-sm-6 mb-4">
               <div className="base-card shadow-lg h-100">
                 {imgSrc
-                  ? <img src={imgSrc} alt={base.name} className="base-img" />
+                  ? <img src={imgSrc} alt={base.name} className="base-img"
+                      onError={e => {
+                        const m = imgSrc && (imgSrc.match(/[?&]id=([a-zA-Z0-9_-]+)/) || imgSrc.match(/\/d\/([a-zA-Z0-9_-]+)/));
+                        if (m && !e.target.dataset.fallback) { e.target.dataset.fallback='1'; e.target.src=`https://drive.google.com/uc?export=view&id=${m[1]}`; }
+                        else { e.target.style.opacity='0.3'; }
+                      }}
+                    />
                   : <div style={{ height:180, background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', fontSize:40, color:'#d1d5db' }}>📍</div>
                 }
                 <div className="base-info p-3">
