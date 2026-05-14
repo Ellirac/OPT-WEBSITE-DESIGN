@@ -67,9 +67,9 @@ function FolderList({ folders, posts, images, onOpenFolder, onAddFolder, onEditF
                   style={{ height:110, background:'linear-gradient(135deg,#1a0000,#5c0a00)',
                     display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
                   {(() => {
-                    const firstImg     = images.find(i=>i.folderId===folder.id && (i.src || i.driveFileId));
-                    const firstVid     = posts.find(p=>p.folderId===folder.id && p.youtubeId);
-                    const firstDriveV  = posts.find(p=>p.folderId===folder.id && p.driveUrl);
+                    const firstImg    = images.find(i=>i.folderId===folder.id && (i.src || i.driveFileId));
+                    const firstVid    = posts.find(p=>p.folderId===folder.id && p.youtubeId);
+                    const firstDriveV = posts.find(p=>p.folderId===folder.id && p.driveUrl);
                     const imgSrc = firstImg?.driveFileId
                       ? `https://drive.google.com/thumbnail?id=${firstImg.driveFileId}&sz=w400`
                       : firstImg?.src;
@@ -128,31 +128,55 @@ function FolderList({ folders, posts, images, onOpenFolder, onAddFolder, onEditF
 }
 
 // ─── Drive Auth Banner ────────────────────────────────────────────────────────
+// ✅ FIXED: uses direct promise instead of polling interval.
+//    openDriveAuthWindow() now resolves when the user finishes signing in.
 function DriveAuthBanner({ onConnected }) {
   const [connecting, setConnecting] = useState(false);
   return (
-    <div style={{ background:'#f0f4ff', border:'2px dashed #4285f4', borderRadius:12,
-      padding:'20px 24px', marginBottom:16, display:'flex', alignItems:'center', gap:16 }}>
+    <div style={{
+      background:'#f0f4ff', border:'2px dashed #4285f4', borderRadius:12,
+      padding:'20px 24px', marginBottom:16, display:'flex', alignItems:'center', gap:16,
+    }}>
       <span style={{ fontSize:32 }}>🔗</span>
       <div style={{ flex:1 }}>
-        <p style={{ margin:0, fontWeight:700, color:'#1a56db', fontSize:14 }}>Connect Google Drive to upload files</p>
+        <p style={{ margin:0, fontWeight:700, color:'#1a56db', fontSize:14 }}>
+          Sign in with Google to upload files
+        </p>
         <p style={{ margin:'4px 0 0', fontSize:12, color:'#6b7280' }}>
-          All photos &amp; videos will be stored in your Google Drive (15 GB free — no payment needed)
+          Any Google account — files go to the shared company Drive folder
         </p>
       </div>
       <button
         disabled={connecting}
         onClick={async () => {
           setConnecting(true);
-          await openDriveAuthWindow();
-          const poll = setInterval(async () => {
-            const ok = await checkDriveAuth();
-            if (ok) { clearInterval(poll); onConnected(); }
-          }, 1500);
+          try {
+            await openDriveAuthWindow(); // resolves when sign-in is complete
+            onConnected();
+          } catch {
+            setConnecting(false);
+            alert('Sign-in was cancelled or failed. Please try again.');
+          }
         }}
-        style={{ background:'#4285f4', color:'#fff', border:'none', borderRadius:8,
-          padding:'9px 20px', fontWeight:700, cursor:'pointer', fontSize:13, whiteSpace:'nowrap' }}>
-        {connecting ? 'Opening Google…' : 'Sign in with Google'}
+        style={{
+          display:'flex', alignItems:'center', gap:8,
+          background:'#fff', color:'#3c4043', border:'1px solid #dadce0',
+          borderRadius:8, padding:'9px 18px', fontWeight:700,
+          cursor: connecting ? 'not-allowed' : 'pointer',
+          fontSize:13, whiteSpace:'nowrap',
+          boxShadow:'0 1px 3px rgba(0,0,0,0.1)',
+          opacity: connecting ? 0.7 : 1,
+        }}>
+        {connecting ? (
+          'Signing in…'
+        ) : (
+          <>
+            <svg width="16" height="16" viewBox="0 0 48 48">
+              <path fill="#4285F4" d="M44.5 20H24v8.5h11.8C34.3 33.7 29.7 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/>
+            </svg>
+            Sign in with Google
+          </>
+        )}
       </button>
     </div>
   );
@@ -165,7 +189,7 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
   const [uploadModal,  setUploadModal]  = useState(false);
   const [uploadType,   setUploadType]   = useState('image');
   const [uForm,        setUForm]        = useState({ title:'', date: folder.date||'', desc:'' });
-  const [uFiles,       setUFiles]       = useState([]); // [{name, file, previewUrl, mime}]
+  const [uFiles,       setUFiles]       = useState([]);
   const [uUploading,   setUUploading]   = useState(false);
   const [uProgress,    setUProgress]    = useState(0);
   const [ytId,         setYtId]         = useState('');
@@ -178,7 +202,6 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
   const [confirmTarget, setConfirmTarget] = useState(null);
   const setE = (k,v) => setEditForm(f=>({...f,[k]:v}));
 
-  // Check Drive auth when modal opens
   const openUploadModal = async () => {
     setUploadModal(true);
     const ok = await checkDriveAuth();
@@ -197,7 +220,6 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Stage files for preview (no upload yet)
   const stageImageFiles = (files) => {
     const staged = [];
     for (const file of Array.from(files)) {
@@ -215,18 +237,17 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
   const handleFileInput = (e) => {
     const files = e.target.files;
     if (!files?.length) return;
-    if (uploadType === 'image')        stageImageFiles(files);
+    if (uploadType === 'image')            stageImageFiles(files);
     else if (uploadType === 'video_local') stageVideoFile(files[0]);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
-    if (uploadType === 'image')        stageImageFiles(files);
+    if (uploadType === 'image')            stageImageFiles(files);
     else if (uploadType === 'video_local') stageVideoFile(files[0]);
   };
 
-  // Upload to Drive then dispatch
   const saveUpload = async () => {
     // YouTube — no Drive needed
     if (uploadType === 'video_yt') {
@@ -239,7 +260,7 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
 
     if (!uFiles.length) { toast('No files selected yet','error'); return; }
 
-    // Check auth
+    // Check auth before uploading
     const authed = await checkDriveAuth();
     if (!authed) { setDriveAuthed(false); return; }
 
@@ -260,7 +281,7 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
             id: uid(),
             title: total === 1 ? (uForm.title.trim() || f.name) : (uForm.title ? `${uForm.title} ${i+1}` : f.name),
             date: uForm.date, desc: uForm.desc,
-            src: result.url,         // Drive public URL
+            src: result.url,
             driveFileId: result.fileId,
             folderId: folder.id,
           }});
@@ -299,7 +320,6 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
   };
 
   const handleDelete = async (item) => {
-    // Clean up from Drive if possible
     if (item.driveFileId) {
       deleteFromDrive(item.driveFileId).catch(() => {});
     }
@@ -315,7 +335,6 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
 
   return (
     <div>
-      {/* Header */}
       <div className="cms-page-header">
         <div style={{ display:'flex', alignItems:'center', gap:12 }}>
           <button onClick={onBack}
@@ -337,7 +356,6 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
         </button>
       </div>
 
-      {/* Content grid */}
       <div className="cms-card">
         {allFolderItems.length === 0 ? (
           <div className="cms-empty">
@@ -379,7 +397,6 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
                       </div>
                     </>
                   )}
-                  {/* Legacy local video */}
                   {item._collection === 'post' && item.videoSrc && !item.driveUrl && (
                     <>
                       <video src={item.videoSrc} style={{ width:'100%', height:'100%', objectFit:'cover', opacity:0.85 }} muted />
@@ -415,7 +432,7 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
       {uploadModal && (
         <Modal title="Add Content to Folder" onClose={resetUpload}>
 
-          {/* Drive auth banner if not connected */}
+          {/* Drive auth banner — shown when not signed in */}
           {driveAuthed === false && (
             <DriveAuthBanner onConnected={() => setDriveAuthed(true)} />
           )}
@@ -500,7 +517,7 @@ function FolderContents({ folder, posts, images, dispatch, onBack }) {
                   <p style={{ fontSize:12, color:'#9ca3af', marginBottom:4 }}>
                     {uploadType==='image' ? 'JPG, PNG, WebP — select multiple at once' : 'MP4, WebM, MOV — any size (stored in Drive)'}
                   </p>
-                  <p style={{ fontSize:11, color:'#4285f4', margin:0 }}>☁️ Files go to your Google Drive</p>
+                  <p style={{ fontSize:11, color:'#4285f4', margin:0 }}>☁️ Files go to the shared company Google Drive</p>
                 </>
               )}
             </div>

@@ -55,8 +55,6 @@ const industries = [
   { num: "05", label: "Industrial" },
 ];
 
-/* ── CMS data replaces hardcoded certs and partners (see useCMS below) ── */
-
 function Reveal({ children, direction = "up", delay = 0, className = "" }) {
   const [ref, inView] = useInView(0.12);
   const dirClass = { up: "reveal-up", left: "reveal-left", right: "reveal-right", pop: "reveal-pop" }[direction] || "reveal-up";
@@ -75,9 +73,6 @@ export default function Home() {
   const allPartners = state.home.partners;
   const offices     = state.home.offices ?? [];
 
-  /* ── Normalise Drive image URLs ──────────────────────────────────────────────
-     Old records stored `uc?export=view` URLs which don't render in <img> tags.
-     Extract the file ID and convert to the thumbnail API which always works.    */
   const driveImgSrc = (url, size = 'w800') => {
     if (!url) return null;
     const m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -85,20 +80,9 @@ export default function Home() {
     return url;
   };
 
-  // If thumbnail API fails → retry with uc?export=view (different Drive code-path)
-  const driveImgError = (e, url) => {
-    const m = url && (url.match(/[?&]id=([a-zA-Z0-9_-]+)/) || url.match(/\/d\/([a-zA-Z0-9_-]+)/));
-    if (m && !e.target.dataset.fallback) {
-      e.target.dataset.fallback = '1';
-      e.target.src = `https://drive.google.com/uc?export=view&id=${m[1]}`;
-    } else {
-      e.target.style.opacity = '0.3'; // show broken gracefully
-    }
-  };
-
   /* ── Certificate lightbox ── */
   const [selectedCert, setSelectedCert] = useState(null);
-  // Dynamic rows — works for any partner count
+
   const chunkSize = 8;
   const partnerRows = [];
   for (let i = 0; i < allPartners.length; i += chunkSize) {
@@ -114,12 +98,12 @@ export default function Home() {
     if (!accepted) { setShowNotice(true); document.body.style.overflow = "hidden"; }
   }, []);
 
-  // ESC closes cert lightbox
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') setSelectedCert(null); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
+
   const handleAcceptNotice = () => {
     localStorage.setItem("opt_notice_accepted", "true");
     setShowNotice(false);
@@ -156,6 +140,35 @@ export default function Home() {
     obs.observe(section);
     return () => obs.disconnect();
   }, []);
+
+  /* ── Cert flip: pause/resume marquee track ── */
+  const certTrackRef = useRef(null);
+
+  const handleCertEnter = (e) => {
+    e.currentTarget.classList.add("flipped");
+    if (certTrackRef.current) certTrackRef.current.style.animationPlayState = "paused";
+  };
+
+  const handleCertLeave = (e) => {
+    e.currentTarget.classList.remove("flipped");
+    if (certTrackRef.current) certTrackRef.current.style.animationPlayState = "running";
+  };
+
+  const handleCertTap = (e, c, i) => {
+    const isTouchDevice = window.matchMedia("(hover: none)").matches;
+    if (!isTouchDevice) {
+      if (c.img) setSelectedCert(c);
+      return;
+    }
+    const card = e.currentTarget;
+    if (card.classList.contains("flipped")) {
+      if (c.img) setSelectedCert(c);
+    } else {
+      // flip all others back
+      document.querySelectorAll(".cert-flip-card").forEach(el => el.classList.remove("flipped"));
+      card.classList.add("flipped");
+    }
+  };
 
   return (
     <div className="home-page">
@@ -219,32 +232,26 @@ export default function Home() {
 
       {/* ── WHO WE ARE ── */}
       <section className="wwa-section" ref={wwaRef}>
-
         <div className="wwa-left-panel">
           <div className="wwa-left-inner">
-
             <div className="wwa-animate wwa-eyebrow-row">
               <span className="wwa-rule" />
               <span className="wwa-eyebrow-label">Who We Are</span>
             </div>
-
             <h2 className="wwa-animate wwa-heading">
               A Legacy<br />
               of <em>Precision</em><br />
               &amp; Innovation
             </h2>
-
             <p className="wwa-animate wwa-lead">
               An affiliate of <strong>OHTSUKA POLY-TECH CO. LTD</strong>, founded in Japan in 1948.
               Among the Philippines' leading manufacturers of rubber &amp; plastic parts for
               automobiles, electrical, and household appliances.
             </p>
-
             <p className="wwa-animate wwa-body">
               Our customers include every major vehicle and engine manufacturer in the world —
               a testament to decades of trust, precision engineering, and unwavering quality.
             </p>
-
             <div className="wwa-animate wwa-stats-row">
               <div className="wwa-stat">
                 <span className="wwa-stat-n">1948</span>
@@ -261,7 +268,6 @@ export default function Home() {
                 <span className="wwa-stat-l">PH Plants</span>
               </div>
             </div>
-
             <a href="/about" className="wwa-animate wwa-cta">
               Discover About Us
               <span className="wwa-cta-icon">
@@ -270,10 +276,8 @@ export default function Home() {
                 </svg>
               </span>
             </a>
-
           </div>
         </div>
-
         <div className="wwa-right-panel">
           <div className="wwa-image" style={{ backgroundImage: `url(${whoImage})` }} />
           <div className="wwa-image-scrim" />
@@ -288,7 +292,6 @@ export default function Home() {
             <span className="wwa-float-label">Years of Excellence</span>
           </div>
         </div>
-
       </section>
 
       <div className="sep sep--wwa-to-products" />
@@ -377,15 +380,13 @@ export default function Home() {
                 </p>
               </Reveal>
             </div>
-
-            {/* Marquee strip — scrolls left continuously */}
             <div className="offices-marquee-wrapper">
               <div className="offices-marquee-track">
                 {[...offices, ...offices].map((office, i) => (
                   <div key={i} className="office-marquee-card">
                     <div className="office-marquee-img-wrap">
                       {office.img
-                        ? <img src={driveImgSrc(office.img, 'w800')} alt={office.name} className="office-marquee-img" onError={e => driveImgError(e, office.img)} />
+                        ? <img src={driveImgSrc(office.img, 'w800')} alt={office.name} className="office-marquee-img" />
                         : <div className="office-img-placeholder">
                             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
                               <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
@@ -420,50 +421,68 @@ export default function Home() {
           </Reveal>
         </div>
 
-        {/* 1–2 certs → static, left-aligned | 3+ certs → marquee */}
+        {/* 1–2 certs → static left-aligned | 3+ certs → marquee flip */}
         {certs.length < 3 ? (
           <div className="certs-static-wrapper">
-            {certs.map((c) => (
+            {certs.map((c, i) => (
               <div
                 key={c.id}
-                className={`cert-card${c.img ? ' cert-card--clickable' : ''}`}
-                onClick={() => c.img && setSelectedCert(c)}
-                style={{ cursor: c.img ? 'pointer' : 'default' }}
+                className={`cert-flip-card${c.img ? ' cert-card--clickable' : ''}`}
+                onMouseEnter={handleCertEnter}
+                onMouseLeave={handleCertLeave}
+                onClick={(e) => handleCertTap(e, c, i)}
               >
-                {c.img && (
-                  <div className="cert-img-wrap">
-                    <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" onError={e => driveImgError(e, c.img)} />
-                    <div className="cert-img-overlay" />
+                <div className="cert-flip-inner">
+                  <div className="cert-flip-front">
+                    {c.img
+                      ? <img src={driveImgSrc(c.img, 'w600')} alt={c.code} className="cert-flip-img" />
+                      : <div className="cert-flip-placeholder">
+                          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M3 15l5-5 4 4 3-3 6 6"/>
+                          </svg>
+                        </div>
+                    }
                   </div>
-                )}
-                <div className="cert-info">
-                  <div className="cert-code">{c.code}</div>
-                  <div className="cert-label">{c.label}</div>
-                  {c.img && <div className="cert-view-hint">View Certificate →</div>}
+                  <div className="cert-flip-back">
+                    <div className="cert-flip-back-code">{c.code}</div>
+                    <div className="cert-flip-back-label">{c.label}</div>
+                    {c.issuedBy   && <div className="cert-flip-back-meta">{c.issuedBy}</div>}
+                    {c.validUntil && <div className="cert-flip-back-meta">Valid until {c.validUntil}</div>}
+                    {c.img && <div className="cert-view-hint">Click to view →</div>}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="certs-marquee-wrapper">
-            <div className="certs-track">
+            <div className="certs-track" ref={certTrackRef}>
               {[...certs, ...certs].map((c, i) => (
                 <div
                   key={i}
-                  className={`cert-card${c.img ? ' cert-card--clickable' : ''}`}
-                  onClick={() => c.img && setSelectedCert(c)}
-                  style={{ cursor: c.img ? 'pointer' : 'default' }}
+                  className={`cert-flip-card${c.img ? ' cert-card--clickable' : ''}`}
+                  onMouseEnter={handleCertEnter}
+                  onMouseLeave={handleCertLeave}
+                  onClick={(e) => handleCertTap(e, c, i)}
                 >
-                  {c.img && (
-                    <div className="cert-img-wrap">
-                      <img src={driveImgSrc(c.img, 'w400')} alt={c.code} className="cert-img" onError={e => driveImgError(e, c.img)} />
-                      <div className="cert-img-overlay" />
+                  <div className="cert-flip-inner">
+                    <div className="cert-flip-front">
+                      {c.img
+                        ? <img src={driveImgSrc(c.img, 'w600')} alt={c.code} className="cert-flip-img" />
+                        : <div className="cert-flip-placeholder">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                              <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M3 15l5-5 4 4 3-3 6 6"/>
+                            </svg>
+                          </div>
+                      }
                     </div>
-                  )}
-                  <div className="cert-info">
-                    <div className="cert-code">{c.code}</div>
-                    <div className="cert-label">{c.label}</div>
-                    {c.img && <div className="cert-view-hint">View Certificate →</div>}
+                    <div className="cert-flip-back">
+                      <div className="cert-flip-back-code">{c.code}</div>
+                      <div className="cert-flip-back-label">{c.label}</div>
+                      {c.issuedBy   && <div className="cert-flip-back-meta">{c.issuedBy}</div>}
+                      {c.validUntil && <div className="cert-flip-back-meta">Valid until {c.validUntil}</div>}
+                      {c.img && <div className="cert-view-hint">Click to view →</div>}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -471,85 +490,78 @@ export default function Home() {
           </div>
         )}
 
-          {/* Certificate Lightbox */}
-          {selectedCert && (
-            <div
-              onClick={() => setSelectedCert(null)}
-              style={{
-                position:'fixed', inset:0, zIndex:9998,
-                background:'rgba(0,0,0,0.92)', backdropFilter:'blur(6px)',
-                display:'flex', alignItems:'center', justifyContent:'center',
-                padding:24, animation:'certFadeIn 0.2s ease',
-              }}
-            >
-              <div onClick={e => e.stopPropagation()} style={{ maxWidth:780, width:'100%', position:'relative' }}>
-                {/* Header */}
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:16 }}>
-                  <div>
-                    <div style={{ color:'#fff', fontSize:22, fontWeight:800, letterSpacing:'-0.3px' }}>
-                      {selectedCert.code}
-                    </div>
-                    <div style={{ color:'rgba(255,255,255,0.55)', fontSize:13.5, marginTop:3 }}>
-                      {selectedCert.label}
-                      {selectedCert.issuedBy && <span style={{ color:'rgba(255,255,255,0.35)' }}> · {selectedCert.issuedBy}</span>}
-                      {selectedCert.validUntil && <span style={{ color:'rgba(255,255,255,0.35)' }}> · Valid until {selectedCert.validUntil}</span>}
-                    </div>
+        {/* Certificate Lightbox */}
+        {selectedCert && (
+          <div
+            onClick={() => setSelectedCert(null)}
+            style={{
+              position:'fixed', inset:0, zIndex:9998,
+              background:'rgba(0,0,0,0.92)', backdropFilter:'blur(6px)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              padding:24, animation:'certFadeIn 0.2s ease',
+            }}
+          >
+            <div onClick={e => e.stopPropagation()} style={{ maxWidth:780, width:'100%', position:'relative' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:16 }}>
+                <div>
+                  <div style={{ color:'#fff', fontSize:22, fontWeight:800, letterSpacing:'-0.3px' }}>
+                    {selectedCert.code}
                   </div>
-                  <button
-                    onClick={() => setSelectedCert(null)}
-                    style={{
-                      background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.15)',
-                      color:'#fff', borderRadius:8, padding:'7px 16px', cursor:'pointer',
-                      fontSize:13.5, fontWeight:500, flexShrink:0, marginLeft:16,
-                    }}
-                  >
-                    ✕ Close
-                  </button>
-                </div>
-
-                {/* Certificate image */}
-                <div style={{
-                  borderRadius:12, overflow:'hidden',
-                  boxShadow:'0 32px 80px rgba(0,0,0,0.5)',
-                  display:'flex', alignItems:'center', justifyContent:'center',
-                }}>
-                  <img
-                    src={driveImgSrc(selectedCert.img, 'w1600')}
-                    alt={selectedCert.code}
-                    style={{ width:'100%', maxHeight:'75vh', objectFit:'cover', display:'block', borderRadius:12 }}
-                    onError={e => driveImgError(e, selectedCert.img)}
-                  />
-                </div>
-
-                {/* Navigation if multiple certs have images */}
-                {certs.filter(c => c.img).length > 1 && (
-                  <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:14 }}>
-                    {certs.filter(c => c.img).map(c => (
-                      <button
-                        key={c.id}
-                        onClick={(e) => { e.stopPropagation(); setSelectedCert(c); }}
-                        style={{
-                          padding:'5px 14px', border:'1px solid',
-                          borderColor: selectedCert.id === c.id ? '#c0392b' : 'rgba(255,255,255,0.2)',
-                          background:  selectedCert.id === c.id ? '#c0392b'  : 'rgba(255,255,255,0.07)',
-                          color:'#fff', borderRadius:20, fontSize:12.5, cursor:'pointer',
-                          fontWeight: selectedCert.id === c.id ? 700 : 400,
-                          transition:'all 0.15s',
-                        }}
-                      >
-                        {c.code}
-                      </button>
-                    ))}
+                  <div style={{ color:'rgba(255,255,255,0.55)', fontSize:13.5, marginTop:3 }}>
+                    {selectedCert.label}
+                    {selectedCert.issuedBy && <span style={{ color:'rgba(255,255,255,0.35)' }}> · {selectedCert.issuedBy}</span>}
+                    {selectedCert.validUntil && <span style={{ color:'rgba(255,255,255,0.35)' }}> · Valid until {selectedCert.validUntil}</span>}
                   </div>
-                )}
-
-                <p style={{ textAlign:'center', fontSize:12, color:'rgba(255,255,255,0.25)', marginTop:14 }}>
-                  Click outside or press ESC to close
-                </p>
+                </div>
+                <button
+                  onClick={() => setSelectedCert(null)}
+                  style={{
+                    background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.15)',
+                    color:'#fff', borderRadius:8, padding:'7px 16px', cursor:'pointer',
+                    fontSize:13.5, fontWeight:500, flexShrink:0, marginLeft:16,
+                  }}
+                >
+                  ✕ Close
+                </button>
               </div>
-              <style>{`@keyframes certFadeIn{from{opacity:0}to{opacity:1}}`}</style>
+              <div style={{
+                borderRadius:12, overflow:'hidden',
+                boxShadow:'0 32px 80px rgba(0,0,0,0.5)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+              }}>
+                <img
+                  src={driveImgSrc(selectedCert.img, 'w1600')}
+                  alt={selectedCert.code}
+                  style={{ width:'100%', maxHeight:'75vh', objectFit:'contain', display:'block', borderRadius:12 }}
+                />
+              </div>
+              {certs.filter(c => c.img).length > 1 && (
+                <div style={{ display:'flex', justifyContent:'center', gap:8, marginTop:14 }}>
+                  {certs.filter(c => c.img).map(c => (
+                    <button
+                      key={c.id}
+                      onClick={(e) => { e.stopPropagation(); setSelectedCert(c); }}
+                      style={{
+                        padding:'5px 14px', border:'1px solid',
+                        borderColor: selectedCert.id === c.id ? '#c0392b' : 'rgba(255,255,255,0.2)',
+                        background:  selectedCert.id === c.id ? '#c0392b'  : 'rgba(255,255,255,0.07)',
+                        color:'#fff', borderRadius:20, fontSize:12.5, cursor:'pointer',
+                        fontWeight: selectedCert.id === c.id ? 700 : 400,
+                        transition:'all 0.15s',
+                      }}
+                    >
+                      {c.code}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <p style={{ textAlign:'center', fontSize:12, color:'rgba(255,255,255,0.25)', marginTop:14 }}>
+                Click outside or press ESC to close
+              </p>
             </div>
-          )}
+            <style>{`@keyframes certFadeIn{from{opacity:0}to{opacity:1}}`}</style>
+          </div>
+        )}
       </section>
 
       <div className="sep sep--certs-to-partners" />
